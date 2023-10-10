@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import World from './classes/World.ts';
 import FlatWorldGenerator from './generator/FlatWorldGenerator.ts';
 import Stats from 'three/addons/libs/stats.module.js';
+import WorldManager from './classes/WorldManager.ts';
 const stats = new Stats();
 document.body.appendChild( stats.dom );
 
@@ -27,30 +28,23 @@ scene.add(light);
 const ambient = new THREE.AmbientLight(0xffffff, 0.001);
 scene.add(ambient);
 
+
+
+console.time('Init');
+
+const worldManager = new WorldManager(16, 64, scene, {
+	worldGenerator: new FlatWorldGenerator(),
+	renderDistance: 4,
+});
+
+console.timeEnd('Init');
+
 function animate() {
 	requestAnimationFrame( animate );
 	controls.update();
 	stats.update();
 	renderer.render( scene, camera );
+	worldManager.updateVisibilityPoint(camera.position);
+	worldManager.updateWorld();
 }
 animate();
-
-console.time('Init');
-const world = new World(16, 64, scene);
-console.timeEnd('Init');
-
-
-console.time('generate');
-const chunks = 2;
-for (let x = 0; x < chunks; x++) {
-	for (let z = 0; z < chunks; z++) {
-		world.generateChunkAt(new THREE.Vector3(x, 0, z), new FlatWorldGenerator());
-	}
-}
-console.timeEnd('generate');
-
-console.time('Render');
-world.renderAll();
-console.timeEnd('Render');
-
-console.log(world);

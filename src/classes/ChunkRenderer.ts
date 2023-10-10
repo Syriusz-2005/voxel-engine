@@ -16,7 +16,11 @@ export default class ChunkRenderer {
     return this.chunk;
   }
 
-  public updateMesh(): InstancedMesh {
+  public get Position(): THREE.Vector3 {
+    return this.chunkPosition;
+  }
+
+  private updateMesh(): InstancedMesh {
     const geometry = new PlaneGeometry(1, 1);
     const material = new MeshLambertMaterial({});
 
@@ -26,7 +30,6 @@ export default class ChunkRenderer {
     const count = voxels.length;
 
     const mesh = new InstancedMesh(geometry, material, facesCount);
-    console.log('Rendering voxels: ', voxels);
 
     const object = new Object3D();
     let faceIndex = 0;

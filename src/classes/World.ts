@@ -41,22 +41,25 @@ export default class World {
     return renderer?.Chunk;
   }
 
-  private setChunkAt(vec: Vector3, chunk: Chunk): void {
+  private setChunkAt(vec: Vector3, chunk: Chunk): ChunkRenderer {
+    const newRenderer = new ChunkRenderer(chunk, this.scene, vec, this.chunkSize);
     this.renderers.set(
       Representation.toRepresentation(vec), 
-      new ChunkRenderer(chunk, this.scene, vec, this.chunkSize),
+      newRenderer,
     );
+    return newRenderer;
   }
 
-  private createChunk(vec: Vector3): Chunk {
+  private createChunk(vec: Vector3): ChunkRenderer {
     const chunk = new Chunk(this.chunkSize, this.chunkHeight);
-    this.setChunkAt(vec, chunk);
-    return chunk;
+    const renderer = this.setChunkAt(vec, chunk);
+    return renderer;
   }
 
-  public generateChunkAt(vec: Vector3, generator: WorldGenerator) {
-    const chunk = this.createChunk(vec);
-    chunk.generate(generator, vec);
+  public generateChunkAt(vec: Vector3, generator: WorldGenerator): ChunkRenderer {
+    const renderer = this.createChunk(vec);
+    renderer.Chunk.generate(generator, vec);
+    return renderer;
   }
 
   public disposeChunkAt(vec: Vector3): void {
@@ -66,6 +69,30 @@ export default class World {
 
     renderer.remove();
     this.renderers.delete(representation);
+  }
+
+  public findChunksInRadius(center: Vector3, radius: number): ChunkRenderer[] {
+    const renderers: ChunkRenderer[] = [];
+    this.renderers.forEach((renderer, vecRepresentation) => {
+      const vec = Representation.fromRepresentation(vecRepresentation);
+      const distance = center.distanceTo(vec);
+      if (distance < radius) {
+        renderers.push(renderer);
+      }
+    });
+    return renderers;
+  }
+
+  public findChunksOutOfRadius(center: Vector3, radius: number) {
+    const renderers: ChunkRenderer[] = [];
+    this.renderers.forEach((renderer, vecRepresentation) => {
+      const vec = Representation.fromRepresentation(vecRepresentation);
+      const distance = center.distanceTo(vec);
+      if (distance > radius) {
+        renderers.push(renderer);
+      }
+    });
+    return renderers;
   }
 
   public getVoxelAt(worldPos: Vector3): Voxel {
