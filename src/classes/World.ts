@@ -4,11 +4,12 @@ import Voxel from "./Voxel.ts";
 import MissingChunkError from "../errors/MissingChunkError.ts";
 import ChunkRenderer from "./ChunkRenderer.ts";
 import WorldGenerator from "../generator/WorldGenerator.ts";
+import Representation, { VectorRepresentation } from "./VectorRepresentation.ts";
 
 
 
 export default class World {
-  private readonly renderers: Map<Vector3, ChunkRenderer> = new Map();
+  private readonly renderers: Map<VectorRepresentation, ChunkRenderer> = new Map();
 
   constructor(
     private readonly chunkSize: number,
@@ -35,13 +36,13 @@ export default class World {
   }
 
   public getChunkAt(vec: Vector3): Chunk | undefined {
-    const renderer = this.renderers.get(vec);
+    const renderer = this.renderers.get(Representation.toRepresentation(vec));
 
     return renderer?.Chunk;
   }
 
   private setChunkAt(vec: Vector3, chunk: Chunk): void {
-    this.renderers.set(vec, new ChunkRenderer(chunk, this.scene));
+    this.renderers.set(Representation.toRepresentation(vec), new ChunkRenderer(chunk, this.scene));
   }
 
   public createChunk(vec: Vector3): Chunk {
@@ -62,7 +63,7 @@ export default class World {
     const chunk = this.getChunkAt(chunkPos);
     if (!chunk) throw new MissingChunkError(chunkPos);
 
-    const voxelType = chunk.getBlockAt(posInChunk);
+    const voxelType = chunk.getVoxelAt(posInChunk);
     return new Voxel(voxelType);
   }
 

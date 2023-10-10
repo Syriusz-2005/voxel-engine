@@ -17,10 +17,11 @@ document.body.appendChild( renderer.domElement );
 
 const controls = new OrbitControls( camera, renderer.domElement );
 
-camera.position.z = 5;
+camera.position.z = 8;
+camera.position.y = 8;
 controls.update();
 
-const light = new THREE.DirectionalLight(0xffffff, 0.1);
+const light = new THREE.DirectionalLight(0xffffff, 0.006);
 light.position.set(0.15, 0.7, 0);
 scene.add(light);
 
@@ -40,3 +41,5 @@ const world = new World(4, 64, scene);
 world.generateChunkAt(new THREE.Vector3(0, 0, 0), new FlatWorldGenerator());
 
 world.renderAll();
+
+console.log(world);

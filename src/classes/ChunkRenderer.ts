@@ -30,7 +30,9 @@ export default class ChunkRenderer {
     for (let i = 0; i < count; i++) {
       const renderableVoxel = voxels[i];
       const {PosInChunk} = renderableVoxel;
-      object.position.set(PosInChunk.x, PosInChunk.y, PosInChunk.z);
+      const positionMultiplier = 2;
+      const voxelPosition = PosInChunk.multiplyScalar(positionMultiplier);
+      object.position.set(voxelPosition.x, voxelPosition.y, voxelPosition.z);
 
       object.updateMatrix();
 

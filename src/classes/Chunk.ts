@@ -4,9 +4,10 @@ import Voxel from "./Voxel.ts";
 import RenderableVoxel from "./RenderableVoxel.ts";
 import ChunkError from "../errors/ChunkError.ts";
 import WorldGenerator from "../generator/WorldGenerator.ts";
+import Representation, { VectorRepresentation } from "./VectorRepresentation.ts";
 
 export default class Chunk {
-  private readonly data: Map<Vector3, VoxelType>;
+  private readonly data: Map<VectorRepresentation, VoxelType>;
 
   constructor(
     private readonly size: number,
@@ -20,22 +21,22 @@ export default class Chunk {
     return x >= 0 && y >= 0 && z >= 0 && x < this.size && y < this.height && z < this.size;
   }
 
-  public getBlockAt(vec: Vector3): VoxelType {
+  public getVoxelAt(vec: Vector3): VoxelType {
     const {x, y, z} = vec;
     if (y > this.height) return 'air';
     if (!this.isInBounds(vec)) 
       throw new ChunkError(`Block at ${x} ${y} ${z} is out of bounds!`)
-    return this.data.get(vec) ?? 'air';
+    return this.data.get(Representation.toRepresentation(vec)) ?? 'air';
   }
 
-  public setBlockAt(vec: Vector3, value: Voxel): void {
+  public setVoxelAt(vec: Vector3, value: Voxel): void {
     if (!this.isInBounds(vec)) 
       throw new ChunkError(`Block at ${vec.x} ${vec.y} ${vec.z} is out of bounds!`)
-    this.data.set(vec, value.Name);
+    this.data.set(Representation.toRepresentation(vec), value.Name);
   }
 
   public removeBlockAt(vec: Vector3): void {
-    this.data.delete(vec);
+    this.data.delete(Representation.toRepresentation(vec));
   }
 
   public generate(generator: WorldGenerator, chunkWorldPos: Vector3): void {
@@ -52,7 +53,7 @@ export default class Chunk {
           
           const voxel = generator.getVoxelAt(worldPos);
           if (voxel) {
-            this.setBlockAt(posInChunk, voxel);
+            this.setVoxelAt(posInChunk, voxel);
           }
         }
       }
@@ -61,9 +62,34 @@ export default class Chunk {
 
   public getRenderableVoxels(): RenderableVoxel[] {
     const voxels: RenderableVoxel[] = []
-    this.data.forEach((voxelType, vec) => {
+    this.data.forEach((voxelType, vecRepresentation) => {
       const voxel = new Voxel(voxelType);
-      voxels.push(new RenderableVoxel(voxel, vec));
+      const vec = Representation.fromRepresentation(vecRepresentation);
+      const {x, y, z} = vec;
+      const adjacents = [
+        new Vector3(x + 1, y, z),
+        new Vector3(x - 1, y, z),
+        new Vector3(x, y + 1, z),
+        new Vector3(x, y - 1, z),
+        new Vector3(x, y, z + 1),
+        new Vector3(x, y, z - 1),
+      ];
+      let isRenderable = false;
+      for (const adj of adjacents) {
+        if (!this.isInBounds(adj)) {
+          isRenderable = true;
+          break;
+        }
+        const adjacentVoxel = this.getVoxelAt(adj);
+        
+        if (adjacentVoxel === 'air') {
+          isRenderable = true;
+          break;
+        }
+      }
+      if (!isRenderable) return;
+      const renderableVoxel = new RenderableVoxel(voxel, vec);
+      voxels.push(renderableVoxel);
     });
     return voxels;
   }

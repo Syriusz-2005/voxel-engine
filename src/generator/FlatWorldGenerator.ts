@@ -7,11 +7,11 @@ export default class FlatWorldGenerator implements WorldGenerator {
   constructor() {}
   
   public getVoxelAt(worldPos: Vector3) {
-    if (worldPos.y < 1) {
+    if (worldPos.y < 4) {
       return new Voxel('dirt');
     }
 
-    if (worldPos.y < 2) {
+    if (worldPos.y < 5) {
       return new Voxel('grass');
     }
 
