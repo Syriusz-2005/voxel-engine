@@ -41,9 +41,9 @@ console.timeEnd('Init');
 
 
 console.time('generate');
-const chunks = 10;
-for (let x = 0; x <= chunks; x++) {
-	for (let z = 0; z <= chunks; z++) {
+const chunks = 2;
+for (let x = 0; x < chunks; x++) {
+	for (let z = 0; z < chunks; z++) {
 		world.generateChunkAt(new THREE.Vector3(x, 0, z), new FlatWorldGenerator());
 	}
 }

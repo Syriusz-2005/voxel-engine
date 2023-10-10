@@ -48,7 +48,7 @@ export default class World {
     );
   }
 
-  public createChunk(vec: Vector3): Chunk {
+  private createChunk(vec: Vector3): Chunk {
     const chunk = new Chunk(this.chunkSize, this.chunkHeight);
     this.setChunkAt(vec, chunk);
     return chunk;
@@ -57,6 +57,15 @@ export default class World {
   public generateChunkAt(vec: Vector3, generator: WorldGenerator) {
     const chunk = this.createChunk(vec);
     chunk.generate(generator, vec);
+  }
+
+  public disposeChunkAt(vec: Vector3): void {
+    const representation = Representation.toRepresentation(vec);
+    const renderer = this.renderers.get(representation);
+    if (!renderer) return;
+
+    renderer.remove();
+    this.renderers.delete(representation);
   }
 
   public getVoxelAt(worldPos: Vector3): Voxel {

@@ -93,6 +93,7 @@ export default class Chunk {
       const renderableVoxel = new RenderableVoxel(voxel, vec, renderableFaces);
       voxels.push(renderableVoxel);
     });
+    
     return {
       facesCount,
       voxels,
