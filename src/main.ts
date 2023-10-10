@@ -19,7 +19,7 @@ document.body.appendChild( renderer.domElement );
 const controls = new OrbitControls( camera, renderer.domElement );
 
 camera.position.z = 8;
-camera.position.y = 14;
+camera.position.y = 50;
 controls.update();
 
 const light = new THREE.DirectionalLight(0xffffff, 0.006);
@@ -35,7 +35,7 @@ console.time('Init');
 
 const worldManager = new WorldManager(16, 64, scene, {
 	worldGenerator: new RandomFlatWorldGenerator(),
-	renderDistance: 8,
+	renderDistance: 6,
 });
 
 console.timeEnd('Init');
