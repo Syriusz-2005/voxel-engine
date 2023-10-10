@@ -5,6 +5,7 @@ import World from './classes/World.ts';
 import FlatWorldGenerator from './generator/FlatWorldGenerator.ts';
 import Stats from 'three/addons/libs/stats.module.js';
 import WorldManager from './classes/WorldManager.ts';
+import RandomFlatWorldGenerator from './generator/RandomFlatWorldGenerator.ts';
 const stats = new Stats();
 document.body.appendChild( stats.dom );
 
@@ -18,7 +19,7 @@ document.body.appendChild( renderer.domElement );
 const controls = new OrbitControls( camera, renderer.domElement );
 
 camera.position.z = 8;
-camera.position.y = 8;
+camera.position.y = 14;
 controls.update();
 
 const light = new THREE.DirectionalLight(0xffffff, 0.006);
@@ -33,8 +34,8 @@ scene.add(ambient);
 console.time('Init');
 
 const worldManager = new WorldManager(16, 64, scene, {
-	worldGenerator: new FlatWorldGenerator(),
-	renderDistance: 4,
+	worldGenerator: new RandomFlatWorldGenerator(),
+	renderDistance: 8,
 });
 
 console.timeEnd('Init');
@@ -46,5 +47,6 @@ function animate() {
 	renderer.render( scene, camera );
 	worldManager.updateVisibilityPoint(camera.position);
 	worldManager.updateWorld();
+	// camera.position.z += 10;
 }
 animate();
