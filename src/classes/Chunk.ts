@@ -60,8 +60,9 @@ export default class Chunk {
     }
   }
 
-  public getRenderableVoxels(): RenderableVoxel[] {
-    const voxels: RenderableVoxel[] = []
+  public getRenderableVoxels(): {facesCount: number, voxels: RenderableVoxel[]} {
+    const voxels: RenderableVoxel[] = [];
+    let facesCount = 0;
     this.data.forEach((voxelType, vecRepresentation) => {
       const voxel = new Voxel(voxelType);
       const vec = Representation.fromRepresentation(vecRepresentation);
@@ -74,23 +75,27 @@ export default class Chunk {
         new Vector3(x, y, z + 1),
         new Vector3(x, y, z - 1),
       ];
-      let isRenderable = false;
-      for (const adj of adjacents) {
-        if (!this.isInBounds(adj)) {
-          isRenderable = true;
-          break;
-        }
-        const adjacentVoxel = this.getVoxelAt(adj);
-        
-        if (adjacentVoxel === 'air') {
-          isRenderable = true;
-          break;
-        }
-      }
-      if (!isRenderable) return;
-      const renderableVoxel = new RenderableVoxel(voxel, vec);
+      const renderableFaces = adjacents
+        .filter(adj => {
+          if (!this.isInBounds(adj)) {
+            return true;
+          }
+
+          const adjacentVoxel = this.getVoxelAt(adj);
+          if (adjacentVoxel === 'air') {
+            return true;
+          }
+        })
+        .map(adj => adj.sub(vec));
+
+      if (renderableFaces.length === 0) return;
+      facesCount += renderableFaces.length;
+      const renderableVoxel = new RenderableVoxel(voxel, vec, renderableFaces);
       voxels.push(renderableVoxel);
     });
-    return voxels;
+    return {
+      facesCount,
+      voxels,
+    };
   }
 }

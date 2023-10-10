@@ -1,4 +1,4 @@
-import { BoxGeometry, InstancedMesh, Matrix4, MeshBasicMaterial, MeshLambertMaterial, MeshStandardMaterial, Object3D } from "three";
+import { InstancedMesh, MeshLambertMaterial, Object3D, PlaneGeometry, DoubleSide, Vector3 } from "three";
 import Chunk from "./Chunk.ts";
 
 
@@ -15,29 +15,51 @@ export default class ChunkRenderer {
   }
 
   public updateMesh(): InstancedMesh {
-    const geometry = new BoxGeometry(1, 1, 1);
-    const material = new MeshLambertMaterial();
+    const geometry = new PlaneGeometry(1, 1);
+    const material = new MeshLambertMaterial({});
 
     const {chunk} = this;
 
-    const voxels = chunk.getRenderableVoxels();
+    const {voxels, facesCount} = chunk.getRenderableVoxels();
     const count = voxels.length;
 
-    const mesh = new InstancedMesh(geometry, material, count);
-    console.log('rendering voxels: ', voxels);
+    const mesh = new InstancedMesh(geometry, material, facesCount);
+    console.log('Rendering voxels: ', voxels);
 
     const object = new Object3D();
+    let faceIndex = 0;
     for (let i = 0; i < count; i++) {
       const renderableVoxel = voxels[i];
       const {PosInChunk} = renderableVoxel;
       const positionMultiplier = 2;
-      const voxelPosition = PosInChunk.multiplyScalar(positionMultiplier);
-      object.position.set(voxelPosition.x, voxelPosition.y, voxelPosition.z);
+      const voxelPosition = PosInChunk.clone().multiplyScalar(positionMultiplier);
+      for (let face of renderableVoxel.RenderableFaces) {
+        object.rotation.set(0, 0, 0);
+        object.position.set(
+          voxelPosition.x + 0.5, 
+          voxelPosition.y + 0.5, 
+          voxelPosition.z + 0.5,
+        );
+        const facePos = face.clone().multiplyScalar(.5);
+        object.translateX(facePos.x);
+        object.translateY(facePos.y);
+        object.translateZ(facePos.z);
 
-      object.updateMatrix();
+        console.log(face);
+        if (face.y !== 0) object.rotateX(-face.y * Math.PI / 2);
+        if (face.x !== 0) object.rotateY(face.x * Math.PI / 2);
+        if (face.z === -1) object.rotateY(Math.PI);
+        // if (face.z !== 0) object.rotateZ(Math.PI);
 
-      mesh.setMatrixAt(i, object.matrix);
-      mesh.setColorAt(i, renderableVoxel.Voxel.Color);
+
+        object.updateMatrix();
+  
+        mesh.setMatrixAt(faceIndex, object.matrix);
+        mesh.setColorAt(faceIndex, renderableVoxel.Voxel.Color);
+
+        faceIndex++;
+      }
+
     }
 
     mesh.instanceColor!.needsUpdate = true;
