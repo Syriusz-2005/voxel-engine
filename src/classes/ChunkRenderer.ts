@@ -1,4 +1,4 @@
-import { InstancedMesh, MeshLambertMaterial, Object3D, PlaneGeometry, DoubleSide, Vector3 } from "three";
+import { InstancedMesh, MeshLambertMaterial, Object3D, PlaneGeometry } from "three";
 import Chunk from "./Chunk.ts";
 
 
@@ -8,6 +8,8 @@ export default class ChunkRenderer {
   constructor(
     private readonly chunk: Chunk,
     private readonly scene: THREE.Scene,
+    private readonly chunkPosition: THREE.Vector3,
+    private readonly chunkSize: number,
   ) {}
 
   public get Chunk(): Chunk {
@@ -31,7 +33,7 @@ export default class ChunkRenderer {
     for (let i = 0; i < count; i++) {
       const renderableVoxel = voxels[i];
       const {PosInChunk} = renderableVoxel;
-      const positionMultiplier = 2;
+      const positionMultiplier = 1;
       const voxelPosition = PosInChunk.clone().multiplyScalar(positionMultiplier);
       for (let face of renderableVoxel.RenderableFaces) {
         object.rotation.set(0, 0, 0);
@@ -45,12 +47,9 @@ export default class ChunkRenderer {
         object.translateY(facePos.y);
         object.translateZ(facePos.z);
 
-        console.log(face);
         if (face.y !== 0) object.rotateX(-face.y * Math.PI / 2);
         if (face.x !== 0) object.rotateY(face.x * Math.PI / 2);
         if (face.z === -1) object.rotateY(Math.PI);
-        // if (face.z !== 0) object.rotateZ(Math.PI);
-
 
         object.updateMatrix();
   
@@ -59,9 +58,9 @@ export default class ChunkRenderer {
 
         faceIndex++;
       }
-
     }
 
+    mesh.position.set(this.chunkPosition.x * this.chunkSize, this.chunkPosition.y, this.chunkPosition.z * this.chunkSize);
     mesh.instanceColor!.needsUpdate = true;
 
     this.mesh = mesh;

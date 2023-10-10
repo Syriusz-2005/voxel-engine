@@ -42,7 +42,10 @@ export default class World {
   }
 
   private setChunkAt(vec: Vector3, chunk: Chunk): void {
-    this.renderers.set(Representation.toRepresentation(vec), new ChunkRenderer(chunk, this.scene));
+    this.renderers.set(
+      Representation.toRepresentation(vec), 
+      new ChunkRenderer(chunk, this.scene, vec, this.chunkSize),
+    );
   }
 
   public createChunk(vec: Vector3): Chunk {
