@@ -20,13 +20,13 @@ export default class ChunkRenderer {
     return this.chunkPosition;
   }
 
-  private updateMesh(): InstancedMesh {
+  private async updateMesh(): Promise<InstancedMesh> {
     const geometry = new PlaneGeometry(1, 1);
     const material = new MeshLambertMaterial({});
 
     const {chunk} = this;
 
-    const {voxels, facesCount} = chunk.getRenderableVoxels();
+    const {voxels, facesCount} = await chunk.getRenderableVoxels();
     const count = voxels.length;
 
     const mesh = new InstancedMesh(geometry, material, facesCount);
@@ -71,8 +71,8 @@ export default class ChunkRenderer {
     return mesh;
   }
 
-  private init(): void {
-    this.updateMesh();
+  private async init(): Promise<void> {
+    await this.updateMesh();
     this.scene.add(this.mesh!); 
   }
 

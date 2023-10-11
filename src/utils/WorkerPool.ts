@@ -11,6 +11,7 @@ export type TaskData = {
 
 export type Task = {
   data: {command: string, data: any};
+  transfers?: Transferable[];
   resolve: (value: any) => void;
   reject: (reason?: any) => void;
 }
@@ -35,7 +36,7 @@ export default class WorkerPool {
 
   private assignTask(worker: WorkerData, task: Task) {
     worker.isBusy = true;
-    worker.worker.postMessage(task.data);
+    worker.worker.postMessage(task.data, {transfer: task.transfers});
     worker.worker.onmessage = (event) => {
       worker.isBusy = false;
       task.resolve(event.data);
@@ -58,10 +59,11 @@ export default class WorkerPool {
     }
   }
 
-  public scheduleTask(data: TaskData): Promise<any> {
+  public scheduleTask(data: TaskData, transfers?: Transferable[]): Promise<any> {
     return new Promise((resolve, reject) => {
       this.tasks.push({
         data,
+        transfers,
         resolve,
         reject,
       });

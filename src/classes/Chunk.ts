@@ -9,11 +9,25 @@ import Representation, { VectorRepresentation } from "./VectorRepresentation.ts"
 export default class Chunk {
   private readonly data: Map<VectorRepresentation, VoxelType>;
 
+  private isGenerating: boolean = false;
+  private onGenerated?: () => void;
+
   constructor(
     private readonly size: number,
     private readonly height: number,
   ) {
     this.data = new Map();
+  }
+
+  private setOnGeneratedListener(listener: () => void): void {
+    this.onGenerated = () => listener();
+  }
+
+  private waitForGenerationComplete() {
+    return new Promise<void>((resolve) => {
+      if (this.isGenerating === false) resolve();
+      this.setOnGeneratedListener(resolve);
+    });
   }
 
   private isInBounds(vec: Vector3): boolean {
@@ -39,7 +53,7 @@ export default class Chunk {
     this.data.delete(Representation.toRepresentation(vec));
   }
 
-  public generate(generator: WorldGenerator, chunkWorldPos: Vector3): void {
+  private generateVoxelsByOne(generator: WorldGenerator, chunkWorldPos: Vector3): void {
     for (let x = 0; x < this.size; x++) {
       for (let z = 0; z < this.size; z++) {
         const height = this.height;
@@ -60,9 +74,26 @@ export default class Chunk {
     }
   }
 
-  public getRenderableVoxels(): {facesCount: number, voxels: RenderableVoxel[]} {
+  public async generate(generator: WorldGenerator, chunkWorldPos: Vector3): Promise<void> {
+    this.isGenerating = true;
+    if (generator.getChunkAt !== undefined) {
+      const voxels = await generator.getChunkAt(chunkWorldPos)
+      voxels.forEach(({posInChunk, voxel}) => {
+        this.setVoxelAt(posInChunk, voxel);
+      });
+      this.isGenerating = false;
+      return this.onGenerated?.();
+    }
+
+    this.generateVoxelsByOne(generator, chunkWorldPos);
+    this.isGenerating = false;
+    this.onGenerated?.();
+  }
+
+  public async getRenderableVoxels(): Promise<{facesCount: number, voxels: RenderableVoxel[]}> {
     const voxels: RenderableVoxel[] = [];
     let facesCount = 0;
+    await this.waitForGenerationComplete();
     this.data.forEach((voxelType, vecRepresentation) => {
       const voxel = new Voxel(voxelType);
       const vec = Representation.fromRepresentation(vecRepresentation);
