@@ -7,7 +7,7 @@ import WorldGenerator from "../generator/WorldGenerator.ts";
 import Representation, { VectorRepresentation } from "./VectorRepresentation.ts";
 
 export default class Chunk {
-  private readonly data: Map<VectorRepresentation, {type: VoxelType, pos: Vector3}>;
+  private readonly data: ({type: VoxelType, pos: Vector3} | undefined)[][][];
 
   private isGenerating: boolean = false;
   private onGenerated?: () => void;
@@ -18,7 +18,12 @@ export default class Chunk {
     private readonly size: number,
     private readonly height: number,
   ) {
-    this.data = new Map();
+    this.data = new Array(size)
+      .fill(undefined)
+      .map(() => new Array(height)
+        .fill(undefined)
+        .map(() => new Array(size))
+      );
   }
 
   private setOnGeneratedListener(listener: () => void): void {
@@ -41,17 +46,30 @@ export default class Chunk {
     if (vec.y > this.height) return 'air';
     if (!this.isInBounds(vec)) 
       throw new ChunkError(`Block is out of bounds!`)
-    return this.data.get(Representation.toRepresentation(vec))?.type ?? 'air';
+    return this.data[vec.x][vec.y][vec.z]?.type ?? 'air';
   }
 
   public setVoxelAt(vec: Vector3, value: Voxel): void {
     if (!this.isInBounds(vec)) 
       throw new ChunkError(`Block at ${vec.x} ${vec.y} ${vec.z} is out of bounds!`)
-    this.data.set(Representation.toRepresentation(vec), {type: value.Name, pos: vec});
+    this.data[vec.x][vec.y][vec.z] = {type: value.Name, pos: vec};
   }
 
   public removeBlockAt(vec: Vector3): void {
-    this.data.delete(Representation.toRepresentation(vec));
+    this.data[vec.x][vec.y][vec.z] = undefined;
+  }
+
+  public *each() {
+    for (let x = 0; x < this.size; x++) {
+      for (let z = 0; z < this.size; z++) {
+        for (let y = 0; y < this.height; y++) {
+          const voxel = this.data[x][y][z];
+          if (voxel) {
+            yield voxel;
+          }
+        }
+      }
+    }
   }
 
   private generateVoxelsByOne(generator: WorldGenerator, chunkWorldPos: Vector3): void {
@@ -116,22 +134,13 @@ export default class Chunk {
       new Vector3(),
     ];
 
-    this.data.forEach(({type: voxelType, pos: vec}) => {
-      // const {x, y, z} = vec;
-      // const adjacents = [
-      //   new Vector3(x + 1, y, z),
-      //   new Vector3(x - 1, y, z),
-      //   new Vector3(x, y + 1, z),
-      //   new Vector3(x, y - 1, z),
-      //   new Vector3(x, y, z + 1),
-      //   new Vector3(x, y, z - 1),
-      // ];
+    for (const {type: voxelType, pos: vec} of this.each()) {
       const renderableFaces: Vector3[] = [];
-
+  
       adjacents.forEach((adj, index) => {
         adj.copy(vec);
         adj.add(precompiledAdjacents[index])
-
+  
         if (!this.isInBounds(adj)) {
           return renderableFaces.push(precompiledAdjacents[index]);
         }
@@ -143,13 +152,15 @@ export default class Chunk {
         }
       });
       
-      if (renderableFaces.length === 0) return;
-
+      if (renderableFaces.length === 0) continue;
+  
       facesCount += renderableFaces.length;
       const voxel = new Voxel(voxelType);
       const renderableVoxel = new RenderableVoxel(voxel, vec, renderableFaces);
       voxels.push(renderableVoxel);
-    });
+    }
+
+
     
     return {
       facesCount,
