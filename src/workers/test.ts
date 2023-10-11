@@ -2,7 +2,6 @@ import { TaskData } from "../utils/WorkerPool";
 
 
 
-console.log('Hello from worker!');
 
 self.onmessage = (event) => {
   const data: TaskData = event.data;

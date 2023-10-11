@@ -77,7 +77,7 @@ export default class Chunk {
   public async generate(generator: WorldGenerator, chunkWorldPos: Vector3): Promise<void> {
     this.isGenerating = true;
     if (generator.getChunkAt !== undefined) {
-      const voxels = await generator.getChunkAt(chunkWorldPos)
+      const voxels = await generator.getChunkAt(chunkWorldPos, this.size, this.height);
       voxels.forEach(({posInChunk, voxel}) => {
         this.setVoxelAt(posInChunk, voxel);
       });
