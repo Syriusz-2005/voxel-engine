@@ -56,9 +56,9 @@ export default class World {
     return renderer;
   }
 
-  public generateChunkAt(vec: Vector3, generator: WorldGenerator): ChunkRenderer {
+  public async generateChunkAt(vec: Vector3, generator: WorldGenerator): Promise<ChunkRenderer> {
     const renderer = this.createChunk(vec);
-    renderer.Chunk.generate(generator, vec);
+    await renderer.Chunk.generate(generator, vec);
     return renderer;
   }
 

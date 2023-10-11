@@ -21,17 +21,27 @@ export default class ChunkRenderer {
     return this.chunkPosition;
   }
 
-  private async updateMesh(): Promise<InstancedMesh> {
+  private async updateMesh(): Promise<InstancedMesh | undefined> {
     const geometry = new PlaneGeometry(1, 1);
     const material = new MeshLambertMaterial({});
 
     const {chunk} = this;
 
     const {voxels, facesCount} = await chunk.getRenderableVoxels();
-    if (this.isDisposed) return this.mesh!;
+    if (this.isDisposed) {
+      this.remove();
+      return;
+    };
+    if (this.mesh) {
+      this.mesh.dispose();
+      this.scene.remove(this.mesh);
+      this.mesh = undefined;
+    }
     const count = voxels.length;
 
-    const mesh = new InstancedMesh(geometry, material, facesCount);
+
+    this.mesh = new InstancedMesh(geometry, material, facesCount);
+    const mesh = this.mesh;
 
     const object = new Object3D();
     let faceIndex = 0;
@@ -68,27 +78,26 @@ export default class ChunkRenderer {
     mesh.position.set(this.chunkPosition.x * this.chunkSize, this.chunkPosition.y, this.chunkPosition.z * this.chunkSize);
     mesh.instanceColor!.needsUpdate = true;
 
-    this.mesh = mesh;
-
     return mesh;
   }
 
   private async init(): Promise<void> {
-    this.isDisposed = false;
     await this.updateMesh();
-    if (!this.mesh) return;
-    this.scene.add(this.mesh!); 
+    if (this.mesh) {
+      this.scene.add(this.mesh);
+    }
   }
 
   public async update(): Promise<void> {
-    this.remove();
     await this.init();
   }
 
   public remove(): void {
     this.isDisposed = true;
-    if (!this.mesh) return;
-    this.mesh.dispose();
-    this.scene.remove(this.mesh);
+    if (this.mesh) {
+      this.mesh.dispose();
+      this.scene.remove(this.mesh);
+      this.mesh = undefined;
+    }
   }
 }
