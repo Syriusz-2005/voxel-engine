@@ -6,6 +6,7 @@ import FlatWorldGenerator from './generator/FlatWorldGenerator.ts';
 import Stats from 'three/addons/libs/stats.module.js';
 import WorldManager from './classes/WorldManager.ts';
 import RandomFlatWorldGenerator from './generator/RandomFlatWorldGenerator.ts';
+import WorkerPool from './utils/WorkerPool.ts';
 const stats = new Stats();
 document.body.appendChild( stats.dom );
 
@@ -50,3 +51,11 @@ function animate() {
 	// camera.position.z += 10;
 }
 animate();
+
+
+const pool = new WorkerPool(new URL('./workers/test.ts', import.meta.url), 4);
+
+pool.scheduleTask({command: 'say', data: 'Hello from main thread!'})
+	.then(() => {
+		console.log('Task done!')
+	})
