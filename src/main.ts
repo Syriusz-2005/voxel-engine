@@ -50,7 +50,7 @@ async function animate() {
 	renderer.render( scene, camera );
 	worldManager.updateVisibilityPoint(camera.position);
 	await worldManager.updateWorld();
-	// camera.position.z += 3;
+	// camera.position.z -= 1;
 	
 }
 animate();

@@ -7,10 +7,12 @@ import WorldGenerator from "../generator/WorldGenerator.ts";
 import Representation, { VectorRepresentation } from "./VectorRepresentation.ts";
 
 export default class Chunk {
-  private readonly data: Map<VectorRepresentation, VoxelType>;
+  private readonly data: Map<VectorRepresentation, {type: VoxelType, pos: Vector3}>;
 
   private isGenerating: boolean = false;
   private onGenerated?: () => void;
+
+  private strCache: VectorRepresentation | undefined;
 
   constructor(
     private readonly size: number,
@@ -36,17 +38,16 @@ export default class Chunk {
   }
 
   public getVoxelAt(vec: Vector3): VoxelType {
-    const {x, y, z} = vec;
-    if (y > this.height) return 'air';
+    if (vec.y > this.height) return 'air';
     if (!this.isInBounds(vec)) 
-      throw new ChunkError(`Block at ${x} ${y} ${z} is out of bounds!`)
-    return this.data.get(Representation.toRepresentation(vec)) ?? 'air';
+      throw new ChunkError(`Block is out of bounds!`)
+    return this.data.get(Representation.toRepresentation(vec))?.type ?? 'air';
   }
 
   public setVoxelAt(vec: Vector3, value: Voxel): void {
     if (!this.isInBounds(vec)) 
       throw new ChunkError(`Block at ${vec.x} ${vec.y} ${vec.z} is out of bounds!`)
-    this.data.set(Representation.toRepresentation(vec), value.Name);
+    this.data.set(Representation.toRepresentation(vec), {type: value.Name, pos: vec});
   }
 
   public removeBlockAt(vec: Vector3): void {
@@ -78,10 +79,12 @@ export default class Chunk {
     this.isGenerating = true;
     if (generator.getChunkAt !== undefined) {
       const voxels = await generator.getChunkAt(chunkWorldPos, this.size, this.height);
+      console.time('Chunk data array creation');
       voxels.forEach(({posInChunk, voxel}) => {
         this.setVoxelAt(posInChunk, voxel);
       });
       this.isGenerating = false;
+      console.timeEnd('Chunk data array creation');
       return this.onGenerated?.();
     }
 
@@ -94,33 +97,56 @@ export default class Chunk {
     const voxels: RenderableVoxel[] = [];
     let facesCount = 0;
     await this.waitForGenerationComplete();
-    this.data.forEach((voxelType, vecRepresentation) => {
-      const voxel = new Voxel(voxelType);
-      const vec = Representation.fromRepresentation(vecRepresentation);
-      const {x, y, z} = vec;
-      const adjacents = [
-        new Vector3(x + 1, y, z),
-        new Vector3(x - 1, y, z),
-        new Vector3(x, y + 1, z),
-        new Vector3(x, y - 1, z),
-        new Vector3(x, y, z + 1),
-        new Vector3(x, y, z - 1),
-      ];
-      const renderableFaces = adjacents
-        .filter(adj => {
-          if (!this.isInBounds(adj)) {
-            return true;
-          }
 
-          const adjacentVoxel = this.getVoxelAt(adj);
-          if (adjacentVoxel === 'air') {
-            return true;
-          }
-        })
-        .map(adj => adj.sub(vec));
+    const precompiledAdjacents = [
+      new Vector3(1, 0, 0),
+      new Vector3(-1, 0, 0),
+      new Vector3(0, 1, 0),
+      new Vector3(0, -1, 0),
+      new Vector3(0, 0, 1),
+      new Vector3(0, 0, -1),
+    ];
 
+    const adjacents: Vector3[] = [
+      new Vector3(),
+      new Vector3(),
+      new Vector3(),
+      new Vector3(),
+      new Vector3(),
+      new Vector3(),
+    ];
+
+    this.data.forEach(({type: voxelType, pos: vec}) => {
+      // const {x, y, z} = vec;
+      // const adjacents = [
+      //   new Vector3(x + 1, y, z),
+      //   new Vector3(x - 1, y, z),
+      //   new Vector3(x, y + 1, z),
+      //   new Vector3(x, y - 1, z),
+      //   new Vector3(x, y, z + 1),
+      //   new Vector3(x, y, z - 1),
+      // ];
+      const renderableFaces: Vector3[] = [];
+
+      adjacents.forEach((adj, index) => {
+        adj.copy(vec);
+        adj.add(precompiledAdjacents[index])
+
+        if (!this.isInBounds(adj)) {
+          return renderableFaces.push(precompiledAdjacents[index]);
+        }
+  
+        
+        const adjacentVoxel = this.getVoxelAt(adj);
+        if (adjacentVoxel === 'air') {
+          return renderableFaces.push(precompiledAdjacents[index]);
+        }
+      });
+      
       if (renderableFaces.length === 0) return;
+
       facesCount += renderableFaces.length;
+      const voxel = new Voxel(voxelType);
       const renderableVoxel = new RenderableVoxel(voxel, vec, renderableFaces);
       voxels.push(renderableVoxel);
     });

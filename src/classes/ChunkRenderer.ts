@@ -33,9 +33,8 @@ export default class ChunkRenderer {
       return;
     };
     if (this.mesh) {
-      this.mesh.dispose();
       this.scene.remove(this.mesh);
-      this.mesh = undefined;
+      this.disposeMesh();
     }
     const count = voxels.length;
 
@@ -78,6 +77,7 @@ export default class ChunkRenderer {
     mesh.position.set(this.chunkPosition.x * this.chunkSize, this.chunkPosition.y, this.chunkPosition.z * this.chunkSize);
     mesh.instanceColor!.needsUpdate = true;
 
+    
     return mesh;
   }
 
@@ -92,12 +92,24 @@ export default class ChunkRenderer {
     await this.init();
   }
 
+  private disposeMesh(): void {
+    this.mesh!.geometry.dispose();
+
+    const materials = this.mesh!.material;
+    if (materials instanceof Array) {
+      materials.forEach(material => material.dispose());
+    } else {
+      materials.dispose();
+    }
+    this.mesh!.dispose();
+    delete this.mesh;
+  }
+
   public remove(): void {
     this.isDisposed = true;
     if (this.mesh) {
-      this.mesh.dispose();
       this.scene.remove(this.mesh);
-      this.mesh = undefined;
+      this.disposeMesh();
     }
   }
 }
