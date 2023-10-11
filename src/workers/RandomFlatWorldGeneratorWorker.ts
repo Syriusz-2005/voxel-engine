@@ -5,6 +5,7 @@ import { voxelRegistry } from "../types/VoxelRegistry";
 self.onmessage = (event) => {
   const data: TaskData = event.data;
 
+  console.time('Chunk generation');
   const {chunkPos: chunkPosRepresentation, chunkSize, chunkHeight} = data.data as {chunkPos: {x: number; y: number; z: number}, chunkSize: number, chunkHeight: number};
 
   const chunkPos = new Vector3(chunkPosRepresentation.x, chunkPosRepresentation.y, chunkPosRepresentation.z)
@@ -26,4 +27,5 @@ self.onmessage = (event) => {
   }
 
   self.postMessage(chunkData.buffer, {transfer: [chunkData.buffer]});
+  console.timeEnd('Chunk generation');
 }

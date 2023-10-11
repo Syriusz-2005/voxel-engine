@@ -21,6 +21,7 @@ const controls = new OrbitControls( camera, renderer.domElement );
 
 camera.position.z = 8;
 camera.position.y = 50;
+camera.rotation.x = -0.3;
 controls.update();
 
 const light = new THREE.DirectionalLight(0xffffff, 0.006);
@@ -41,21 +42,16 @@ const worldManager = new WorldManager(16, 64, scene, {
 
 console.timeEnd('Init');
 
-function animate() {
+async function animate() {
 	requestAnimationFrame( animate );
 	controls.update();
+
 	stats.update();
 	renderer.render( scene, camera );
 	worldManager.updateVisibilityPoint(camera.position);
-	worldManager.updateWorld();
-	// camera.position.z += 10;
+	await worldManager.updateWorld();
+	// camera.position.z += 3;
+	
 }
 animate();
 
-
-const pool = new WorkerPool(new URL('./workers/test.ts', import.meta.url), 4);
-
-pool.scheduleTask({command: 'say', data: 'Hello from main thread!'})
-	.then(() => {
-		console.log('Task done!')
-	})

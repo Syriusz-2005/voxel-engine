@@ -4,6 +4,7 @@ import Chunk from "./Chunk.ts";
 
 export default class ChunkRenderer {
   private mesh: InstancedMesh | undefined;
+  private isDisposed: boolean = false;
 
   constructor(
     private readonly chunk: Chunk,
@@ -27,6 +28,7 @@ export default class ChunkRenderer {
     const {chunk} = this;
 
     const {voxels, facesCount} = await chunk.getRenderableVoxels();
+    if (this.isDisposed) return this.mesh!;
     const count = voxels.length;
 
     const mesh = new InstancedMesh(geometry, material, facesCount);
@@ -72,16 +74,19 @@ export default class ChunkRenderer {
   }
 
   private async init(): Promise<void> {
+    this.isDisposed = false;
     await this.updateMesh();
+    if (!this.mesh) return;
     this.scene.add(this.mesh!); 
   }
 
-  public update(): void {
+  public async update(): Promise<void> {
     this.remove();
-    this.init();
+    await this.init();
   }
 
   public remove(): void {
+    this.isDisposed = true;
     if (!this.mesh) return;
     this.mesh.dispose();
     this.scene.remove(this.mesh);

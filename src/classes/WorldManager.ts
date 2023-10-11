@@ -17,14 +17,14 @@ export default class WorldManager {
     private readonly scene: Scene,
     private readonly config: WorldManagerConfig,
   ) {
-    this.world = new World(chunkSize, chunkHeight, scene);
+    this.world = new World(this.chunkSize, this.chunkHeight, this.scene);
   }
 
   public updateVisibilityPoint(pos: Vector3) {
     this.visibilityPoint = pos.clone();
   }
 
-  public updateWorld() {
+  public async updateWorld() {
     if (!this.visibilityPoint) {
       return;
     }
@@ -47,7 +47,7 @@ export default class WorldManager {
           const chunk = this.world.getChunkAt(chunkPos);
           if (!chunk) {
             const chunkRenderer = this.world.generateChunkAt(chunkPos, worldGenerator);
-            chunkRenderer.update();
+            await chunkRenderer.update();
           }
         }
       }

@@ -47,7 +47,6 @@ export default class RandomFlatWorldGenerator implements WorldGenerator {
         posInChunk: new Vector3(x, y, z),
       });
     }
-    console.log(chunkData);
 
     return chunkData;
   }
