@@ -20,7 +20,7 @@ document.body.appendChild( renderer.domElement );
 const controls = new OrbitControls( camera, renderer.domElement );
 
 camera.position.z = 8;
-camera.position.y = 50;
+camera.position.y = 15;
 camera.rotation.x = -0.3;
 controls.update();
 
@@ -37,7 +37,7 @@ console.time('Init');
 
 const worldManager = new WorldManager(16, 64, scene, {
 	worldGenerator: new RandomFlatWorldGenerator(),
-	renderDistance: 15,
+	renderDistance: 6,
 });
 
 console.timeEnd('Init');

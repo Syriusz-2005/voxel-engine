@@ -1,4 +1,4 @@
-import { InstancedMesh, MeshLambertMaterial, Object3D, PlaneGeometry } from "three";
+import { InstancedMesh, MeshLambertMaterial, Object3D, PlaneGeometry, Vector3 } from "three";
 import Chunk from "./Chunk.ts";
 
 
@@ -28,6 +28,7 @@ export default class ChunkRenderer {
     const {chunk} = this;
 
     const {voxels, facesCount} = await chunk.getRenderableVoxels();
+    
     if (this.isDisposed) {
       this.remove();
       return;
@@ -44,11 +45,12 @@ export default class ChunkRenderer {
 
     const object = new Object3D();
     let faceIndex = 0;
+    let voxelPosition = new Vector3();
     for (let i = 0; i < count; i++) {
       const renderableVoxel = voxels[i];
       const {PosInChunk} = renderableVoxel;
       const positionMultiplier = 1;
-      const voxelPosition = PosInChunk.clone().multiplyScalar(positionMultiplier);
+      voxelPosition = voxelPosition.copy(PosInChunk).multiplyScalar(positionMultiplier);
       for (let face of renderableVoxel.RenderableFaces) {
         object.rotation.set(0, 0, 0);
         object.position.set(

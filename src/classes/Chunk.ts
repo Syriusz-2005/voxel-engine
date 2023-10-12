@@ -5,6 +5,9 @@ import RenderableVoxel from "./RenderableVoxel.ts";
 import ChunkError from "../errors/ChunkError.ts";
 import WorldGenerator from "../generator/WorldGenerator.ts";
 import Representation, { VectorRepresentation } from "./VectorRepresentation.ts";
+import Perf from "../utils/Perf.ts";
+
+const perfTest = new Perf('Voxel info generation', 20);
 
 export default class Chunk {
   private readonly data: ({type: VoxelType, pos: Vector3} | undefined)[][][];
@@ -72,6 +75,19 @@ export default class Chunk {
     }
   }
 
+  public *subchunk(yTop: number, yBottom: number) {
+    for (let x = 0; x < this.size; x++) {
+      for (let z = 0; z < this.size; z++) {
+        for (let y = yBottom; y < yTop; y++) {
+          const voxel = this.data[x][y][z];
+          if (voxel) {
+            yield voxel;
+          }
+        }
+      }
+    }
+  }
+
   private generateVoxelsByOne(generator: WorldGenerator, chunkWorldPos: Vector3): void {
     for (let x = 0; x < this.size; x++) {
       for (let z = 0; z < this.size; z++) {
@@ -97,12 +113,11 @@ export default class Chunk {
     this.isGenerating = true;
     if (generator.getChunkAt !== undefined) {
       const voxels = await generator.getChunkAt(chunkWorldPos, this.size, this.height);
-      console.time('Chunk data array creation');
+      
       voxels.forEach(({posInChunk, voxel}) => {
         this.setVoxelAt(posInChunk, voxel);
       });
       this.isGenerating = false;
-      console.timeEnd('Chunk data array creation');
       return this.onGenerated?.();
     }
 
@@ -111,11 +126,17 @@ export default class Chunk {
     this.onGenerated?.();
   }
 
-  public async getRenderableVoxels(): Promise<{facesCount: number, voxels: RenderableVoxel[]}> {
+  public async getRenderableVoxels(
+    subchunkIterator?: Generator<{
+      type: "air" | "grass" | "dirt";
+      pos: Vector3;
+    }, void, unknown>
+  ): Promise<{facesCount: number, voxels: RenderableVoxel[]}> {
     const voxels: RenderableVoxel[] = [];
     let facesCount = 0;
     await this.waitForGenerationComplete();
-
+    
+    perfTest.start();
     const precompiledAdjacents = [
       new Vector3(1, 0, 0),
       new Vector3(-1, 0, 0),
@@ -134,23 +155,18 @@ export default class Chunk {
       new Vector3(),
     ];
 
-    for (const {type: voxelType, pos: vec} of this.each()) {
+    for (const {type: voxelType, pos: vec} of subchunkIterator ?? this.each()) {
       const renderableFaces: Vector3[] = [];
   
-      adjacents.forEach((adj, index) => {
+      for (let i = 0; i < adjacents.length; i++) {
+        const adj = adjacents[i];
         adj.copy(vec);
-        adj.add(precompiledAdjacents[index])
+        adj.add(precompiledAdjacents[i]);
   
-        if (!this.isInBounds(adj)) {
-          return renderableFaces.push(precompiledAdjacents[index]);
+        if (!this.isInBounds(adj) || this.getVoxelAt(adj) === 'air') {
+          renderableFaces.push(precompiledAdjacents[i]);
         }
-  
-        
-        const adjacentVoxel = this.getVoxelAt(adj);
-        if (adjacentVoxel === 'air') {
-          return renderableFaces.push(precompiledAdjacents[index]);
-        }
-      });
+      }
       
       if (renderableFaces.length === 0) continue;
   
@@ -160,6 +176,8 @@ export default class Chunk {
       voxels.push(renderableVoxel);
     }
 
+
+    perfTest.stop();
 
     
     return {
