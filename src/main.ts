@@ -1,12 +1,10 @@
 import './style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import World from './classes/World.ts';
-import FlatWorldGenerator from './generator/FlatWorldGenerator.ts';
 import Stats from 'three/addons/libs/stats.module.js';
 import WorldManager from './classes/WorldManager.ts';
 import RandomFlatWorldGenerator from './generator/RandomFlatWorldGenerator.ts';
-import WorkerPool from './utils/WorkerPool.ts';
+
 const stats = new Stats();
 document.body.appendChild( stats.dom );
 
@@ -20,7 +18,7 @@ document.body.appendChild( renderer.domElement );
 const controls = new OrbitControls( camera, renderer.domElement );
 
 camera.position.z = 8;
-camera.position.y = 15;
+camera.position.y = 40;
 camera.rotation.x = -0.3;
 controls.update();
 
@@ -37,20 +35,20 @@ console.time('Init');
 
 const worldManager = new WorldManager(16, 64, scene, {
 	worldGenerator: new RandomFlatWorldGenerator(),
-	renderDistance: 6,
+	renderDistance: 20,
 });
 
 console.timeEnd('Init');
 
 async function animate() {
 	requestAnimationFrame( animate );
-	controls.update();
+	// controls.update();
 
 	stats.update();
 	renderer.render( scene, camera );
 	worldManager.updateVisibilityPoint(camera.position);
 	await worldManager.updateWorld();
-	// camera.position.z -= 1;
+	// camera.position.z -= 3;
 	
 }
 animate();

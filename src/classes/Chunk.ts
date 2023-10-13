@@ -7,7 +7,7 @@ import WorldGenerator from "../generator/WorldGenerator.ts";
 import Representation, { VectorRepresentation } from "./VectorRepresentation.ts";
 import Perf from "../utils/Perf.ts";
 
-const perfTest = new Perf('Voxel info generation', 20);
+const perfTest = new Perf('Voxel info generation', 400);
 
 export default class Chunk {
   private readonly data: ({type: VoxelType, pos: Vector3} | undefined)[][][];
