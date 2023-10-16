@@ -4,7 +4,7 @@ declare module 'noisejs' {
     Noise: typeof Noise;
   }
   export default module;
-  class Noise {
+  export class Noise {
     /**
      * Passing in seed will seed this Noise instance
      * @param  {number} seed
