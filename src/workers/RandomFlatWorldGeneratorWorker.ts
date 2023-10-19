@@ -1,4 +1,3 @@
-import { MathUtils } from "three";
 import WorkerVoxelGenerator from "../utils/WorkerVoxelGenerator";
 import Noise from 'noisejs';
 console.log(Noise);
