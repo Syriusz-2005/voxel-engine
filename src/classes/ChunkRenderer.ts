@@ -1,5 +1,7 @@
-import { InstancedMesh, MeshLambertMaterial, Object3D, PlaneGeometry, Vector3 } from "three";
+import { InstancedMesh, MeshLambertMaterial, Object3D, PlaneGeometry, ShaderMaterial, Vector3 } from "three";
 import Chunk from "./Chunk.ts";
+import vertex from '../shader/vertex.glsl?raw';
+import fragment from '../shader/fragment.glsl?raw';
 
 
 export default class ChunkRenderer {
@@ -24,6 +26,12 @@ export default class ChunkRenderer {
   private async updateMesh(): Promise<InstancedMesh | undefined> {
     const geometry = new PlaneGeometry(1, 1);
     const material = new MeshLambertMaterial({});
+    // const material = new ShaderMaterial({
+    //   vertexShader: vertex,
+    //   fragmentShader: fragment,
+    //   lights: true,
+    //   uniforms: {},
+    // })
 
     const {chunk} = this;
 

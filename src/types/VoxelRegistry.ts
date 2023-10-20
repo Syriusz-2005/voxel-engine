@@ -4,12 +4,14 @@ export type VoxelData = {
   color: THREE.Color;
   existing?: boolean;
   id: number;
+  opacity?: number;
 }
 
 export const voxelRegistry = {
   'air': {existing: false, color: new Color(0, 0, 0), id: 0} as VoxelData,
   'grass': {color: new Color(0, 255, 0), id: 1} as VoxelData,
   'dirt': {color: new Color(235, 143, 52), id: 2} as VoxelData,
+  'water': {color: new Color(0, 80, 255), id: 3, opacity: 0.5} as VoxelData,
 } as const;
 
 

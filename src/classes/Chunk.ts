@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import { VoxelType } from "../types/VoxelRegistry.ts";
+import { VoxelType, voxelRegistry } from "../types/VoxelRegistry.ts";
 import Voxel from "./Voxel.ts";
 import RenderableVoxel from "./RenderableVoxel.ts";
 import ChunkError from "../errors/ChunkError.ts";
@@ -163,7 +163,21 @@ export default class Chunk {
         adj.copy(vec);
         adj.add(precompiledAdjacents[i]);
   
-        if (!this.isInBounds(adj) || this.getVoxelAt(adj) === 'air') {
+        if (!this.isInBounds(adj)) {
+          renderableFaces.push(precompiledAdjacents[i]);
+          continue;
+        }
+
+        const currVoxelName = this.getVoxelAt(adj);
+        const currVoxelType = voxelRegistry[currVoxelName];
+        if (
+          currVoxelType.existing === false 
+          || (
+            currVoxelType.opacity !== undefined 
+            && currVoxelType.opacity < 1 
+            && currVoxelName !== voxelType
+          )
+        ) {
           renderableFaces.push(precompiledAdjacents[i]);
         }
       }
