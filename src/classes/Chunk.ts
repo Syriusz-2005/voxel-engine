@@ -59,7 +59,7 @@ export default class Chunk {
   }
 
   public removeBlockAt(vec: Vector3): void {
-    this.data[vec.x][vec.y][vec.z] = undefined;
+    this.data[vec.x][vec.y][vec.z] = {type: 'air', pos: vec};
   }
 
   public *each() {
@@ -88,42 +88,15 @@ export default class Chunk {
     }
   }
 
-  private generateVoxelsByOne(generator: WorldGenerator, chunkWorldPos: Vector3): void {
-    for (let x = 0; x < this.size; x++) {
-      for (let z = 0; z < this.size; z++) {
-        const height = this.height;
-        for (let y = 0; y < height; y++) {
-          const posInChunk = new Vector3(x, y, z);
-          const worldPos = new Vector3(
-            chunkWorldPos.x * this.size + x, 
-            y,
-            chunkWorldPos.z * this.size + z
-          );
-          
-          const voxel = generator.getVoxelAt(worldPos);
-          if (voxel) {
-            this.setVoxelAt(posInChunk, voxel);
-          }
-        }
-      }
-    }
-  }
-
   public async generate(generator: WorldGenerator, chunkWorldPos: Vector3): Promise<void> {
     this.isGenerating = true;
-    if (generator.getChunkAt !== undefined) {
-      const voxels = await generator.getChunkAt(chunkWorldPos, this.size, this.height);
-      
-      voxels.forEach(({posInChunk, voxel}) => {
-        this.setVoxelAt(posInChunk, voxel);
-      });
-      this.isGenerating = false;
-      return this.onGenerated?.();
-    }
 
-    this.generateVoxelsByOne(generator, chunkWorldPos);
+    const voxels = await generator.getChunkAt(chunkWorldPos, this.size, this.height);
+    
+    voxels.forEach(({posInChunk, voxel}) => {
+      this.setVoxelAt(posInChunk, voxel);
+    });
     this.isGenerating = false;
-    this.onGenerated?.();
   }
 
   public async getRenderableVoxels(
@@ -176,6 +149,7 @@ export default class Chunk {
         if (x < 0 || z < 0 || x >= this.size || z >= this.size) {
           const voxelNear = this.world.getVoxelAt(
             chunkWorldPos
+              .clone()
               .add(adj)
           );
           if (voxelNear) {
@@ -186,7 +160,7 @@ export default class Chunk {
                 currVoxelType.opacity !== undefined 
                 && currVoxelType.opacity < 1 
                 && voxelNear.Name !== voxelType
-              )
+                )
             ) {
               renderableFaces.push(precompiledAdjacents[i]);
             }

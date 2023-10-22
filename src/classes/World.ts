@@ -46,7 +46,7 @@ export default class World {
   }
 
   private setChunkAt(vec: Vector3, chunk: Chunk): ChunkRenderer {
-    const newRenderer = new ChunkRenderer(chunk, this.scene, vec, this.chunkSize);
+    const newRenderer = new ChunkRenderer(chunk, this.scene, vec, this.chunkSize, this);
     this.renderers.set(
       Representation.toRepresentation(vec), 
       newRenderer,
@@ -117,5 +117,11 @@ export default class World {
     this.renderers.forEach(renderer => {
       renderer.update();
     });
+  }
+
+  public renderChunkAt(chunkPos: Vector3): void {
+    const renderer = this.renderers.get(Representation.toRepresentation(chunkPos));
+    if (!renderer) return;
+    renderer.update();
   }
 }

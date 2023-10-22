@@ -2,6 +2,7 @@ import { InstancedMesh, MeshLambertMaterial, Object3D, PlaneGeometry, ShaderMate
 import Chunk from "./Chunk.ts";
 import vertex from '../shader/vertex.glsl?raw';
 import fragment from '../shader/fragment.glsl?raw';
+import World from "./World.ts";
 
 
 export default class ChunkRenderer {
@@ -13,6 +14,7 @@ export default class ChunkRenderer {
     private readonly scene: THREE.Scene,
     private readonly chunkPosition: THREE.Vector3,
     private readonly chunkSize: number,
+    private readonly world: World,
   ) {}
 
   public get Chunk(): Chunk {
@@ -91,7 +93,13 @@ export default class ChunkRenderer {
     return mesh;
   }
 
-  private async init(): Promise<void> {
+  public async init(isUpdate: boolean = false): Promise<void> {
+    if (isUpdate === false) {
+      this.world.renderChunkAt(this.Position.clone().add(new Vector3(0, 0, 1)));
+      this.world.renderChunkAt(this.Position.clone().add(new Vector3(0, 0, -1)));
+      this.world.renderChunkAt(this.Position.clone().add(new Vector3(1, 0, 0)));
+      this.world.renderChunkAt(this.Position.clone().add(new Vector3(-1, 0, 0)));
+    }
     await this.updateMesh();
     if (this.mesh) {
       this.scene.add(this.mesh);
@@ -99,7 +107,7 @@ export default class ChunkRenderer {
   }
 
   public async update(): Promise<void> {
-    await this.init();
+    await this.init(true);
   }
 
   private disposeMesh(): void {

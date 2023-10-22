@@ -56,7 +56,7 @@ export default class WorldManager {
             this.world.generateChunkAt(chunkPos, worldGenerator)
               .then(async chunkRenderer => {
                 if (chunkPos.distanceTo(this.getCurrentChunk()!) < renderDistance) {
-                  await chunkRenderer.update();
+                  await chunkRenderer.init();
                 } else {
                   this.world.disposeChunkAt(chunkPos);
                 }
