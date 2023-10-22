@@ -1,7 +1,6 @@
 import { Scene, Vector3 } from "three";
 import Chunk from "./Chunk.ts";
 import Voxel from "./Voxel.ts";
-import MissingChunkError from "../errors/MissingChunkError.ts";
 import ChunkRenderer from "./ChunkRenderer.ts";
 import WorldGenerator from "../generator/WorldGenerator.ts";
 import Representation, { VectorRepresentation } from "./VectorRepresentation.ts";
@@ -11,11 +10,15 @@ import Representation, { VectorRepresentation } from "./VectorRepresentation.ts"
 export default class World {
   private readonly renderers: Map<VectorRepresentation, ChunkRenderer> = new Map();
 
+  private readonly chunkDimensions: Vector3;
+
   constructor(
     private readonly chunkSize: number,
     private readonly chunkHeight: number,
     private readonly scene: Scene,  
-  ) {}
+  ) {
+    this.chunkDimensions = new Vector3(chunkSize, chunkHeight, chunkSize);
+  }
 
   public transformWorldPosToChunkPos(worldPos: Vector3): Vector3 {
     const {x, y, z} = worldPos;
@@ -27,16 +30,13 @@ export default class World {
   }
 
   public transformWorldPosToPosInChunk(worldPos: Vector3): Vector3 {
-    let {x, y, z} = worldPos
     
-    let posInChunkX = x % this.chunkSize;
-    let posInChunkY = y % this.chunkHeight;
-    let posInChunkZ = z % this.chunkSize;
-    
-    if (x < 0) posInChunkX = this.chunkSize - 1 + posInChunkX;
-    if (z < 0) posInChunkZ = this.chunkSize - 1 + posInChunkZ;
+    const chunkWorldPos = this.transformWorldPosToChunkPos(worldPos)
+      .multiply(this.chunkDimensions);
 
-    return new Vector3(posInChunkX, posInChunkY, posInChunkZ);
+    const posInChunk = worldPos.sub(chunkWorldPos);
+
+    return posInChunk;
   }
 
   public getChunkAt(vec: Vector3): Chunk | undefined {
