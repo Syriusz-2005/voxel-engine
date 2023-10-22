@@ -4,7 +4,6 @@ import Voxel from "./Voxel.ts";
 import RenderableVoxel from "./RenderableVoxel.ts";
 import ChunkError from "../errors/ChunkError.ts";
 import WorldGenerator from "../generator/WorldGenerator.ts";
-import Representation, { VectorRepresentation } from "./VectorRepresentation.ts";
 import Perf from "../utils/Perf.ts";
 
 const perfTest = new Perf('Voxel info generation', 400);
@@ -14,8 +13,6 @@ export default class Chunk {
 
   private isGenerating: boolean = false;
   private onGenerated?: () => void;
-
-  private strCache: VectorRepresentation | undefined;
 
   constructor(
     private readonly size: number,
