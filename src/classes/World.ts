@@ -27,10 +27,14 @@ export default class World {
   }
 
   public transformWorldPosToPosInChunk(worldPos: Vector3): Vector3 {
-    const {x, y, z} = worldPos;
-    const posInChunkX = x % this.chunkSize;
-    const posInChunkY = y % this.chunkHeight;
-    const posInChunkZ = z % this.chunkSize;
+    let {x, y, z} = worldPos
+    
+    let posInChunkX = x % this.chunkSize;
+    let posInChunkY = y % this.chunkHeight;
+    let posInChunkZ = z % this.chunkSize;
+    
+    if (x < 0) posInChunkX = this.chunkSize - 1 + posInChunkX;
+    if (z < 0) posInChunkZ = this.chunkSize - 1 + posInChunkZ;
 
     return new Vector3(posInChunkX, posInChunkY, posInChunkZ);
   }
@@ -51,7 +55,7 @@ export default class World {
   }
 
   private createChunk(vec: Vector3): ChunkRenderer {
-    const chunk = new Chunk(this.chunkSize, this.chunkHeight);
+    const chunk = new Chunk(this.chunkSize, this.chunkHeight, this, vec);
     const renderer = this.setChunkAt(vec, chunk);
     return renderer;
   }
@@ -95,12 +99,12 @@ export default class World {
     return renderers;
   }
 
-  public getVoxelAt(worldPos: Vector3): Voxel {
+  public getVoxelAt(worldPos: Vector3): Voxel | undefined {
     const chunkPos = this.transformWorldPosToChunkPos(worldPos);
     const posInChunk = this.transformWorldPosToPosInChunk(worldPos);
 
     const chunk = this.getChunkAt(chunkPos);
-    if (!chunk) throw new MissingChunkError(chunkPos);
+    if (!chunk) return undefined;
 
     const voxelType = chunk.getVoxelAt(posInChunk);
     return new Voxel(voxelType);

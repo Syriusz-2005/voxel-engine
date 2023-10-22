@@ -5,6 +5,7 @@ import RenderableVoxel from "./RenderableVoxel.ts";
 import ChunkError from "../errors/ChunkError.ts";
 import WorldGenerator from "../generator/WorldGenerator.ts";
 import Perf from "../utils/Perf.ts";
+import World from "./World.ts";
 
 const perfTest = new Perf('Voxel info generation', 400);
 
@@ -17,6 +18,8 @@ export default class Chunk {
   constructor(
     private readonly size: number,
     private readonly height: number,
+    private readonly world: World,
+    private readonly chunkPos: Vector3,
   ) {
     this.data = new Array(size)
       .fill(undefined)
@@ -152,6 +155,10 @@ export default class Chunk {
       new Vector3(),
     ];
 
+    const chunkWorldPos = this.chunkPos
+      .clone()
+      .multiplyScalar(this.size);
+
     for (const {type: voxelType, pos: vec} of subchunkIterator ?? this.each()) {
       const renderableFaces: Vector3[] = [];
   
@@ -160,8 +167,31 @@ export default class Chunk {
         adj.copy(vec);
         adj.add(precompiledAdjacents[i]);
   
-        if (!this.isInBounds(adj)) {
+        const {x, y, z} = adj;
+        if (y < 0 || y > this.height) {
           renderableFaces.push(precompiledAdjacents[i]);
+          continue;
+        }
+
+        if (x < 0 || z < 0 || x >= this.size || z >= this.size) {
+          const voxelNear = this.world.getVoxelAt(
+            chunkWorldPos
+              .add(adj)
+          );
+          if (voxelNear) {
+            const currVoxelType = voxelRegistry[voxelNear.Name];
+            if (
+              currVoxelType.existing === false 
+              || (
+                currVoxelType.opacity !== undefined 
+                && currVoxelType.opacity < 1 
+                && voxelNear.Name !== voxelType
+              )
+            ) {
+              renderableFaces.push(precompiledAdjacents[i]);
+            }
+          }
+          // renderableFaces.push(precompiledAdjacents[i]);
           continue;
         }
 
