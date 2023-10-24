@@ -27,16 +27,16 @@ export default class ChunkRenderer {
 
   private async updateMesh(): Promise<InstancedMesh | undefined> {
     const geometry = new PlaneGeometry(1, 1);
-    // const material = new MeshLambertMaterial({});
-    const material = new ShaderMaterial({
-      vertexShader: vertex,
-      fragmentShader: fragment,
-      uniforms: {
+    const material = new MeshLambertMaterial({});
+    // const material = new ShaderMaterial({
+    //   vertexShader: vertex,
+    //   fragmentShader: fragment,
+    //   uniforms: {
         
-      },
-      depthWrite: false,
-      transparent: true,
-    })
+    //   },
+    //   depthWrite: false,
+    //   transparent: true,
+    // })
 
     const {chunk} = this;
 

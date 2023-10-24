@@ -35,7 +35,7 @@ console.time('Init');
 
 const worldManager = new WorldManager(16, 64, scene, {
 	worldGenerator: new RandomFlatWorldGenerator(),
-	renderDistance: 15,
+	renderDistance: 35,
 });
 
 console.timeEnd('Init');
