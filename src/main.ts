@@ -29,7 +29,9 @@ scene.add(light);
 const ambient = new THREE.AmbientLight(0xffffff, 0.001);
 scene.add(ambient);
 
+const axis = new THREE.AxesHelper(50);
 
+scene.add(axis);
 
 console.time('Init');
 

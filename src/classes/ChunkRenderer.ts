@@ -38,22 +38,30 @@ export default class ChunkRenderer {
       -1.0, -1.0,  1.0  // v5
     ]);
 
-    geometry.setAttribute('position', new BufferAttribute(vertices, 3));
-    geometry.setAttribute('meshPosition', new BufferAttribute(new Float32Array([
+    const chunkWorldPos = new Vector3(
       this.chunkPosition.x * this.chunkSize,
       this.Position.y,
       this.chunkPosition.z * this.chunkSize,
-    ]), 3))
+    );
 
+    geometry.setAttribute('position', new BufferAttribute(vertices, 3));
+    geometry.setAttribute('meshPosition', new BufferAttribute(new Float32Array([
+      chunkWorldPos.x,
+      chunkWorldPos.y,
+      chunkWorldPos.z,
+    ]), 3))
     // const material = new MeshLambertMaterial({});
     const material = new ShaderMaterial({
       vertexShader: vertex,
       fragmentShader: fragment,
       uniforms: {
-        
+        'chunkWorldPosition': {
+          value: chunkWorldPos,
+        }
       },
       depthWrite: false,
       transparent: true,
+      // side: DoubleSide,
     })
 
     const {chunk} = this;
@@ -82,8 +90,7 @@ export default class ChunkRenderer {
     for (let i = 0; i < count; i++) {
       const renderableVoxel = voxels[i];
       const {PosInChunk} = renderableVoxel;
-      const positionMultiplier = 1;
-      voxelPosition = voxelPosition.copy(PosInChunk).multiplyScalar(positionMultiplier);
+      voxelPosition = voxelPosition.copy(PosInChunk);
       let faceIndex = 0;
       for (let face of renderableVoxel.RenderableFaces) {
         object.rotation.set(0, 0, 0);
@@ -92,17 +99,10 @@ export default class ChunkRenderer {
           voxelPosition.y + 0.5, 
           voxelPosition.z + 0.5,
         );
-        const facePos = face.clone().multiplyScalar(.5);
-        object.position.x += (facePos.x);
-        object.position.y += (facePos.y);
-        object.position.z += (facePos.z);
         
         if (face.y !== 0) object.rotateX(-face.y * Math.PI / 2);
         if (face.x !== 0) object.rotateY(face.x * Math.PI / 2);
-        if (face.z === -1) {
-          
-          object.rotateY(Math.PI);
-        }
+        if (face.z === -1) object.rotateY(Math.PI);
 
         object.updateMatrix();
   
@@ -115,6 +115,7 @@ export default class ChunkRenderer {
         ];
 
         // debugger
+        // Each facen has 6 vertices
         for (let vertexIndex = 0; vertexIndex < 6; vertexIndex++) {
           for (let itemIndex = 0; itemIndex < matArray.length; itemIndex++) {
             elements[elementIndex] = matArray[itemIndex];
@@ -128,11 +129,7 @@ export default class ChunkRenderer {
     
     geometry.setAttribute('instanceMatrix', new InstancedBufferAttribute(elements, 16));
 
-    mesh.position.set(
-      this.chunkPosition.x * this.chunkSize, 
-      this.chunkPosition.y, 
-      this.chunkPosition.z * this.chunkSize
-    );
+    mesh.position.copy(chunkWorldPos);
     // mesh.instanceColor!.needsUpdate = true;
 
     
