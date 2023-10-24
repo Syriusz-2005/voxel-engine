@@ -1,4 +1,4 @@
-import { InstancedMesh, MeshLambertMaterial, Object3D, PlaneGeometry, ShaderMaterial, Vector3 } from "three";
+import { DoubleSide, BufferAttribute, BufferGeometry, InstancedBufferGeometry, InstancedMesh, Mesh, MeshLambertMaterial, Object3D, PlaneGeometry, ShaderMaterial, Vector3, InstancedBufferAttribute } from "three";
 import Chunk from "./Chunk.ts";
 import vertex from '../shader/vertex.glsl?raw';
 import fragment from '../shader/fragment.glsl?raw';
@@ -6,7 +6,7 @@ import World from "./World.ts";
 
 
 export default class ChunkRenderer {
-  private mesh: InstancedMesh | undefined;
+  private mesh: Mesh | undefined;
   private isDisposed: boolean = false;
 
   constructor(
@@ -25,8 +25,26 @@ export default class ChunkRenderer {
     return this.chunkPosition;
   }
 
-  private async updateMesh(): Promise<InstancedMesh | undefined> {
-    const geometry = new PlaneGeometry(1, 1);
+  private async updateMesh(): Promise<Mesh | undefined> {
+    const geometry = new InstancedBufferGeometry();
+    
+    const vertices = new Float32Array([
+      -1.0, -1.0,  1.0, // v0
+       1.0, -1.0,  1.0, // v1
+       1.0,  1.0,  1.0, // v2
+    
+       1.0,  1.0,  1.0, // v3
+      -1.0,  1.0,  1.0, // v4
+      -1.0, -1.0,  1.0  // v5
+    ]);
+
+    geometry.setAttribute('position', new BufferAttribute(vertices, 3));
+    geometry.setAttribute('meshPosition', new BufferAttribute(new Float32Array([
+      this.chunkPosition.x * this.chunkSize,
+      this.Position.y,
+      this.chunkPosition.z * this.chunkSize,
+    ]), 3))
+
     // const material = new MeshLambertMaterial({});
     const material = new ShaderMaterial({
       vertexShader: vertex,
@@ -36,6 +54,7 @@ export default class ChunkRenderer {
       },
       depthWrite: false,
       transparent: true,
+      // side: DoubleSide,
     })
 
     const {chunk} = this;
@@ -53,17 +72,20 @@ export default class ChunkRenderer {
     const count = voxels.length;
 
 
-    this.mesh = new InstancedMesh(geometry, material, facesCount);
+    this.mesh = new Mesh(geometry, material);
     const mesh = this.mesh;
 
+    const elements = new Float32Array(facesCount * 16 * 6);
+
     const object = new Object3D();
-    let faceIndex = 0;
     let voxelPosition = new Vector3();
+    let elementIndex = 0;
     for (let i = 0; i < count; i++) {
       const renderableVoxel = voxels[i];
       const {PosInChunk} = renderableVoxel;
       const positionMultiplier = 1;
       voxelPosition = voxelPosition.copy(PosInChunk).multiplyScalar(positionMultiplier);
+      let faceIndex = 0;
       for (let face of renderableVoxel.RenderableFaces) {
         object.rotation.set(0, 0, 0);
         object.position.set(
@@ -72,25 +94,47 @@ export default class ChunkRenderer {
           voxelPosition.z + 0.5,
         );
         const facePos = face.clone().multiplyScalar(.5);
-        object.translateX(facePos.x);
-        object.translateY(facePos.y);
-        object.translateZ(facePos.z);
-
+        object.position.x += (facePos.x);
+        object.position.y += (facePos.y);
+        object.position.z += (facePos.z);
+        
         if (face.y !== 0) object.rotateX(-face.y * Math.PI / 2);
         if (face.x !== 0) object.rotateY(face.x * Math.PI / 2);
-        if (face.z === -1) object.rotateY(Math.PI);
+        if (face.z === -1) {
+          
+          object.rotateY(Math.PI);
+        }
 
         object.updateMatrix();
   
-        mesh.setMatrixAt(faceIndex, object.matrix);
-        mesh.setColorAt(faceIndex, renderableVoxel.Voxel.Color);
+        // mesh.setMatrixAt(faceIndex, object.matrix);
+        // mesh.setColorAt(faceIndex, renderableVoxel.Voxel.Color);
+        const matArray = [
+          ...object.matrix
+            .toArray()
+            .values()
+        ];
 
+        // debugger
+        for (let vertexIndex = 0; vertexIndex < 6; vertexIndex++) {
+          for (let itemIndex = 0; itemIndex < matArray.length; itemIndex++) {
+            elements[elementIndex] = matArray[itemIndex];
+            elementIndex++;
+          }
+        }
+        
         faceIndex++;
       }
     }
+    
+    geometry.setAttribute('instanceMatrix', new InstancedBufferAttribute(elements, 16));
 
-    mesh.position.set(this.chunkPosition.x * this.chunkSize, this.chunkPosition.y, this.chunkPosition.z * this.chunkSize);
-    mesh.instanceColor!.needsUpdate = true;
+    mesh.position.set(
+      this.chunkPosition.x * this.chunkSize, 
+      this.chunkPosition.y, 
+      this.chunkPosition.z * this.chunkSize
+    );
+    // mesh.instanceColor!.needsUpdate = true;
 
     
     return mesh;
@@ -122,7 +166,7 @@ export default class ChunkRenderer {
     } else {
       materials.dispose();
     }
-    this.mesh!.dispose();
+    this.mesh!;
     delete this.mesh;
   }
 
