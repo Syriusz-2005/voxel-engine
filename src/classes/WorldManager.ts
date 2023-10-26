@@ -1,4 +1,4 @@
-import { Scene, Vector3 } from "three";
+import { Camera, Material, Matrix4, Scene, ShaderMaterial, Vector3 } from "three";
 import World from "./World";
 import WorldGenerator from "../generator/WorldGenerator";
 
@@ -33,12 +33,17 @@ export default class WorldManager {
       .floor();
   }
 
-  public async updateWorld() {
+  public async updateWorld(camera: Camera) {
     if (!this.visibilityPoint) {
       return;
     }
     const {renderDistance, worldGenerator} = this.config;
 
+    for (const renderer of this.world.Renderers.values()) {
+      const material = renderer.Mesh?.material as ShaderMaterial;
+      if (!material) continue;
+      material.uniforms['cViewMatrix'].value = new Matrix4().copy(camera.matrixWorldInverse);
+    }
 
     const currentChunk = this.getCurrentChunk()!;
 

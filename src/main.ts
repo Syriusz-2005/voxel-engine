@@ -18,7 +18,7 @@ document.body.appendChild( renderer.domElement );
 const controls = new OrbitControls( camera, renderer.domElement );
 
 camera.position.z = 8;
-camera.position.y = 60;
+camera.position.y = 140;
 camera.rotation.x = -0.3;
 controls.update();
 
@@ -37,7 +37,7 @@ console.time('Init');
 
 const worldManager = new WorldManager(16, 64, scene, {
 	worldGenerator: new RandomFlatWorldGenerator(),
-	renderDistance: 5,
+	renderDistance: 15,
 });
 
 console.timeEnd('Init');
@@ -46,10 +46,13 @@ async function animate() {
 	requestAnimationFrame( animate );
 	// controls.update();
 
+	// camera.updateProjectionMatrix();
+	// camera.updateMatrixWorld();
+	// camera.updateWorldMatrix(true, true);
 	stats.update();
 	renderer.render( scene, camera );
 	worldManager.updateVisibilityPoint(camera.position);
-	await worldManager.updateWorld();
+	await worldManager.updateWorld(camera);
 	// camera.position.z -= 3;
 	
 }
