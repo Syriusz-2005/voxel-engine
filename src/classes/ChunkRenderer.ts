@@ -1,4 +1,4 @@
-import { DoubleSide, BufferAttribute, BufferGeometry, InstancedBufferGeometry, InstancedMesh, Mesh, MeshLambertMaterial, Object3D, PlaneGeometry, ShaderMaterial, Vector3, InstancedBufferAttribute, Matrix4 } from "three";
+import { DoubleSide, BufferAttribute, BufferGeometry, InstancedBufferGeometry, InstancedMesh, Mesh, MeshLambertMaterial, Object3D, PlaneGeometry, ShaderMaterial, Vector3, InstancedBufferAttribute, Matrix4, FrontSide } from "three";
 import Chunk from "./Chunk.ts";
 import vertex from '../shader/vertex.glsl?raw';
 import fragment from '../shader/fragment.glsl?raw';
@@ -65,13 +65,12 @@ export default class ChunkRenderer {
           value: new Matrix4(),
         },
       },
-      depthWrite: false,
-      transparent: true,
-      
+      depthWrite: true,
+      transparent: false,
       // wireframe: true,
       // // linewidth: 8,
       // wireframeLinewidth: 24,
-      side: DoubleSide,
+      side: FrontSide,
     });
 
     const {chunk} = this;
@@ -111,7 +110,7 @@ export default class ChunkRenderer {
           voxelPosition.y + 0.5, 
           voxelPosition.z + 0.5,
         );
-        object.position.multiplyScalar(2);
+        // object.position.multiplyScalar(2); 
         
         if (face.y !== 0) object.rotateX(-face.y * Math.PI / 2);
         if (face.x !== 0) object.rotateY(face.x * Math.PI / 2);

@@ -21,9 +21,9 @@ new WorkerVoxelGenerator((worldPos) => {
 
   // return 'air';
 
-  if (worldPos.y <= (noise.simplex2(worldPos.x / 10, worldPos.z / 10) > 0.7 ? 2 : 1)) return 'dirt';
+  // if (worldPos.y <= (noise.simplex2(worldPos.x / 10, worldPos.z / 10) > 0.7 ? 2 : 1)) return 'dirt';
 
-  return 'air';
+  // return 'air';
   // if (
   //   worldPos.y < 2 
   //   && (
@@ -41,7 +41,7 @@ new WorkerVoxelGenerator((worldPos) => {
   // }
 
   // return 'air';
-  const worldHeight = noise.simplex2(worldPos.x / 100, worldPos.z / 100) * 14 + 20;
+  const worldHeight = noise.simplex2(worldPos.x / 100, worldPos.z / 100) * 14 + 10;
   
   if (worldPos.y < worldHeight) {
     return 'dirt';
