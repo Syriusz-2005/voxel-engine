@@ -29,16 +29,20 @@ export default class ChunkRenderer {
     return this.mesh;
   }
 
+  private getAttrArray(facesCount: number, perVertexCount: number): Float32Array {
+    return new Float32Array(facesCount * 6 * perVertexCount);
+  }
+
   private async updateMesh(): Promise<Mesh | undefined> {
     const geometry = new InstancedBufferGeometry();
     const vertices = new Float32Array([
-      -1.0, -1.0,  1.0, // v0
-       1.0, -1.0,  1.0, // v1
-       1.0,  1.0,  1.0, // v2
+      -0.5, -0.5,  0.5, // v0
+      0.5, -0.5,  0.5, // v1
+      0.5,  0.5,  0.5, // v2
     
-       1.0,  1.0,  1.0, // v3
-      -1.0,  1.0,  1.0, // v4
-      -1.0, -1.0,  1.0  // v5
+      0.5,  0.5,  0.5, // v3
+      -0.5,  0.5,  0.5, // v4
+      -0.5, -0.5,  0.5  // v5
     ]);
 
     const chunkWorldPos = new Vector3(
@@ -91,13 +95,15 @@ export default class ChunkRenderer {
     this.mesh = new Mesh(geometry, material);
     const mesh = this.mesh;
 
-    const elements = new Float32Array(facesCount * 16 * 6);
-    const faceRotations = new Float32Array(facesCount * 1 * 6);
+    const elements = this.getAttrArray(facesCount, 16);
+    const faceRotations = this.getAttrArray(facesCount, 1);
+    const colors = this.getAttrArray(facesCount, 3);
 
     const object = new Object3D();
     let voxelPosition = new Vector3();
     let elementIndex = 0;
     let faceId = 0;
+    let colorIndex = 0;
     for (let i = 0; i < count; i++) {
       const renderableVoxel = voxels[i];
       const {PosInChunk} = renderableVoxel;
@@ -107,7 +113,7 @@ export default class ChunkRenderer {
         object.rotation.set(0, 0, 0);
         object.position.set(
           voxelPosition.x + 0.5, 
-          voxelPosition.y + 0.5, 
+          (voxelPosition.y + 0.5), 
           voxelPosition.z + 0.5,
         );
         // object.position.multiplyScalar(2); 
@@ -142,9 +148,13 @@ export default class ChunkRenderer {
           : 5;  
 
         // debugger
-        // Each facen has 6 vertices
+        // Each face has 6 vertices
         for (let vertexIndex = 0; vertexIndex < 6; vertexIndex++) {
           faceRotations[faceId + vertexIndex] = rotationId;
+          colors[colorIndex++] = renderableVoxel.Voxel.Color.r;
+          colors[colorIndex++] = renderableVoxel.Voxel.Color.g; 
+          colors[colorIndex++] = renderableVoxel.Voxel.Color.b; 
+          
           for (let itemIndex = 0; itemIndex < matArray.length; itemIndex++) {
             elements[elementIndex] = matArray[itemIndex];
             elementIndex++;
@@ -158,6 +168,7 @@ export default class ChunkRenderer {
     
     geometry.setAttribute('instanceMatrix', new InstancedBufferAttribute(elements, 16));
     geometry.setAttribute('faceRotation', new InstancedBufferAttribute(faceRotations, 1));
+    geometry.setAttribute('voxelColor', new InstancedBufferAttribute(colors, 3));
 
     mesh.frustumCulled = false;
 

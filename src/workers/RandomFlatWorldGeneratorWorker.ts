@@ -41,15 +41,15 @@ new WorkerVoxelGenerator((worldPos) => {
   // }
 
   // return 'air';
-  const worldHeight = noise.simplex2(worldPos.x / 100, worldPos.z / 100) * 14 + 10;
+  const worldHeight = noise.simplex2(worldPos.x / 100, worldPos.z / 100) * 18 + 15;
   
   if (worldPos.y < worldHeight) {
     return 'dirt';
   }
 
-  // if (worldPos.y <= seaLevel) {
-  //   return 'water';
-  // }
+  if (worldPos.y <= seaLevel) {
+    return 'water';
+  }
   
   return 'air';
 });
