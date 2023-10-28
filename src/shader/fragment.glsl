@@ -7,7 +7,7 @@ varying vec3 vNormal;
 varying vec3 vLightFront;
 varying vec3 vPosition;
 flat varying float vFaceRotation;
-flat varying vec3 vColor;
+flat varying vec4 vColor;
 
 void main() {
 
@@ -19,9 +19,9 @@ void main() {
   cl = max(0.2, vFaceRotation / 5.0);
 
   // gl_FragColor = vec4( diffuse, 1.0 );
-  gl_FragColor = vec4(1.0);
+  gl_FragColor = vec4(vec3(1.0), vColor.a);
   gl_FragColor.xyz = mix(
-    vColor,
+    vColor.xyz,
     vec3(0.0, 0.0, 0.0),
     cl * 0.5
   );

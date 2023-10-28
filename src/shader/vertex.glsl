@@ -5,21 +5,21 @@ attribute mat4 instanceMatrix;
 attribute vec3 vertices;
 attribute vec3 meshPosition;
 attribute float faceRotation;
-attribute vec3 voxelColor;
+attribute vec4 voxelColor;
 
 
 varying vec2 vUv;
 varying vec3 vNormal;
 varying vec3 vPosition;
 flat varying float vFaceRotation;
-flat varying vec3 vColor;
+flat varying vec4 vColor;
 
 void main() {
   vUv = uv;
   vNormal = normal;
   vPosition = meshPosition;
   vFaceRotation = faceRotation;
-  vColor = voxelColor / 255.;
+  vColor = vec4(voxelColor.xyz / 255., voxelColor.a);
 
   mat4 matrix = instanceMatrix;
 

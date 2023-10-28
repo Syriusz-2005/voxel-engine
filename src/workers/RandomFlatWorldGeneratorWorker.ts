@@ -10,7 +10,7 @@ new WorkerVoxelGenerator((worldPos) => {
   // if (worldPos.x % 16 === 1 && worldPos.z % 16 === 1) {
 
   //   if (worldPos.y > 8 && worldPos.y < 11) {
-  //     return 'dirt';
+  //     return 'water';
   //   }
   
   //   if (worldPos.y === 20) {

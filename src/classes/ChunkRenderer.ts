@@ -70,7 +70,9 @@ export default class ChunkRenderer {
         },
       },
       depthWrite: true,
-      transparent: false,
+      depthTest: true,
+      transparent: true,
+      // depthTest: false,
       // wireframe: true,
       // // linewidth: 8,
       // wireframeLinewidth: 24,
@@ -97,13 +99,15 @@ export default class ChunkRenderer {
 
     const elements = this.getAttrArray(facesCount, 16);
     const faceRotations = this.getAttrArray(facesCount, 1);
-    const colors = this.getAttrArray(facesCount, 3);
+    const colors = this.getAttrArray(facesCount, 4);
+    const liquids = this.getAttrArray(facesCount, 1);
 
     const object = new Object3D();
     let voxelPosition = new Vector3();
     let elementIndex = 0;
     let faceId = 0;
     let colorIndex = 0;
+    let isLiquidIndex = 0;
     for (let i = 0; i < count; i++) {
       const renderableVoxel = voxels[i];
       const {PosInChunk} = renderableVoxel;
@@ -116,6 +120,7 @@ export default class ChunkRenderer {
           (voxelPosition.y + 0.5), 
           voxelPosition.z + 0.5,
         );
+        object.scale.set(1, 1, 1);
         // object.position.multiplyScalar(2); 
         
         if (face.y !== 0) object.rotateX(-face.y * Math.PI / 2);
@@ -132,8 +137,8 @@ export default class ChunkRenderer {
             .values()
         ];
         /*
-          top 0
-          bottom 1
+          bottom 0
+          top 1
           left 2
           right 3
           front 4
@@ -151,9 +156,12 @@ export default class ChunkRenderer {
         // Each face has 6 vertices
         for (let vertexIndex = 0; vertexIndex < 6; vertexIndex++) {
           faceRotations[faceId + vertexIndex] = rotationId;
+          liquids[isLiquidIndex++] = renderableVoxel.Voxel.isLiquid ? 1 : 0;
+          
           colors[colorIndex++] = renderableVoxel.Voxel.Color.r;
-          colors[colorIndex++] = renderableVoxel.Voxel.Color.g; 
-          colors[colorIndex++] = renderableVoxel.Voxel.Color.b; 
+          colors[colorIndex++] = renderableVoxel.Voxel.Color.g;
+          colors[colorIndex++] = renderableVoxel.Voxel.Color.b;
+          colors[colorIndex++] = renderableVoxel.Voxel.Opacity;
           
           for (let itemIndex = 0; itemIndex < matArray.length; itemIndex++) {
             elements[elementIndex] = matArray[itemIndex];
@@ -168,9 +176,12 @@ export default class ChunkRenderer {
     
     geometry.setAttribute('instanceMatrix', new InstancedBufferAttribute(elements, 16));
     geometry.setAttribute('faceRotation', new InstancedBufferAttribute(faceRotations, 1));
-    geometry.setAttribute('voxelColor', new InstancedBufferAttribute(colors, 3));
+    geometry.setAttribute('voxelColor', new InstancedBufferAttribute(colors, 4));
+    geometry.setAttribute('isLiquid', new InstancedBufferAttribute(liquids, 1));
 
     mesh.frustumCulled = false;
+    
+    // geometry.computeBoundingBox();
 
     mesh.position.copy(chunkWorldPos);
     // mesh.instanceColor!.needsUpdate = true;

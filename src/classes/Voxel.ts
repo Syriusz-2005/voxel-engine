@@ -15,4 +15,14 @@ export default class Voxel {
     const registryData = voxelRegistry[this.name];
     return registryData.color;
   }
+
+  public get Opacity(): number {
+    const registryData = voxelRegistry[this.name];
+    return registryData.opacity ?? 1;
+  }
+
+  public get isLiquid(): boolean {
+    const registryData = voxelRegistry[this.name];
+    return registryData.isLiquid ?? false;
+  }
 }
