@@ -26,7 +26,7 @@ export const voxelRegistry = {
   'water': {
     color: new Color(0, 80, 255), 
     id: 3, 
-    opacity: .3,
+    opacity: .1,
     isLiquid: true,
   } as VoxelData,
 } as const;

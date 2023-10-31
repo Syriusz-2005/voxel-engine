@@ -52,26 +52,7 @@ export default class ChunkRenderer {
 
 
     // const material = new MeshLambertMaterial({});
-    const material = new ShaderMaterial({
-      vertexShader: vertex,
-      fragmentShader: fragment,
-      uniforms: {
-        'chunkWorldPosition': {
-          value: chunkWorldPos,
-        },
-        'cViewMatrix': {
-          value: new Matrix4(),
-        },
-      },
-      depthWrite: true,
-      depthTest: true,
-      transparent: true,
-      // depthTest: false,
-      // wireframe: true,
-      // // linewidth: 8,
-      // wireframeLinewidth: 24,
-      side: FrontSide,
-    });
+    
 
     const {chunk} = this;
 
@@ -83,6 +64,7 @@ export default class ChunkRenderer {
     };
     this.disposeMeshes();
 
+    let index = 0;
     for (const {voxels, facesCount} of transparencyPasses)  {
       const geometry = new InstancedBufferGeometry();
       geometry.setAttribute('position', new BufferAttribute(vertices, 3));
@@ -90,7 +72,30 @@ export default class ChunkRenderer {
         chunkWorldPos.x,
         chunkWorldPos.y,
         chunkWorldPos.z,
-      ]), 3))
+      ]), 3));
+
+      const isOpaque = index++ === 0;
+
+      const material = new ShaderMaterial({
+        vertexShader: vertex,
+        fragmentShader: fragment,
+        uniforms: {
+          'chunkWorldPosition': {
+            value: chunkWorldPos,
+          },
+          'cViewMatrix': {
+            value: new Matrix4(),
+          },
+        },
+        depthWrite: isOpaque,
+        depthTest: true,
+        transparent: !isOpaque,
+        // depthTest: false,
+        // wireframe: true,
+        // // linewidth: 8,
+        // wireframeLinewidth: 24,
+        side: FrontSide,
+      });
 
       const mesh = new Mesh(geometry, material);
       this.meshes.push(mesh);
@@ -217,6 +222,7 @@ export default class ChunkRenderer {
         materials.dispose();
       }
     }
+    this.meshes = [];
   }
 
   public remove(): void {

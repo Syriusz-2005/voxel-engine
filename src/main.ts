@@ -35,7 +35,7 @@ scene.add(axis);
 
 console.time('Init');
 
-const worldManager = new WorldManager(16, 64, scene, {
+const worldManager = new WorldManager(25, 64, scene, {
 	worldGenerator: new RandomFlatWorldGenerator(),
 	renderDistance: 8,
 });
