@@ -83,9 +83,9 @@ export default class ChunkRenderer {
           'chunkWorldPosition': {
             value: chunkWorldPos,
           },
-          'cViewMatrix': {
-            value: new Matrix4(),
-          },
+          'frame': {
+            value: 0,
+          }
         },
         depthWrite: isOpaque,
         depthTest: true,
@@ -107,6 +107,7 @@ export default class ChunkRenderer {
       const faceRotations = this.getAttrArray(facesCount, 1);
       const colors = this.getAttrArray(facesCount, 4);
       const liquids = this.getAttrArray(facesCount, 1);
+      const voxelId = new Uint8Array(facesCount * 6);
   
       const object = new Object3D();
       let voxelPosition = new Vector3();
@@ -159,6 +160,7 @@ export default class ChunkRenderer {
           // Each face has 6 vertices
           for (let vertexIndex = 0; vertexIndex < 6; vertexIndex++) {
             faceRotations[faceId + vertexIndex] = rotationId;
+            voxelId[isLiquidIndex] = renderableVoxel.Voxel.Id;
             liquids[isLiquidIndex++] = renderableVoxel.Voxel.isLiquid ? 1 : 0;
             
             colors[colorIndex++] = renderableVoxel.Voxel.Color.r;
@@ -181,7 +183,8 @@ export default class ChunkRenderer {
       geometry.setAttribute('faceRotation', new InstancedBufferAttribute(faceRotations, 1));
       geometry.setAttribute('voxelColor', new InstancedBufferAttribute(colors, 4));
       geometry.setAttribute('isLiquid', new InstancedBufferAttribute(liquids, 1));
-  
+      geometry.setAttribute('voxelId', new InstancedBufferAttribute(voxelId, 1));
+
       mesh.frustumCulled = false;
   
       mesh.position.copy(chunkWorldPos);

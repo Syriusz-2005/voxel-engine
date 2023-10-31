@@ -10,6 +10,7 @@ export type WorldManagerConfig = {
 export default class WorldManager {
   private readonly world: World;
   private visibilityPoint: Vector3 | undefined;
+  private frameIndex = 0;
 
   constructor(
     private readonly chunkSize: number,
@@ -39,10 +40,14 @@ export default class WorldManager {
     }
     const {renderDistance, worldGenerator} = this.config;
 
+    this.frameIndex++;
     for (const renderer of this.world.Renderers.values()) {
-      const material = renderer.Mesh?.material as ShaderMaterial;
-      if (!material) continue;
-      material.uniforms['cViewMatrix'].value = new Matrix4().copy(camera.matrixWorldInverse);
+      for (const mesh of renderer.Meshes) {
+        const material = mesh.material as ShaderMaterial;
+        if (material) {
+          material.uniforms['frame'].value = this.frameIndex;
+        }
+      }
     }
 
     const currentChunk = this.getCurrentChunk()!;
