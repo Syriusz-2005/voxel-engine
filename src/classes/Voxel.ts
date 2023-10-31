@@ -25,4 +25,9 @@ export default class Voxel {
     const registryData = voxelRegistry[this.name];
     return registryData.isLiquid ?? false;
   }
+
+  public get Id(): number {
+    const registryData = voxelRegistry[this.name];
+    return registryData.id;
+  }
 }

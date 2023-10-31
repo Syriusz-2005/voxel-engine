@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import { VoxelType, voxelRegistry } from "../types/VoxelRegistry.ts";
+import { VoxelType, registry, voxelRegistry } from "../types/VoxelRegistry.ts";
 import Voxel from "./Voxel.ts";
 import RenderableVoxel from "./RenderableVoxel.ts";
 import ChunkError from "../errors/ChunkError.ts";
@@ -8,6 +8,8 @@ import Perf from "../utils/Perf.ts";
 import World from "./World.ts";
 
 const perfTest = new Perf('Voxel info generation', 400);
+
+export type TransparencyPass = {voxels: RenderableVoxel[], facesCount: number};
 
 export default class Chunk {
   private readonly data: ({type: VoxelType, pos: Vector3} | undefined)[][][];
@@ -101,11 +103,14 @@ export default class Chunk {
 
   public async getRenderableVoxels(
     subchunkIterator?: Generator<{
-      type: "air" | "grass" | "dirt";
+      type: VoxelType;
       pos: Vector3;
     }, void, unknown>
-  ): Promise<{facesCount: number, voxels: RenderableVoxel[]}> {
-    const voxels: RenderableVoxel[] = [];
+  ): Promise<{
+    facesCount: number,
+    transparencyPasses: TransparencyPass[],
+  }> {
+    const transparencyPasses = registry.getTransparencyPasses();
     let facesCount = 0;
     await this.waitForGenerationComplete();
     
@@ -188,7 +193,13 @@ export default class Chunk {
       facesCount += renderableFaces.length;
       const voxel = new Voxel(voxelType);
       const renderableVoxel = new RenderableVoxel(voxel, vec, renderableFaces);
-      voxels.push(renderableVoxel);
+
+      const passId = voxel.Opacity > 0 && voxel.Opacity < 1 ? voxel.Id : 0;
+
+      const prevTransparencyPass = transparencyPasses.get(passId)!;
+      prevTransparencyPass.facesCount += renderableFaces.length;
+      prevTransparencyPass.voxels.push(renderableVoxel);
+
     }
 
 
@@ -197,7 +208,7 @@ export default class Chunk {
     
     return {
       facesCount,
-      voxels,
+      transparencyPasses: Array.from(transparencyPasses.values()),
     };
   }
 }
