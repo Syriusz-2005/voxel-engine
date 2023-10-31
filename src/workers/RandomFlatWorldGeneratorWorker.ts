@@ -43,7 +43,12 @@ new WorkerVoxelGenerator((worldPos) => {
   // return 'air';
   const worldHeight = noise.simplex2(worldPos.x / 100, worldPos.z / 100) * 18 + 15;
   
+
   if (worldPos.y < worldHeight) {
+    if (worldPos.y > 22) {
+      return 'grass';
+    }
+    
     return 'dirt';
   }
 
