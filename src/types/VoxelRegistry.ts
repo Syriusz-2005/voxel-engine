@@ -1,4 +1,5 @@
 import { Color } from "three";
+import VoxelRegistry from "../classes/VoxelRegistry";
 
 export type VoxelData = {
   color: THREE.Color;
@@ -25,7 +26,7 @@ export const voxelRegistry = {
   'water': {
     color: new Color(0, 80, 255), 
     id: 3, 
-    opacity: .3,
+    opacity: .2,
     isLiquid: true,
   } as VoxelData,
 } as const;
@@ -37,3 +38,5 @@ export const voxelNamesRegistryById: {[key in number]: VoxelType} = Object.fromE
   Object.entries(voxelRegistry)
     .map(([name, data]) => [data.id, name as VoxelType])
 );
+
+export const registry = new VoxelRegistry();

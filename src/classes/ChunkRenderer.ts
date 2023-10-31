@@ -6,7 +6,7 @@ import World from "./World.ts";
 
 
 export default class ChunkRenderer {
-  private mesh: Mesh | undefined;
+  private meshes: Mesh[] = [];
   private isDisposed: boolean = false;
 
   constructor(
@@ -25,16 +25,15 @@ export default class ChunkRenderer {
     return this.chunkPosition;
   }
 
-  public get Mesh(): Mesh | undefined {
-    return this.mesh;
+  public get Meshes(): Mesh[] {
+    return this.meshes;
   }
 
   private getAttrArray(facesCount: number, perVertexCount: number): Float32Array {
     return new Float32Array(facesCount * 6 * perVertexCount);
   }
 
-  private async updateMesh(): Promise<Mesh | undefined> {
-    const geometry = new InstancedBufferGeometry();
+  private async updateMesh() {
     const vertices = new Float32Array([
       -0.5, -0.5,  0.5, // v0
       0.5, -0.5,  0.5, // v1
@@ -51,143 +50,152 @@ export default class ChunkRenderer {
       this.chunkPosition.z * this.chunkSize,
     );
 
-    geometry.setAttribute('position', new BufferAttribute(vertices, 3));
-    geometry.setAttribute('meshPosition', new BufferAttribute(new Float32Array([
-      chunkWorldPos.x,
-      chunkWorldPos.y,
-      chunkWorldPos.z,
-    ]), 3))
+
     // const material = new MeshLambertMaterial({});
-    const material = new ShaderMaterial({
-      vertexShader: vertex,
-      fragmentShader: fragment,
-      uniforms: {
-        'chunkWorldPosition': {
-          value: chunkWorldPos,
-        },
-        'cViewMatrix': {
-          value: new Matrix4(),
-        },
-      },
-      depthWrite: true,
-      depthTest: true,
-      transparent: true,
-      // depthTest: false,
-      // wireframe: true,
-      // // linewidth: 8,
-      // wireframeLinewidth: 24,
-      side: FrontSide,
-    });
+    
 
     const {chunk} = this;
 
-    const {voxels, facesCount} = await chunk.getRenderableVoxels();
-    
+    const {transparencyPasses, facesCount} = await chunk.getRenderableVoxels();
+
     if (this.isDisposed) {
       this.remove();
       return;
     };
-    if (this.mesh) {
-      this.scene.remove(this.mesh);
-      this.disposeMesh();
-    }
-    const count = voxels.length;
+    this.disposeMeshes();
 
+    let index = 0;
+    for (const {voxels, facesCount} of transparencyPasses)  {
+      const geometry = new InstancedBufferGeometry();
+      geometry.setAttribute('position', new BufferAttribute(vertices, 3));
+      geometry.setAttribute('meshPosition', new BufferAttribute(new Float32Array([
+        chunkWorldPos.x,
+        chunkWorldPos.y,
+        chunkWorldPos.z,
+      ]), 3));
 
-    this.mesh = new Mesh(geometry, material);
-    const mesh = this.mesh;
+      const isOpaque = index++ === 0;
 
-    const elements = this.getAttrArray(facesCount, 16);
-    const faceRotations = this.getAttrArray(facesCount, 1);
-    const colors = this.getAttrArray(facesCount, 4);
-    const liquids = this.getAttrArray(facesCount, 1);
-
-    const object = new Object3D();
-    let voxelPosition = new Vector3();
-    let elementIndex = 0;
-    let faceId = 0;
-    let colorIndex = 0;
-    let isLiquidIndex = 0;
-    for (let i = 0; i < count; i++) {
-      const renderableVoxel = voxels[i];
-      const {PosInChunk} = renderableVoxel;
-      voxelPosition = voxelPosition.copy(PosInChunk);
-      let localFaceIndex = 0;
-      for (let face of renderableVoxel.RenderableFaces) {
-        object.rotation.set(0, 0, 0);
-        object.position.set(
-          voxelPosition.x + 0.5, 
-          (voxelPosition.y + 0.5), 
-          voxelPosition.z + 0.5,
-        );
-        object.scale.set(1, 1, 1);
-        // object.position.multiplyScalar(2); 
-        
-        if (face.y !== 0) object.rotateX(-face.y * Math.PI / 2);
-        if (face.x !== 0) object.rotateY(face.x * Math.PI / 2);
-        if (face.z === -1) object.rotateY(Math.PI);
-
-        object.updateMatrix();
-  
-        // mesh.setMatrixAt(faceIndex, object.matrix);
-        // mesh.setColorAt(faceIndex, renderableVoxel.Voxel.Color);
-        const matArray = [
-          ...object.matrix
-            .toArray()
-            .values()
-        ];
-        /*
-          bottom 0
-          top 1
-          left 2
-          right 3
-          front 4
-          back 5 
-        */
-        const rotationId = 
-          face.y === -1 ? 0
-          : face.y === 1 ? 1
-          : face.x === -1 ? 2
-          : face.x === 1 ? 3
-          : face.z === -1 ? 4
-          : 5;  
-
-        // debugger
-        // Each face has 6 vertices
-        for (let vertexIndex = 0; vertexIndex < 6; vertexIndex++) {
-          faceRotations[faceId + vertexIndex] = rotationId;
-          liquids[isLiquidIndex++] = renderableVoxel.Voxel.isLiquid ? 1 : 0;
-          
-          colors[colorIndex++] = renderableVoxel.Voxel.Color.r;
-          colors[colorIndex++] = renderableVoxel.Voxel.Color.g;
-          colors[colorIndex++] = renderableVoxel.Voxel.Color.b;
-          colors[colorIndex++] = renderableVoxel.Voxel.Opacity;
-          
-          for (let itemIndex = 0; itemIndex < matArray.length; itemIndex++) {
-            elements[elementIndex] = matArray[itemIndex];
-            elementIndex++;
+      const material = new ShaderMaterial({
+        vertexShader: vertex,
+        fragmentShader: fragment,
+        uniforms: {
+          'chunkWorldPosition': {
+            value: chunkWorldPos,
+          },
+          'frame': {
+            value: 0,
           }
+        },
+        depthWrite: isOpaque,
+        depthTest: true,
+        transparent: !isOpaque,
+        // depthTest: false,
+        // wireframe: true,
+        // // linewidth: 8,
+        // wireframeLinewidth: 24,
+        side: FrontSide,
+      });
+
+      const mesh = new Mesh(geometry, material);
+      this.meshes.push(mesh);
+
+
+      const count = voxels.length;
+  
+      const elements = this.getAttrArray(facesCount, 16);
+      const faceRotations = this.getAttrArray(facesCount, 1);
+      const colors = this.getAttrArray(facesCount, 4);
+      const liquids = this.getAttrArray(facesCount, 1);
+      const voxelId = new Uint8Array(facesCount * 6);
+  
+      const object = new Object3D();
+      let voxelPosition = new Vector3();
+      let elementIndex = 0;
+      let faceId = 0;
+      let colorIndex = 0;
+      let isLiquidIndex = 0;
+      for (let i = 0; i < count; i++) {
+        const renderableVoxel = voxels[i];
+        const {PosInChunk} = renderableVoxel;
+        voxelPosition = voxelPosition.copy(PosInChunk);
+        let localFaceIndex = 0;
+        for (let face of renderableVoxel.RenderableFaces) {
+          object.rotation.set(0, 0, 0);
+          object.position.set(
+            voxelPosition.x + 0.5, 
+            (voxelPosition.y + 0.5), 
+            voxelPosition.z + 0.5,
+          );
+          object.scale.set(1, 1, 1);
+          
+          if (face.y !== 0) object.rotateX(-face.y * Math.PI / 2);
+          if (face.x !== 0) object.rotateY(face.x * Math.PI / 2);
+          if (face.z === -1) object.rotateY(Math.PI);
+  
+          object.updateMatrix();
+    
+          const matArray = [
+            ...object.matrix
+              .toArray()
+              .values()
+          ];
+          /*
+            bottom 0
+            top 1
+            left 2
+            right 3
+            front 4
+            back 5 
+          */
+          const rotationId = 
+            face.y === -1 ? 0
+            : face.y === 1 ? 1
+            : face.x === -1 ? 2
+            : face.x === 1 ? 3
+            : face.z === -1 ? 4
+            : 5;  
+  
+          // debugger
+          // Each face has 6 vertices
+          for (let vertexIndex = 0; vertexIndex < 6; vertexIndex++) {
+            faceRotations[faceId + vertexIndex] = rotationId;
+            voxelId[isLiquidIndex] = renderableVoxel.Voxel.Id;
+            liquids[isLiquidIndex++] = renderableVoxel.Voxel.isLiquid ? 1 : 0;
+            
+            colors[colorIndex++] = renderableVoxel.Voxel.Color.r;
+            colors[colorIndex++] = renderableVoxel.Voxel.Color.g;
+            colors[colorIndex++] = renderableVoxel.Voxel.Color.b;
+            colors[colorIndex++] = renderableVoxel.Voxel.Opacity;
+            
+            for (let itemIndex = 0; itemIndex < matArray.length; itemIndex++) {
+              elements[elementIndex] = matArray[itemIndex];
+              elementIndex++;
+            }
+          }
+          
+          faceId += 6;
+          localFaceIndex++;
         }
-        
-        faceId += 6;
-        localFaceIndex++;
       }
+      
+      geometry.setAttribute('instanceMatrix', new InstancedBufferAttribute(elements, 16));
+      geometry.setAttribute('faceRotation', new InstancedBufferAttribute(faceRotations, 1));
+      geometry.setAttribute('voxelColor', new InstancedBufferAttribute(colors, 4));
+      geometry.setAttribute('isLiquid', new InstancedBufferAttribute(liquids, 1));
+      geometry.setAttribute('voxelId', new InstancedBufferAttribute(voxelId, 1));
+
+      mesh.frustumCulled = false;
+  
+      mesh.position.copy(chunkWorldPos);
     }
     
-    geometry.setAttribute('instanceMatrix', new InstancedBufferAttribute(elements, 16));
-    geometry.setAttribute('faceRotation', new InstancedBufferAttribute(faceRotations, 1));
-    geometry.setAttribute('voxelColor', new InstancedBufferAttribute(colors, 4));
-    geometry.setAttribute('isLiquid', new InstancedBufferAttribute(liquids, 1));
+  }
 
-    mesh.frustumCulled = false;
-    
-    // geometry.computeBoundingBox();
-
-    mesh.position.copy(chunkWorldPos);
-    // mesh.instanceColor!.needsUpdate = true;
-
-    
-    return mesh;
+  private addMeshes() {
+    for (const mesh of this.meshes) {
+      this.scene.add(mesh);
+    }
   }
 
   public async init(isUpdate: boolean = false): Promise<void> {
@@ -198,33 +206,30 @@ export default class ChunkRenderer {
       this.world.renderChunkAt(this.Position.clone().add(new Vector3(-1, 0, 0)));
     }
     await this.updateMesh();
-    if (this.mesh) {
-      this.scene.add(this.mesh);
-    }
+    this.addMeshes();
   }
 
   public async update(): Promise<void> {
     await this.init(true);
   }
 
-  private disposeMesh(): void {
-    this.mesh!.geometry.dispose();
-
-    const materials = this.mesh!.material;
-    if (materials instanceof Array) {
-      materials.forEach(material => material.dispose());
-    } else {
-      materials.dispose();
+  private disposeMeshes(): void {
+    for (const mesh of this.meshes) {
+      mesh!.geometry.dispose();
+      this.scene.remove(mesh);
+  
+      const materials = mesh!.material;
+      if (materials instanceof Array) {
+        materials.forEach(material => material.dispose());
+      } else {
+        materials.dispose();
+      }
     }
-    this.mesh!;
-    delete this.mesh;
+    this.meshes = [];
   }
 
   public remove(): void {
     this.isDisposed = true;
-    if (this.mesh) {
-      this.scene.remove(this.mesh);
-      this.disposeMesh();
-    }
+    this.disposeMeshes();
   }
 }
