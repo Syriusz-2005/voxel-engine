@@ -2,15 +2,9 @@
 
 // uniform vec3 chunkWorldPosition;
 
-varying vec2 uv;
-varying vec3 vNormal;
-varying vec3 vLightFront;
-varying vec3 vPosition;
 flat varying float vFaceRotation;
 flat varying vec4 vColor;
-flat varying float vVoxelId;
 
-varying vec3 vLocalOffset;
 
 void main() {
 
@@ -30,12 +24,12 @@ void main() {
     cl * 0.5
   );
   
-  if (vVoxelId == 3.0) {
-    gl_FragColor.xyz = mix(
-      vColor.xyz,
-      vec3(0.0, 0.0, 1.0),
-      vLocalOffset.y
-    );
-  }
+  // if (vVoxelId == 3.0) {
+  //   gl_FragColor.xyz = mix(
+  //     vColor.xyz,
+  //     vec3(0.0, 0.0, 1.0),
+  //     vLocalOffset.y
+  //   );
+  // }
 
 }

@@ -9,21 +9,12 @@ attribute vec4 voxelColor;
 attribute float voxelId;
 
 
-varying vec2 vUv;
-varying vec3 vNormal;
-varying vec3 vPosition;
 flat varying float vFaceRotation;
 flat varying vec4 vColor;
-flat varying float vVoxelId;
-varying vec3 vLocalOffset;
 
 void main() {
-  vUv = uv;
-  vNormal = normal;
-  vPosition = meshPosition;
   vFaceRotation = faceRotation;
   vColor = vec4(voxelColor.xyz / 255., voxelColor.a);
-  vVoxelId = voxelId;
 
   mat4 matrix = instanceMatrix;
 
@@ -31,16 +22,14 @@ void main() {
 
   vec3 localOffset = vec3(0.0);
 
-  float worldPosZ = matrix[3][2] + chunkWorldPosition.z - position.y;
-  float worldPosX = matrix[3][0] + chunkWorldPosition.x + position.x;
+  float worldPosZ = matrix[3][2] + chunkWorldPosition.z - pos.y;
+  float worldPosX = matrix[3][0] + chunkWorldPosition.x + pos.x;
 
   if (voxelId == 3.0) {
     localOffset.y -= 0.15 
       + sin(worldPosX * 1.0 + float(frame) * 0.01 - 1000.) * 0.2
       + sin(worldPosZ * 1.0 + float(frame) * 0.03) * 0.1;
   }
-
-  vLocalOffset = localOffset;
 
   matrix[3][1] += localOffset.y;
 
