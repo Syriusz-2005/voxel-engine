@@ -199,12 +199,6 @@ export default class ChunkRenderer {
   }
 
   public async init(isUpdate: boolean = false): Promise<void> {
-    if (isUpdate === false) {
-      this.world.renderChunkAt(this.Position.clone().add(new Vector3(0, 0, 1)));
-      this.world.renderChunkAt(this.Position.clone().add(new Vector3(0, 0, -1)));
-      this.world.renderChunkAt(this.Position.clone().add(new Vector3(1, 0, 0)));
-      this.world.renderChunkAt(this.Position.clone().add(new Vector3(-1, 0, 0)));
-    }
     await this.updateMesh();
     this.addMeshes();
   }

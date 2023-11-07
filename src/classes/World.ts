@@ -108,7 +108,7 @@ export default class World {
     const posInChunk = this.transformWorldPosToPosInChunk(worldPos);
 
     const chunk = this.getChunkAt(chunkPos);
-    if (!chunk) return undefined;
+    if (!chunk || chunk.IsGenerating) return undefined;
 
     const voxelType = chunk.getVoxelAt(posInChunk);
     return new Voxel(voxelType);

@@ -29,7 +29,7 @@ export abstract class Generator implements WorldGenerator {
 
     const chunkDataArray = new Uint8Array(chunkDataBuffer);
     
-
+    const outlinedChunkSize = chunkSize + 2;
     const chunkData: VoxelPromiseResult[] = [];
 
     for (let i = 0; i < chunkDataArray.length; i++) {
@@ -37,13 +37,13 @@ export abstract class Generator implements WorldGenerator {
       const voxelName = voxelNamesRegistryById[voxelId];
       if (voxelName === 'air') continue;
       const voxel = new Voxel(voxelName);
-      const y = Math.floor(i / (chunkSize * chunkSize));
-      const z = Math.floor((i - y * chunkSize * chunkSize) / chunkSize);
-      const x = Math.floor(i - y * chunkSize * chunkSize - z * chunkSize);
+      const y = Math.floor(i / (outlinedChunkSize * outlinedChunkSize));
+      const z = Math.floor((i - y * outlinedChunkSize * outlinedChunkSize) / outlinedChunkSize);
+      const x = Math.floor(i - y * outlinedChunkSize * outlinedChunkSize - z * outlinedChunkSize);
       
       chunkData.push({
         voxel,
-        posInChunk: new Vector3(x, y, z),
+        posInChunk: new Vector3(x - 1, y, z - 1),
       });
     }
 

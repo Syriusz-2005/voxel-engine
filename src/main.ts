@@ -35,14 +35,14 @@ scene.add(axis);
 
 console.time('Init');
 
-const worldManager = new WorldManager(25, 64, scene, {
+const worldManager = new WorldManager(20, 64, scene, {
 	worldGenerator: new RandomFlatWorldGenerator(),
 	renderDistance: 8,
 });
 
 console.timeEnd('Init');
 
-async function animate() {
+function animate() {
 	requestAnimationFrame( animate );
 	// controls.update();
 
@@ -52,7 +52,7 @@ async function animate() {
 	stats.update();
 	renderer.render( scene, camera );
 	worldManager.updateVisibilityPoint(camera.position);
-	await worldManager.updateWorld(camera);
+	worldManager.updateWorld(camera);
 	// camera.position.z -= 3;
 	
 }

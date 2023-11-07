@@ -29,6 +29,12 @@ export default class Chunk {
         .fill(undefined)
         .map(() => new Array(size))
       );
+    this.data[-1] = new Array(height)
+      .fill(undefined)
+      .map(() => new Array(size))
+    this.data[size] = new Array(height)
+      .fill(undefined)
+      .map(() => new Array(size))  
   }
 
   private setOnGeneratedListener(listener: () => void): void {
@@ -46,17 +52,17 @@ export default class Chunk {
     const {x, y, z} = vec;
     return x >= 0 && y >= 0 && z >= 0 && x < this.size && y < this.height && z < this.size;
   }
+ 
+  public get IsGenerating() {
+    return this.isGenerating;
+  }
 
   public getVoxelAt(vec: Vector3): VoxelType {
     if (vec.y > this.height) return 'air';
-    if (!this.isInBounds(vec)) 
-      throw new ChunkError(`Block is out of bounds!`)
     return this.data[vec.x][vec.y][vec.z]?.type ?? 'air';
   }
 
   public setVoxelAt(vec: Vector3, value: Voxel): void {
-    if (!this.isInBounds(vec)) 
-      throw new ChunkError(`Block at ${vec.x} ${vec.y} ${vec.z} is out of bounds!`)
     this.data[vec.x][vec.y][vec.z] = {type: value.Name, pos: vec};
   }
 
@@ -72,6 +78,16 @@ export default class Chunk {
           if (voxel) {
             yield voxel;
           }
+        }
+      }
+    }
+  }
+
+  public static *each(chunkSize: number, chunkHeight: number) {
+    for (let x = 0; x < chunkSize; x++) {
+      for (let z = 0; z < chunkSize; z++) {
+        for (let y = 0; y < chunkHeight; y++) {
+          yield new Vector3(x, y, z);
         }
       }
     }
@@ -98,6 +114,7 @@ export default class Chunk {
     voxels.forEach(({posInChunk, voxel}) => {
       this.setVoxelAt(posInChunk, voxel);
     });
+    
     this.isGenerating = false;
   }
 
@@ -152,11 +169,15 @@ export default class Chunk {
         }
 
         if (x < 0 || z < 0 || x >= this.size || z >= this.size) {
-          const voxelNear = this.world.getVoxelAt(
+          let voxelNear = this.world.getVoxelAt(
             chunkWorldPos
               .clone()
               .add(adj)
           );
+          if (!voxelNear) {
+            // console.log('no voxel near', this.getVoxelAt(adj))
+            voxelNear = new Voxel(this.getVoxelAt(adj));
+          }
           if (voxelNear) {
             const currVoxelType = voxelRegistry[voxelNear.Name];
             if (
@@ -170,7 +191,7 @@ export default class Chunk {
               renderableFaces.push(precompiledAdjacents[i]);
             }
           }
-          // renderableFaces.push(precompiledAdjacents[i]);
+          
           continue;
         }
 
