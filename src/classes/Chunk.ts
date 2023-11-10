@@ -46,7 +46,7 @@ export default class Chunk {
       .map(() => new Array(size))  
   }
 
-  private get ChunkDimensions(): Vector3 {
+  public get ChunkDimensions(): Vector3 {
     return new Vector3(
       this.size,
       this.height,
@@ -167,7 +167,7 @@ export default class Chunk {
     facesCount: number,
     transparencyPasses: TransparencyPass[],
   }> {
-    const transparencyPasses = registry.getTransparencyPasses();
+    const transparencyPasses = registry.getGreededTransparencyPasses();
     let facesCount = 0;
     await this.waitForGenerationComplete();
     

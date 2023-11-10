@@ -1,5 +1,5 @@
 import { VoxelType, voxelNamesRegistryById, voxelRegistry } from "../types/VoxelRegistry";
-import { TransparencyPass } from "./Chunk";
+import { GreededTransparencyPass, TransparencyPass } from "./Chunk";
 
 
 
@@ -24,6 +24,20 @@ export default class VoxelRegistry {
 
     for (const [_, voxel] of translucentVoxels) {
       passes.set(voxel.id, {voxels: [], facesCount: 0});
+    }
+
+    return passes;
+  }
+
+  public getGreededTransparencyPasses(): Map<number, GreededTransparencyPass> {
+    const translucentVoxels = Object.entries(this.registry)
+      .filter(([_, data]) => data.opacity !== undefined)
+    
+    const passes = new Map<number, GreededTransparencyPass>();
+    passes.set(0, {faces: [], facesCount: 0});
+
+    for (const [_, voxel] of translucentVoxels) {
+      passes.set(voxel.id, {faces: [], facesCount: 0});
     }
 
     return passes;
