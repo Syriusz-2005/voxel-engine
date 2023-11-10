@@ -1,7 +1,7 @@
 import WorkerVoxelGenerator from "../utils/WorkerVoxelGenerator";
 import Noise from 'noisejs';
 console.log(Noise);
-const noise = new Noise.Noise(Math.random());
+const noise = new Noise.Noise(1);
 
 const seaLevel = 20;
 
@@ -41,7 +41,7 @@ new WorkerVoxelGenerator((worldPos) => {
   // }
 
   // return 'air';
-  const worldHeight = noise.simplex2(worldPos.x / 100, worldPos.z / 100) * 2 + 28;
+  const worldHeight = noise.simplex2(worldPos.x / 100, worldPos.z / 100) * 18 + 18;
   
 
   if (worldPos.y < worldHeight) {

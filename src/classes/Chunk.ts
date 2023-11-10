@@ -6,10 +6,19 @@ import ChunkError from "../errors/ChunkError.ts";
 import WorldGenerator from "../generator/WorldGenerator.ts";
 import Perf from "../utils/Perf.ts";
 import World from "./World.ts";
+import RenderableFace from "./RenderableFace.ts";
 
 const perfTest = new Perf('Voxel info generation', 400);
 
-export type TransparencyPass = {voxels: RenderableVoxel[], facesCount: number};
+export type TransparencyPass = {
+  voxels: RenderableVoxel[];
+  facesCount: number
+};
+
+export type GreededTransparencyPass = {
+  faces: RenderableFace[];
+  facesCount: number;
+}
 
 export default class Chunk {
   private readonly data: ({type: VoxelType, pos: Vector3} | undefined)[][][];
@@ -37,6 +46,14 @@ export default class Chunk {
       .map(() => new Array(size))  
   }
 
+  private get ChunkDimensions(): Vector3 {
+    return new Vector3(
+      this.size,
+      this.height,
+      this.size,
+    );
+  }
+
   private setOnGeneratedListener(listener: () => void): void {
     this.onGenerated = () => listener();
   }
@@ -48,7 +65,7 @@ export default class Chunk {
     });
   }
 
-  private isInBounds(vec: Vector3): boolean {
+  public isInBounds(vec: Vector3): boolean {
     const {x, y, z} = vec;
     return x >= 0 && y >= 0 && z >= 0 && x < this.size && y < this.height && z < this.size;
   }
@@ -78,6 +95,17 @@ export default class Chunk {
           if (voxel) {
             yield voxel;
           }
+        }
+      }
+    }
+  }
+
+  public *iterateThroughChunk() {
+    for (let x = 0; x < this.size; x++) {
+      for (let y = 0; y < this.height; y++) {
+        for (let z = 0; z < this.size; z++) {
+          const voxel = this.data[x][y][z];
+          yield voxel;
         }
       }
     }
@@ -118,6 +146,18 @@ export default class Chunk {
     this.isGenerating = false;
   }
 
+  public getGreededTransparencyPasses(passes: TransparencyPass[]): GreededTransparencyPass[] {
+    const greededTransparencyPasses: GreededTransparencyPass[] = [];
+    
+    for (const {voxels, facesCount} of passes) {
+      for (const voxel of voxels) {
+        voxel.RenderableFaces;
+      }
+    }
+    
+    return greededTransparencyPasses;
+  }
+
   public async getRenderableVoxels(
     subchunkIterator?: Generator<{
       type: VoxelType;
@@ -154,6 +194,7 @@ export default class Chunk {
       .clone()
       .multiplyScalar(this.size);
 
+    
     for (const {type: voxelType, pos: vec} of subchunkIterator ?? this.each()) {
       const renderableFaces: Vector3[] = [];
   
@@ -168,44 +209,32 @@ export default class Chunk {
           continue;
         }
 
+        let voxelNear: Voxel | undefined;
         if (x < 0 || z < 0 || x >= this.size || z >= this.size) {
-          let voxelNear = this.world.getVoxelAt(
+          voxelNear = this.world.getVoxelAt(
             chunkWorldPos
               .clone()
               .add(adj)
           );
-          if (!voxelNear) {
-            // console.log('no voxel near', this.getVoxelAt(adj))
-            voxelNear = new Voxel(this.getVoxelAt(adj));
-          }
-          if (voxelNear) {
-            const currVoxelType = voxelRegistry[voxelNear.Name];
-            if (
-              currVoxelType.existing === false 
-              || (
-                currVoxelType.opacity !== undefined 
-                && currVoxelType.opacity < 1 
-                && voxelNear.Name !== voxelType
-                )
-            ) {
-              renderableFaces.push(precompiledAdjacents[i]);
-            }
-          }
-          
-          continue;
+        }
+        
+        if (!voxelNear) {
+          voxelNear = new Voxel(this.getVoxelAt(adj));
         }
 
-        const currVoxelName = this.getVoxelAt(adj);
-        const currVoxelType = voxelRegistry[currVoxelName];
-        if (
-          currVoxelType.existing === false 
-          || (
-            currVoxelType.opacity !== undefined 
-            && currVoxelType.opacity < 1 
-            && currVoxelName !== voxelType
-          )
-        ) {
-          renderableFaces.push(precompiledAdjacents[i]);
+        if (voxelNear) {
+          const currVoxelType = voxelRegistry[voxelNear.Name];
+          if (
+            currVoxelType.existing === false 
+            || (
+              currVoxelType.opacity !== undefined 
+              && currVoxelType.opacity < 1 
+              && voxelNear.Name !== voxelType
+              )
+          ) {
+            renderableFaces.push(precompiledAdjacents[i]);
+          }
+          
         }
       }
       

@@ -1,5 +1,6 @@
 import { Vector3 } from "three";
 import Voxel from "./Voxel.ts";
+import RenderableFace from "./RenderableFace.ts";
 
 
 export default class RenderableVoxel {

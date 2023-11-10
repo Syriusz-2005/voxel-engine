@@ -211,7 +211,7 @@ export default class ChunkRenderer {
     for (const mesh of this.meshes) {
       mesh!.geometry.dispose();
       this.scene.remove(mesh);
-  
+      
       const materials = mesh!.material;
       if (materials instanceof Array) {
         materials.forEach(material => material.dispose());
