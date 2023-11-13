@@ -34,10 +34,10 @@ export default class VoxelRegistry {
       .filter(([_, data]) => data.opacity !== undefined)
     
     const passes = new Map<number, GreededTransparencyPass>();
-    passes.set(0, {faces: [], facesCount: 0});
+    passes.set(0, {faces: []});
 
     for (const [_, voxel] of translucentVoxels) {
-      passes.set(voxel.id, {faces: [], facesCount: 0});
+      passes.set(voxel.id, {faces: []});
     }
 
     return passes;

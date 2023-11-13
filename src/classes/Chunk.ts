@@ -17,7 +17,6 @@ export type TransparencyPass = {
 
 export type GreededTransparencyPass = {
   faces: RenderableFace[];
-  facesCount: number;
 }
 
 export default class Chunk {
@@ -26,13 +25,22 @@ export default class Chunk {
   private isGenerating: boolean = false;
   private onGenerated?: () => void;
 
-  public static PRECOMPILED_ADJACENTS = [
+  public static readonly PRECOMPILED_ADJACENTS = [
     new Vector3(1, 0, 0),
     new Vector3(-1, 0, 0),
     new Vector3(0, 1, 0),
     new Vector3(0, -1, 0),
     new Vector3(0, 0, 1),
     new Vector3(0, 0, -1),
+  ] as const;
+
+  public static readonly ADJACENTS_POOL = [
+    new Vector3(),
+    new Vector3(),
+    new Vector3(),
+    new Vector3(),
+    new Vector3(),
+    new Vector3(),
   ] as const;
 
   constructor(
@@ -61,6 +69,10 @@ export default class Chunk {
       this.height,
       this.size,
     );
+  }
+
+  public get Size(): number {
+    return this.size; 
   }
 
   private setOnGeneratedListener(listener: () => void): void {
@@ -171,6 +183,16 @@ export default class Chunk {
     return this.height;
   }
 
+  public get World(): World {
+    return this.world;
+  }
+
+  public get WorldPos(): Vector3 {
+    return this.chunkPos
+      .clone()
+      .multiply(this.ChunkDimensions);
+  }
+
   public async getRenderableVoxels(
     subchunkIterator?: Generator<{
       type: VoxelType;
@@ -187,20 +209,11 @@ export default class Chunk {
     perfTest.start();
     
 
-    const adjacents: Vector3[] = [
-      new Vector3(),
-      new Vector3(),
-      new Vector3(),
-      new Vector3(),
-      new Vector3(),
-      new Vector3(),
-    ];
+    const adjacents = Chunk.ADJACENTS_POOL;
 
     const precompiledAdjacents = Chunk.PRECOMPILED_ADJACENTS;
 
-    const chunkWorldPos = this.chunkPos
-      .clone()
-      .multiplyScalar(this.size);
+    const chunkWorldPos = this.WorldPos;
 
     
     for (const {type: voxelType, pos: vec} of subchunkIterator ?? this.each()) {

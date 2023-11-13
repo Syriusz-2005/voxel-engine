@@ -30,4 +30,9 @@ export default class Voxel {
     const registryData = voxelRegistry[this.name];
     return registryData.id;
   }
+
+  public get Existing(): boolean {
+    const registryData = voxelRegistry[this.name];
+    return registryData.existing ?? true;
+  }
 }

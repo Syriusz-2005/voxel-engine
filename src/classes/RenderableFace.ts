@@ -6,6 +6,8 @@ import Voxel from "./Voxel.ts";
 export default class RenderableFace {
   constructor(
     public readonly faceRotation: Vector3,
-    public readonly faceZLength: number,
+    public faceZLength: number,
   ) {}
+
+  
 }
