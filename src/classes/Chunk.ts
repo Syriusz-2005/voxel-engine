@@ -26,6 +26,15 @@ export default class Chunk {
   private isGenerating: boolean = false;
   private onGenerated?: () => void;
 
+  public static PRECOMPILED_ADJACENTS = [
+    new Vector3(1, 0, 0),
+    new Vector3(-1, 0, 0),
+    new Vector3(0, 1, 0),
+    new Vector3(0, -1, 0),
+    new Vector3(0, 0, 1),
+    new Vector3(0, 0, -1),
+  ] as const;
+
   constructor(
     private readonly size: number,
     private readonly height: number,
@@ -158,6 +167,10 @@ export default class Chunk {
     return greededTransparencyPasses;
   }
 
+  public get Height(): number {
+    return this.height;
+  }
+
   public async getRenderableVoxels(
     subchunkIterator?: Generator<{
       type: VoxelType;
@@ -167,19 +180,12 @@ export default class Chunk {
     facesCount: number,
     transparencyPasses: TransparencyPass[],
   }> {
-    const transparencyPasses = registry.getGreededTransparencyPasses();
+    const transparencyPasses = registry.getTransparencyPasses();
     let facesCount = 0;
     await this.waitForGenerationComplete();
     
     perfTest.start();
-    const precompiledAdjacents = [
-      new Vector3(1, 0, 0),
-      new Vector3(-1, 0, 0),
-      new Vector3(0, 1, 0),
-      new Vector3(0, -1, 0),
-      new Vector3(0, 0, 1),
-      new Vector3(0, 0, -1),
-    ];
+    
 
     const adjacents: Vector3[] = [
       new Vector3(),
@@ -189,6 +195,8 @@ export default class Chunk {
       new Vector3(),
       new Vector3(),
     ];
+
+    const precompiledAdjacents = Chunk.PRECOMPILED_ADJACENTS;
 
     const chunkWorldPos = this.chunkPos
       .clone()
