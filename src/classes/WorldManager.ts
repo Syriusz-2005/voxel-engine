@@ -5,25 +5,45 @@ import WorldGenerator from "../generator/WorldGenerator";
 export type WorldManagerConfig = {
   renderDistance: number;
   worldGenerator: WorldGenerator;
+  chunkSize: number;
+  chunkHeight: number;
 }
 
 export default class WorldManager {
   private readonly world: World;
   private visibilityPoint: Vector3 | undefined;
   private frameIndex = 0;
+  private readonly chunkSize: number;
+  private readonly chunkHeight: number;
 
   constructor(
-    private readonly chunkSize: number,
-    private readonly chunkHeight: number,
     private readonly scene: Scene,
     private readonly config: WorldManagerConfig,
   ) {
+    this.chunkSize = config.chunkSize;
+    this.chunkHeight = config.chunkHeight;
     this.world = new World(this.chunkSize, this.chunkHeight, this.scene);
     console.log(this);
   }
 
+  public get Config(): WorldManagerConfig {
+    return this.config;
+  }
+
+  public new(config: WorldManagerConfig) {
+    this.destroy();
+    return new WorldManager(
+      this.scene,
+      config,
+    );
+  }
+
   public updateVisibilityPoint(pos: Vector3) {
     this.visibilityPoint = pos.clone();
+  }
+
+  private forEachRenderer() {
+    return this.world.Renderers.values(); 
   }
 
   private getCurrentChunk() {
@@ -32,6 +52,12 @@ export default class WorldManager {
       .clone()
       .divideScalar(this.chunkSize)
       .floor();
+  }
+
+  private destroy() {
+    for (const renderer of this.forEachRenderer()) {
+      renderer.remove();
+    }
   }
 
   public async updateWorld(camera: Camera) {

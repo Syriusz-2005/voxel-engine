@@ -4,6 +4,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
 import WorldManager from './classes/WorldManager.ts';
 import RandomFlatWorldGenerator from './generator/RandomFlatWorldGenerator.ts';
+import Config from './classes/Config.ts';
+import World from './classes/World.ts';
 
 const stats = new Stats();
 document.body.appendChild( stats.dom );
@@ -35,10 +37,22 @@ scene.add(axis);
 
 console.time('Init');
 
-const worldManager = new WorldManager(20, 64, scene, {
+const config = new Config();
+
+let worldManager = new WorldManager(scene, {
 	worldGenerator: new RandomFlatWorldGenerator(),
 	renderDistance: 8,
+	chunkHeight: 64,
+	chunkSize: config.CHUNK_SIZE.getValue(),
+});;
+
+config.CHUNK_SIZE.onChange((size) => {
+	worldManager = worldManager.new({
+		...worldManager.Config,
+		chunkSize: size,	
+	});
 });
+
 
 console.timeEnd('Init');
 
