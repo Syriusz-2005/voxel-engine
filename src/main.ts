@@ -14,11 +14,11 @@ const stats = new Stats();
 document.body.appendChild( stats.dom );
 
 const scene = new THREE.Scene();
+
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
-document.body.appendChild( renderer.domElement );
 
 
 camera.position.z = 8;
@@ -26,6 +26,9 @@ camera.position.y = 50;
 camera.rotation.x = -0.3;
 
 let controls: OrbitControls | PointerLockControls | undefined;
+let wKeyPressed = false;
+
+
 
 function updateControls(type: ConfigSettings['CONTROLS']) {
 	controls?.dispose();
@@ -35,7 +38,8 @@ function updateControls(type: ConfigSettings['CONTROLS']) {
 			break;
 
 		case 'pointer-lock':
-			controls = new PointerLockControls(camera, renderer.domElement);
+			controls = new PointerLockControls(camera, document.body);
+			scene.add(controls.getObject());
 			controls.lock();
 			break;
 	}
@@ -43,6 +47,22 @@ function updateControls(type: ConfigSettings['CONTROLS']) {
 updateControls(config.CONTROLS.getValue());
 
 config.CONTROLS.onChange(updateControls);
+
+function onKeyDown(event: any) {
+	if (event.key === 'w') {
+		wKeyPressed = true;
+	}
+}
+
+document.addEventListener('keydown', onKeyDown);	
+
+document.addEventListener('keyup', (event) => {
+	if (event.key === 'w') {
+		wKeyPressed = false;
+	}
+});
+
+document.body.appendChild( renderer.domElement );
 
 
 const light = new THREE.DirectionalLight(0xffffff, 0.006);
@@ -72,6 +92,12 @@ config.CHUNK_SIZE.onChange((size) => {
 		chunkSize: size,	
 	});
 });
+config.RENDER_DISTANCE.onChange((distance) => {
+	worldManager = worldManager.new({
+		...worldManager.Config,
+		renderDistance: distance,	
+	});
+});
 
 
 console.timeEnd('Init');
@@ -83,6 +109,9 @@ function animate() {
 	// camera.updateProjectionMatrix();
 	// camera.updateMatrixWorld();
 	// camera.updateWorldMatrix(true, true);
+	if (controls instanceof PointerLockControls && wKeyPressed) {
+		controls.moveForward(1);
+	}
 	
 	stats.update();
 	renderer.render( scene, camera );
