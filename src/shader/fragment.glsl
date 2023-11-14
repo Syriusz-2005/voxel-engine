@@ -1,18 +1,12 @@
 
 
-// uniform vec3 chunkWorldPosition;
-
 flat varying float vFaceRotation;
 flat varying vec4 vColor;
 
 
 void main() {
-
-  // float cl = vInstanceMatrix[3][0] / 32.0;
-  
   float cl = 0.6;
 
-  // cl += round(vFaceRotation - 1.0) == 0.0 ? 0.5 : 0.0;
   cl = max(0.2, vFaceRotation / 5.0);
 
 

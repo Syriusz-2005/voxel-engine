@@ -49,6 +49,7 @@ function animate() {
 	// camera.updateProjectionMatrix();
 	// camera.updateMatrixWorld();
 	// camera.updateWorldMatrix(true, true);
+	
 	stats.update();
 	renderer.render( scene, camera );
 	worldManager.updateVisibilityPoint(camera.position);

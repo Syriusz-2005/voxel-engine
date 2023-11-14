@@ -42,6 +42,7 @@ export default class WorldManager {
 
     this.frameIndex++;
     for (const renderer of this.world.Renderers.values()) {
+      renderer.onMeshesRender(camera);
       for (const mesh of renderer.Meshes) {
         const material = mesh.material as ShaderMaterial;
         if (material) {

@@ -7,6 +7,7 @@ import WorldGenerator from "../generator/WorldGenerator.ts";
 import Perf from "../utils/Perf.ts";
 import World from "./World.ts";
 import RenderableFace from "./RenderableFace.ts";
+import GreededTransparencyPassesManager from "./GreededTransparencyPassManager.ts";
 
 const perfTest = new Perf('Voxel info generation', 400);
 
@@ -167,18 +168,6 @@ export default class Chunk {
     this.isGenerating = false;
   }
 
-  public getGreededTransparencyPasses(passes: TransparencyPass[]): GreededTransparencyPass[] {
-    const greededTransparencyPasses: GreededTransparencyPass[] = [];
-    
-    for (const {voxels, facesCount} of passes) {
-      for (const voxel of voxels) {
-        voxel.RenderableFaces;
-      }
-    }
-    
-    return greededTransparencyPasses;
-  }
-
   public get Height(): number {
     return this.height;
   }
@@ -191,6 +180,13 @@ export default class Chunk {
     return this.chunkPos
       .clone()
       .multiply(this.ChunkDimensions);
+  }
+
+  public async getGreededTransparencyPasses(): Promise<GreededTransparencyPass[]> {
+    await this.waitForGenerationComplete();
+    const manager = new GreededTransparencyPassesManager();
+    const {passes} = manager.createFaces(this);
+    return passes;
   }
 
   public async getRenderableVoxels(

@@ -1,4 +1,4 @@
-import { DoubleSide, BufferAttribute, BufferGeometry, InstancedBufferGeometry, InstancedMesh, Mesh, MeshLambertMaterial, Object3D, PlaneGeometry, ShaderMaterial, Vector3, InstancedBufferAttribute, Matrix4, FrontSide } from "three";
+import { DoubleSide, BufferAttribute, BufferGeometry, InstancedBufferGeometry, InstancedMesh, Mesh, MeshLambertMaterial, Object3D, PlaneGeometry, ShaderMaterial, Vector3, InstancedBufferAttribute, Matrix4, FrontSide, Box3, Camera, Frustum } from "three";
 import Chunk from "./Chunk.ts";
 import vertex from '../shader/vertex.glsl?raw';
 import fragment from '../shader/fragment.glsl?raw';
@@ -33,7 +33,7 @@ export default class ChunkRenderer {
     return new Float32Array(facesCount * 6 * perVertexCount);
   }
 
-  private async updateMesh() {
+  private setAttributes(geometry: InstancedBufferGeometry) {
     const vertices = new Float32Array([
       -0.5, -0.5,  0.5, // v0
       0.5, -0.5,  0.5, // v1
@@ -44,11 +44,73 @@ export default class ChunkRenderer {
       -0.5, -0.5,  0.5  // v5
     ]);
 
-    const chunkWorldPos = new Vector3(
-      this.chunkPosition.x * this.chunkSize,
-      this.Position.y,
-      this.chunkPosition.z * this.chunkSize,
-    );
+    const chunkWorldPos = this.Chunk.WorldPos;
+    
+    geometry.setAttribute('position', new BufferAttribute(vertices, 3));
+    geometry.setAttribute('meshPosition', new BufferAttribute(new Float32Array([
+      chunkWorldPos.x,
+      chunkWorldPos.y,
+      chunkWorldPos.z,
+    ]), 3));
+  }
+
+  private getMaterial(isOpaque: boolean) {
+    return new ShaderMaterial({
+      vertexShader: vertex,
+      fragmentShader: fragment,
+      uniforms: {
+        'chunkWorldPosition': {
+          value: this.Chunk.WorldPos,
+        },
+        'frame': {
+          value: 0,
+        },
+      },
+      depthWrite: isOpaque,
+      depthTest: true,
+      transparent: !isOpaque,
+      side: FrontSide,
+    }); 
+  }
+
+  public getMesh(geometry: InstancedBufferGeometry, material: ShaderMaterial) {
+    const mesh = new Mesh(geometry, material);
+    mesh.frustumCulled = false;
+    mesh.position.copy(this.Chunk.WorldPos);
+    this.meshes.push(mesh);
+    return mesh;
+  }
+
+  public async updateGreededMesh() {
+    const transparencyPasses = await this.chunk.getGreededTransparencyPasses();
+  
+    if (this.isDisposed) {
+      this.remove();
+      return;
+    };
+
+    this.disposeMeshes();
+
+    let index = 0;
+    for (const {faces} of transparencyPasses) {
+      const geometry = new InstancedBufferGeometry();
+      this.setAttributes(geometry);
+
+      const isOpaque = index++ === 0;
+
+      const material = this.getMaterial(isOpaque);
+      const mesh = this.getMesh(geometry, material);
+
+      for (const face of faces) {
+        
+      }
+    }
+  }
+
+  private async updateMesh() {
+    
+
+    const chunkWorldPos = this.Chunk.WorldPos;
 
 
     // const material = new MeshLambertMaterial({});
@@ -67,38 +129,14 @@ export default class ChunkRenderer {
     let index = 0;
     for (const {voxels, facesCount} of transparencyPasses)  {
       const geometry = new InstancedBufferGeometry();
-      geometry.setAttribute('position', new BufferAttribute(vertices, 3));
-      geometry.setAttribute('meshPosition', new BufferAttribute(new Float32Array([
-        chunkWorldPos.x,
-        chunkWorldPos.y,
-        chunkWorldPos.z,
-      ]), 3));
+      
+      this.setAttributes(geometry);
 
       const isOpaque = index++ === 0;
 
-      const material = new ShaderMaterial({
-        vertexShader: vertex,
-        fragmentShader: fragment,
-        uniforms: {
-          'chunkWorldPosition': {
-            value: chunkWorldPos,
-          },
-          'frame': {
-            value: 0,
-          }
-        },
-        depthWrite: isOpaque,
-        depthTest: true,
-        transparent: !isOpaque,
-        // depthTest: false,
-        // wireframe: true,
-        // // linewidth: 8,
-        // wireframeLinewidth: 24,
-        side: FrontSide,
-      });
+      const material = this.getMaterial(isOpaque);
 
-      const mesh = new Mesh(geometry, material);
-      this.meshes.push(mesh);
+      const mesh = this.getMesh(geometry, material);
 
 
       const count = voxels.length;
@@ -106,7 +144,6 @@ export default class ChunkRenderer {
       const elements = this.getAttrArray(facesCount, 16);
       const faceRotations = this.getAttrArray(facesCount, 1);
       const colors = this.getAttrArray(facesCount, 4);
-      const liquids = this.getAttrArray(facesCount, 1);
       const voxelId = new Uint8Array(facesCount * 6);
   
       const object = new Object3D();
@@ -114,7 +151,7 @@ export default class ChunkRenderer {
       let elementIndex = 0;
       let faceId = 0;
       let colorIndex = 0;
-      let isLiquidIndex = 0;
+      let idIndex = 0;
       for (let i = 0; i < count; i++) {
         const renderableVoxel = voxels[i];
         const {PosInChunk} = renderableVoxel;
@@ -156,12 +193,10 @@ export default class ChunkRenderer {
             : face.z === -1 ? 4
             : 5;  
   
-          // debugger
           // Each face has 6 vertices
           for (let vertexIndex = 0; vertexIndex < 6; vertexIndex++) {
             faceRotations[faceId + vertexIndex] = rotationId;
-            voxelId[isLiquidIndex] = renderableVoxel.Voxel.Id;
-            liquids[isLiquidIndex++] = renderableVoxel.Voxel.isLiquid ? 1 : 0;
+            voxelId[idIndex++] = renderableVoxel.Voxel.Id;
             
             colors[colorIndex++] = renderableVoxel.Voxel.Color.r;
             colors[colorIndex++] = renderableVoxel.Voxel.Color.g;
@@ -182,12 +217,7 @@ export default class ChunkRenderer {
       geometry.setAttribute('instanceMatrix', new InstancedBufferAttribute(elements, 16));
       geometry.setAttribute('faceRotation', new InstancedBufferAttribute(faceRotations, 1));
       geometry.setAttribute('voxelColor', new InstancedBufferAttribute(colors, 4));
-      geometry.setAttribute('isLiquid', new InstancedBufferAttribute(liquids, 1));
       geometry.setAttribute('voxelId', new InstancedBufferAttribute(voxelId, 1));
-
-      mesh.frustumCulled = false;
-  
-      mesh.position.copy(chunkWorldPos);
     }
     
   }
@@ -198,13 +228,36 @@ export default class ChunkRenderer {
     }
   }
 
-  public async init(isUpdate: boolean = false): Promise<void> {
+  public async init(): Promise<void> {
     await this.updateMesh();
     this.addMeshes();
   }
 
   public async update(): Promise<void> {
-    await this.init(true);
+    await this.init();
+  }
+
+  private get ChunkBox(): Box3 {
+    return new Box3(
+      this.chunk.WorldPos,
+      this.chunk.WorldPos.clone().add(this.chunk.ChunkDimensions),
+    );
+  }
+
+
+  public onMeshesRender(camera: Camera) {
+    const frustum = new Frustum();
+    frustum.setFromProjectionMatrix(
+      new Matrix4()
+        .multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
+    );
+
+    
+    const isIntersecting = frustum.intersectsBox(this.ChunkBox);
+
+    this.meshes.forEach(mesh => {
+      mesh.visible = isIntersecting;
+    });
   }
 
   private disposeMeshes(): void {
