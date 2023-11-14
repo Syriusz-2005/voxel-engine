@@ -4,8 +4,11 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
 import WorldManager from './classes/WorldManager.ts';
 import RandomFlatWorldGenerator from './generator/RandomFlatWorldGenerator.ts';
-import Config from './classes/Config.ts';
-import World from './classes/World.ts';
+import Config, { ConfigSettings } from './classes/Config.ts';
+import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+
+const config = new Config();
+
 
 const stats = new Stats();
 document.body.appendChild( stats.dom );
@@ -17,12 +20,30 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
-const controls = new OrbitControls( camera, renderer.domElement );
 
 camera.position.z = 8;
 camera.position.y = 50;
 camera.rotation.x = -0.3;
-controls.update();
+
+let controls: OrbitControls | PointerLockControls | undefined;
+
+function updateControls(type: ConfigSettings['CONTROLS']) {
+	controls?.dispose();
+	switch (type) {
+		case 'orbit':
+			controls = new OrbitControls(camera, renderer.domElement);
+			break;
+
+		case 'pointer-lock':
+			controls = new PointerLockControls(camera, renderer.domElement);
+			controls.lock();
+			break;
+	}
+}
+updateControls(config.CONTROLS.getValue());
+
+config.CONTROLS.onChange(updateControls);
+
 
 const light = new THREE.DirectionalLight(0xffffff, 0.006);
 light.position.set(0.15, 0.7, 0);
@@ -37,7 +58,6 @@ scene.add(axis);
 
 console.time('Init');
 
-const config = new Config();
 
 let worldManager = new WorldManager(scene, {
 	worldGenerator: new RandomFlatWorldGenerator(),
