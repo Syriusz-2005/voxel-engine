@@ -127,6 +127,7 @@ export default class ChunkRenderer {
     this.disposeMeshes();
 
     let index = 0;
+    let matArray: number[] = [];
     for (const {voxels, facesCount} of transparencyPasses)  {
       const geometry = new InstancedBufferGeometry();
       
@@ -172,11 +173,8 @@ export default class ChunkRenderer {
   
           object.updateMatrix();
     
-          const matArray = [
-            ...object.matrix
-              .toArray()
-              .values()
-          ];
+          object.matrix.toArray(matArray);
+
           /*
             bottom 0
             top 1

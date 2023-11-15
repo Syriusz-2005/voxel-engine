@@ -12,7 +12,7 @@ export default class Config {
 
   public readonly settings = {
     CHUNK_SIZE: 20,
-    CONTROLS: 'pointer-lock',
+    CONTROLS: 'orbit',
     RENDER_DISTANCE: 10,
   } as ConfigSettings;
 

@@ -104,11 +104,7 @@ console.timeEnd('Init');
 
 function animate() {
 	requestAnimationFrame( animate );
-	// controls.update();
-
-	// camera.updateProjectionMatrix();
-	// camera.updateMatrixWorld();
-	// camera.updateWorldMatrix(true, true);
+	
 	if (controls instanceof PointerLockControls && wKeyPressed) {
 		controls.moveForward(1);
 	}
