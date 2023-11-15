@@ -19,4 +19,15 @@ export default class Config {
   public CHUNK_SIZE = this.gui.add(this.settings, 'CHUNK_SIZE', 2, 30, 1);
   public CONTROLS = this.gui.add(this.settings, 'CONTROLS', ['orbit', 'pointer-lock']);
   public RENDER_DISTANCE = this.gui.add(this.settings, 'RENDER_DISTANCE', 2, 40, 1);
+
+  private statsFolder = this.gui.addFolder('Rendering stats');
+
+  public readonly visibleChunks = this.statsFolder.add({visibleChunks: 0}, 'visibleChunks')
+    .disable();
+
+  public readonly chunkUpdates = this.statsFolder.add({chunkUpdates: 0}, 'chunkUpdates').disable();
+
+  constructor() {
+    this.gui.title('Controls & Stats');
+  }
 }

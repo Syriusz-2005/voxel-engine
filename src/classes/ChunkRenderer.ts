@@ -243,7 +243,7 @@ export default class ChunkRenderer {
   }
 
 
-  public onMeshesRender(camera: Camera) {
+  public onMeshesRender(camera: Camera): boolean {
     const frustum = new Frustum();
     frustum.setFromProjectionMatrix(
       new Matrix4()
@@ -256,6 +256,8 @@ export default class ChunkRenderer {
     this.meshes.forEach(mesh => {
       mesh.visible = isIntersecting;
     });
+
+    return isIntersecting;
   }
 
   private disposeMeshes(): void {

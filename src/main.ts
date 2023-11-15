@@ -22,7 +22,7 @@ renderer.setSize( window.innerWidth, window.innerHeight );
 
 
 camera.position.z = 8;
-camera.position.y = 50;
+camera.position.y = 100;
 camera.rotation.x = -0.3;
 
 let controls: OrbitControls | PointerLockControls | undefined;
@@ -84,7 +84,9 @@ let worldManager = new WorldManager(scene, {
 	renderDistance: 8,
 	chunkHeight: 64,
 	chunkSize: config.CHUNK_SIZE.getValue(),
-});;
+});
+
+window.addEventListener('beforeunload', () => worldManager.destroy());
 
 config.CHUNK_SIZE.onChange((size) => {
 	worldManager = worldManager.new({
@@ -102,6 +104,9 @@ config.RENDER_DISTANCE.onChange((distance) => {
 
 console.timeEnd('Init');
 
+let frameIndex = 0;
+let chunkUpdateRequests = 0;
+
 function animate() {
 	requestAnimationFrame( animate );
 	
@@ -112,9 +117,18 @@ function animate() {
 	stats.update();
 	renderer.render( scene, camera );
 	worldManager.updateVisibilityPoint(camera.position);
-	worldManager.updateWorld(camera);
+	worldManager.updateWorld(camera)
+		.then(({visibleChunks, chunkRenderRequests}) => {
+			config.visibleChunks.setValue(visibleChunks);
+			chunkUpdateRequests += chunkRenderRequests;
+			if (frameIndex % 100 === 0) {
+				config.chunkUpdates.setValue(chunkUpdateRequests);
+				chunkUpdateRequests = 0;
+			}
+		});
 	// camera.position.z -= 3;
 	
+	frameIndex++;
 }
 animate();
 

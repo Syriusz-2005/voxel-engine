@@ -8,7 +8,7 @@ import Representation, { VectorRepresentation } from "./VectorRepresentation.ts"
 
 
 export default class World {
-  private readonly renderers: Map<VectorRepresentation, ChunkRenderer> = new Map();
+  private renderers: Map<VectorRepresentation, ChunkRenderer> = new Map();
 
   public get Renderers(): Map<VectorRepresentation, ChunkRenderer> {
     return this.renderers;

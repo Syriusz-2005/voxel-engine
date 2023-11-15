@@ -54,21 +54,27 @@ export default class WorldManager {
       .floor();
   }
 
-  private destroy() {
+  public destroy() {
     for (const renderer of this.forEachRenderer()) {
       renderer.remove();
     }
   }
 
-  public async updateWorld(camera: Camera) {
+  public async updateWorld(camera: Camera): Promise<{visibleChunks: number; chunkRenderRequests: number}> {
+    let visibleChunks = 0;
+    let chunkRenderRequests = 0;
+
     if (!this.visibilityPoint) {
-      return;
+      return {visibleChunks, chunkRenderRequests};
     }
     const {renderDistance, worldGenerator} = this.config;
 
     this.frameIndex++;
     for (const renderer of this.world.Renderers.values()) {
-      renderer.onMeshesRender(camera);
+      const isVisible = renderer.onMeshesRender(camera);
+      if (isVisible) {
+        visibleChunks++;
+      }
       for (const mesh of renderer.Meshes) {
         const material = mesh.material as ShaderMaterial;
         if (material) {
@@ -90,6 +96,7 @@ export default class WorldManager {
         if (chunkPos.distanceTo(currentChunk) < renderDistance) {
           const chunk = this.world.getChunkAt(chunkPos);
           if (!chunk) {
+            chunkRenderRequests++;
             this.world.generateChunkAt(chunkPos, worldGenerator)
               .then(async chunkRenderer => {
                 if (chunkPos.distanceTo(this.getCurrentChunk()!) < renderDistance) {
@@ -103,6 +110,9 @@ export default class WorldManager {
       }
     }
 
-    
+    return {
+      visibleChunks,
+      chunkRenderRequests,
+    };
   } 
 }
