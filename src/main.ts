@@ -121,9 +121,10 @@ function animate() {
 	renderer.render( scene, camera );
 	worldManager.updateVisibilityPoint(camera.position);
 	worldManager.updateWorld(camera)
-		.then(({visibleChunks, chunkRenderRequests}) => {
+		.then(({visibleChunks, chunkRenderRequests, facesCount}) => {
 			chunkUpdateRequests += chunkRenderRequests;
 			config.visibleChunks.setValue(visibleChunks);
+			config.facesCount.setValue(facesCount);
 			timer.useTimer(() => {
 				config.chunkUpdates.setValue(chunkUpdateRequests);
 				chunkUpdateRequests = 0;

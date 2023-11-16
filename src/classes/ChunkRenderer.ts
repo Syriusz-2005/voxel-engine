@@ -8,6 +8,7 @@ import World from "./World.ts";
 export default class ChunkRenderer {
   private meshes: Mesh[] = [];
   private isDisposed: boolean = false;
+  public statFacesCount: number = 0;
 
   constructor(
     private readonly chunk: Chunk,
@@ -108,14 +109,6 @@ export default class ChunkRenderer {
   }
 
   private async updateMesh() {
-    
-
-    const chunkWorldPos = this.Chunk.WorldPos;
-
-
-    // const material = new MeshLambertMaterial({});
-    
-
     const {chunk} = this;
 
     const {transparencyPasses, facesCount} = await chunk.getRenderableVoxels();
@@ -128,6 +121,7 @@ export default class ChunkRenderer {
 
     let index = 0;
     let matArray: number[] = [];
+    this.statFacesCount = facesCount;
     for (const {voxels, facesCount} of transparencyPasses)  {
       const geometry = new InstancedBufferGeometry();
       

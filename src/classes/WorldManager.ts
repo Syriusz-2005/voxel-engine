@@ -60,12 +60,17 @@ export default class WorldManager {
     }
   }
 
-  public async updateWorld(camera: Camera): Promise<{visibleChunks: number; chunkRenderRequests: number}> {
+  public async updateWorld(camera: Camera): Promise<{
+    visibleChunks: number; 
+    chunkRenderRequests: number;
+    facesCount: number;
+  }> {
     let visibleChunks = 0;
     let chunkRenderRequests = 0;
+    let facesCount = 0;
 
     if (!this.visibilityPoint) {
-      return {visibleChunks, chunkRenderRequests};
+      return {visibleChunks, chunkRenderRequests, facesCount};
     }
     const {renderDistance, worldGenerator} = this.config;
 
@@ -74,6 +79,7 @@ export default class WorldManager {
       const isVisible = renderer.onMeshesRender(camera);
       if (isVisible) {
         visibleChunks++;
+        facesCount += renderer.statFacesCount;
       }
       for (const mesh of renderer.Meshes) {
         const material = mesh.material as ShaderMaterial;
@@ -113,6 +119,7 @@ export default class WorldManager {
     return {
       visibleChunks,
       chunkRenderRequests,
+      facesCount,
     };
   } 
 }
