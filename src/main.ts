@@ -6,6 +6,7 @@ import WorldManager from './classes/WorldManager.ts';
 import RandomFlatWorldGenerator from './generator/RandomFlatWorldGenerator.ts';
 import Config, { ConfigSettings } from './classes/Config.ts';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+import Timer from './utils/Timer.ts';
 
 const config = new Config();
 
@@ -107,6 +108,8 @@ console.timeEnd('Init');
 let frameIndex = 0;
 let chunkUpdateRequests = 0;
 
+const timer = new Timer(1);
+
 function animate() {
 	requestAnimationFrame( animate );
 	
@@ -119,12 +122,12 @@ function animate() {
 	worldManager.updateVisibilityPoint(camera.position);
 	worldManager.updateWorld(camera)
 		.then(({visibleChunks, chunkRenderRequests}) => {
-			config.visibleChunks.setValue(visibleChunks);
 			chunkUpdateRequests += chunkRenderRequests;
-			if (frameIndex % 100 === 0) {
+			config.visibleChunks.setValue(visibleChunks);
+			timer.useTimer(() => {
 				config.chunkUpdates.setValue(chunkUpdateRequests);
 				chunkUpdateRequests = 0;
-			}
+			});
 		});
 	// camera.position.z -= 3;
 	

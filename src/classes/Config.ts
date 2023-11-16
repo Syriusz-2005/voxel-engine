@@ -22,10 +22,11 @@ export default class Config {
 
   private statsFolder = this.gui.addFolder('Rendering stats');
 
-  public readonly visibleChunks = this.statsFolder.add({visibleChunks: 0}, 'visibleChunks')
-    .disable();
+  public readonly visibleChunks = this.statsFolder.add({visibleChunks: 0}, 'visibleChunks').disable();
 
   public readonly chunkUpdates = this.statsFolder.add({chunkUpdates: 0}, 'chunkUpdates').disable();
+  public readonly facesCount = this.statsFolder.add({facesCount: 0}, 'facesCount').disable();
+
 
   constructor() {
     this.gui.title('Controls & Stats');
