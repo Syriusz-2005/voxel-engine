@@ -44,12 +44,15 @@ export default class Chunk {
     new Vector3(),
   ] as const;
 
+  private readonly chunkDimensions: Vector3;
+
   constructor(
     private readonly size: number,
     private readonly height: number,
     private readonly world: World,
     private readonly chunkPos: Vector3,
   ) {
+    this.chunkDimensions = new Vector3(this.size, this.height, this.size);
     this.data = new Array(size)
       .fill(undefined)
       .map(() => new Array(height)
@@ -65,11 +68,7 @@ export default class Chunk {
   }
 
   public get ChunkDimensions(): Vector3 {
-    return new Vector3(
-      this.size,
-      this.height,
-      this.size,
-    );
+    return this.chunkDimensions;
   }
 
   public get Size(): number {

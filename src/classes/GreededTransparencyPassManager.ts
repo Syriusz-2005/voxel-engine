@@ -23,6 +23,9 @@ export default class GreededTransparencyPassesManager {
 
     const passes = this.passes;
 
+    const chunkSize = chunk.ChunkDimensions.x;
+    const chunkHeight = chunk.ChunkDimensions.y;
+
 
     for (let x = 0; x < chunk.ChunkDimensions.x; x++) {
       for (let y = 0; y < chunk.ChunkDimensions.y; y++) {
@@ -39,13 +42,19 @@ export default class GreededTransparencyPassesManager {
             adj.copy(voxelPos);
             adj.add(ADJACENT_DIRECTIONS[i]);
 
+            
             let adjVoxel: Voxel | undefined;
             const currFace = new RenderableFace(
-              adj,
+              voxelPos,
+              ADJACENT_DIRECTIONS[i],
               1,
+              currVoxelType,
             );
             
-            if (x < 0 || z < 0 || x >= chunk.Size || z >= chunk.Size) {
+            if (adj.y < 0 || adj.y >= chunkHeight) adjVoxel = new Voxel('air');
+            if (
+              adj.x < 0 || adj.z < 0 || adj.x >= chunkSize || adj.z >= chunkSize
+            ) {
               adjVoxel = chunk.World.getVoxelAt(
                 chunkWorldPos
                   .clone()
@@ -53,14 +62,14 @@ export default class GreededTransparencyPassesManager {
               );
             }
 
+
             if (!adjVoxel) {
               adjVoxel = new Voxel(chunk.getVoxelAt(adj));
             }
 
+
             if (
-              y < 0 
-              || y > chunk.Height
-              || adjVoxel.Existing === false
+              adjVoxel.Existing === false
               || (
                 adjVoxel.Opacity !== undefined 
                 && adjVoxel.Opacity < 1 
@@ -68,18 +77,6 @@ export default class GreededTransparencyPassesManager {
               )
             ) {
               this.pushFace(passIndex, currFace);
-            }
-            
-            if (z < chunk.ChunkDimensions.z - 1) {
-              const nextVoxel = chunk.getVoxelAt(
-                voxelPos
-                  .clone()
-                  .add(new Vector3(0, 0, 1))
-              );
-              if (nextVoxel === currVoxel) {
-                currFace.faceZLength++;
-                z++;
-              }
             }
           }
         

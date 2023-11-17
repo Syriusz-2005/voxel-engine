@@ -1,4 +1,4 @@
-import { DoubleSide, BufferAttribute, BufferGeometry, InstancedBufferGeometry, InstancedMesh, Mesh, MeshLambertMaterial, Object3D, PlaneGeometry, ShaderMaterial, Vector3, InstancedBufferAttribute, Matrix4, FrontSide, Box3, Camera, Frustum } from "three";
+import { BufferAttribute, InstancedBufferGeometry, Mesh, Object3D, ShaderMaterial, Vector3, InstancedBufferAttribute, Matrix4, FrontSide, Box3, Camera, Frustum } from "three";
 import Chunk from "./Chunk.ts";
 import vertex from '../shader/vertex.glsl?raw';
 import fragment from '../shader/fragment.glsl?raw';
@@ -74,7 +74,7 @@ export default class ChunkRenderer {
     }); 
   }
 
-  public getMesh(geometry: InstancedBufferGeometry, material: ShaderMaterial) {
+  public createMeshes(geometry: InstancedBufferGeometry, material: ShaderMaterial) {
     const mesh = new Mesh(geometry, material);
     mesh.frustumCulled = false;
     mesh.position.copy(this.Chunk.WorldPos);
@@ -93,6 +93,8 @@ export default class ChunkRenderer {
     this.disposeMeshes();
 
     let index = 0;
+    let matArray: number[] = [];
+
     for (const {faces} of transparencyPasses) {
       const geometry = new InstancedBufferGeometry();
       this.setAttributes(geometry);
@@ -100,11 +102,75 @@ export default class ChunkRenderer {
       const isOpaque = index++ === 0;
 
       const material = this.getMaterial(isOpaque);
-      const mesh = this.getMesh(geometry, material);
+      this.createMeshes(geometry, material);
+      this.statFacesCount = faces.length;
 
-      for (const face of faces) {
+      const faceObject = new Object3D();
+
+      const elements = this.getAttrArray(faces.length, 16);
+      const faceRotations = this.getAttrArray(faces.length, 1);
+      const colors = this.getAttrArray(faces.length, 4);
+      const voxelId = new Uint8Array(faces.length * 6);
+
+      let elementIndex = 0;
+      let faceId = 0;
+      let colorIndex = 0;
+      let idIndex = 0;
+
+
+      for (const {voxelPosition, faceRotation, faceZLength, voxelType} of faces) {
+        faceObject.rotation.set(0, 0, 0);
+        faceObject.position.set(
+          voxelPosition.x + 0.5, 
+          (voxelPosition.y + 0.5), 
+          voxelPosition.z + 0.5,
+        );
+
+        if (faceRotation.y !== 0) faceObject.rotateX(-faceRotation.y * Math.PI / 2);
+        if (faceRotation.x !== 0) faceObject.rotateY(faceRotation.x * Math.PI / 2);
+        if (faceRotation.z === -1) faceObject.rotateY(Math.PI);
+
+        faceObject.updateMatrix();
+        faceObject.matrix.toArray(matArray);
+
+        /*
+          bottom 0
+          top 1
+          left 2
+          right 3
+          front 4
+          back 5 
+        */
+          const rotationId = 
+          faceRotation.y === -1 ? 0
+          : faceRotation.y === 1 ? 1
+          : faceRotation.x === -1 ? 2
+          : faceRotation.x === 1 ? 3
+          : faceRotation.z === -1 ? 4
+          : 5;  
+
+        // Each face has 6 vertices
+        for (let vertexIndex = 0; vertexIndex < 6; vertexIndex++) {
+          faceRotations[faceId + vertexIndex] = rotationId;
+          voxelId[idIndex++] = voxelType.Id;
+          
+          colors[colorIndex++] = voxelType.Color.r;
+          colors[colorIndex++] = voxelType.Color.g;
+          colors[colorIndex++] = voxelType.Color.b;
+          colors[colorIndex++] = voxelType.Opacity;
+          
+          for (let itemIndex = 0; itemIndex < matArray.length; itemIndex++) {
+            elements[elementIndex] = matArray[itemIndex];
+            elementIndex++;
+          }
+        }
         
+        faceId += 6;
       }
+      geometry.setAttribute('instanceMatrix', new InstancedBufferAttribute(elements, 16));
+      geometry.setAttribute('faceRotation', new InstancedBufferAttribute(faceRotations, 1));
+      geometry.setAttribute('voxelColor', new InstancedBufferAttribute(colors, 4));
+      geometry.setAttribute('voxelId', new InstancedBufferAttribute(voxelId, 1));
     }
   }
 
@@ -131,7 +197,7 @@ export default class ChunkRenderer {
 
       const material = this.getMaterial(isOpaque);
 
-      const mesh = this.getMesh(geometry, material);
+      this.createMeshes(geometry, material);
 
 
       const count = voxels.length;
@@ -166,7 +232,6 @@ export default class ChunkRenderer {
           if (face.z === -1) object.rotateY(Math.PI);
   
           object.updateMatrix();
-    
           object.matrix.toArray(matArray);
 
           /*
@@ -221,7 +286,7 @@ export default class ChunkRenderer {
   }
 
   public async init(): Promise<void> {
-    await this.updateMesh();
+    await this.updateGreededMesh();
     this.addMeshes();
   }
 
