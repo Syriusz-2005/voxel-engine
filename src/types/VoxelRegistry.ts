@@ -10,6 +10,10 @@ export type VoxelData = {
 }
 
 export const voxelRegistry = {
+  'unknown': {
+    id: 9999,
+    color: new Color(0, 0, 0),
+  } as VoxelData,
   'air': {
     existing: false, 
     color: new Color(0, 0, 0), 

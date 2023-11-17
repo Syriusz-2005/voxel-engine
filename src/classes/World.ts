@@ -4,6 +4,7 @@ import Voxel from "./Voxel.ts";
 import ChunkRenderer from "./ChunkRenderer.ts";
 import WorldGenerator from "../generator/WorldGenerator.ts";
 import Representation, { VectorRepresentation } from "./VectorRepresentation.ts";
+import { VoxelType } from "../types/VoxelRegistry.ts";
 
 
 
@@ -101,6 +102,17 @@ export default class World {
       }
     });
     return renderers;
+  }
+
+  public getVoxelTypeAt(worldPos: Vector3): VoxelType {
+    const chunkPos = this.transformWorldPosToChunkPos(worldPos);
+    const posInChunk = this.transformWorldPosToPosInChunk(worldPos);
+
+    const chunk = this.getChunkAt(chunkPos);
+    if (!chunk || chunk.IsGenerating) return 'unknown';
+
+    const voxelType = chunk.getVoxelAt(posInChunk);
+    return voxelType;
   }
 
   public getVoxelAt(worldPos: Vector3): Voxel | undefined {

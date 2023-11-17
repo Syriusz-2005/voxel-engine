@@ -2,7 +2,7 @@ import { Vector3 } from "three";
 import Chunk, { GreededTransparencyPass } from "./Chunk.ts";
 import RenderableFace from "./RenderableFace.ts";
 import Voxel from "./Voxel.ts";
-import { registry } from "../types/VoxelRegistry.ts";
+import { registry, voxelRegistry } from "../types/VoxelRegistry.ts";
 
 
 
@@ -26,16 +26,21 @@ export default class GreededTransparencyPassesManager {
     const chunkSize = chunk.ChunkDimensions.x;
     const chunkHeight = chunk.ChunkDimensions.y;
 
+    let voxelWorldPos = new Vector3();
+    let currVoxelType = new Voxel('unknown');
+    let adjVoxel = new Voxel('unknown');
 
-    for (let x = 0; x < chunk.ChunkDimensions.x; x++) {
-      for (let y = 0; y < chunk.ChunkDimensions.y; y++) {
-        for (let z = 0; z < chunk.ChunkDimensions.z; z++) {
-          const voxelPos = new Vector3(x, y, z);;
-          const currVoxel = chunk.getVoxelAt(voxelPos);
-          if (currVoxel === 'air') continue;
+    for (let x = 0; x < chunkSize; x++) {
+      for (let y = 0; y < chunkHeight; y++) {
+        for (let z = 0; z < chunkSize; z++) {
+          const voxelData = chunk.Data[x][y][z];
+          if (!voxelData) continue;
+          const {type: currVoxel, pos: voxelPos} = voxelData;
 
-          const currVoxelType = new Voxel(currVoxel);
-          const passIndex = currVoxelType.Opacity > 0 && currVoxelType.Opacity < 1 ? currVoxelType.Id : 0;
+          currVoxelType.update(currVoxel);
+          const currVoxelProperties = voxelRegistry[currVoxel];
+          const opacity = currVoxelProperties.opacity ?? 1;
+          const passIndex = opacity > 0 && opacity < 1 ? currVoxelType.Id : 0;
 
           for (let i = 0; i < adjacents.length; i++) {
             const adj = adjacents[i];
@@ -43,44 +48,43 @@ export default class GreededTransparencyPassesManager {
             adj.add(ADJACENT_DIRECTIONS[i]);
 
             
-            let adjVoxel: Voxel | undefined;
-            const currFace = new RenderableFace(
-              voxelPos,
-              ADJACENT_DIRECTIONS[i],
-              1,
-              currVoxelType,
-            );
+            adjVoxel = adjVoxel.update('unknown');
             
-            if (adj.y < 0 || adj.y >= chunkHeight) adjVoxel = new Voxel('air');
+            if (adj.y < 0 || adj.y >= chunkHeight) adjVoxel.update('air');
             if (
               adj.x < 0 || adj.z < 0 || adj.x >= chunkSize || adj.z >= chunkSize
             ) {
-              adjVoxel = chunk.World.getVoxelAt(
-                chunkWorldPos
-                  .clone()
-                  .add(adj)
-              );
+              voxelWorldPos = voxelWorldPos.copy(chunkWorldPos).add(adj);
+              adjVoxel.update(chunk.World.getVoxelTypeAt(
+                voxelWorldPos,
+              ));
             }
 
 
-            if (!adjVoxel) {
-              adjVoxel = new Voxel(chunk.getVoxelAt(adj));
+            if (adjVoxel.Name === 'unknown') {
+              adjVoxel.update(chunk.getVoxelAt(adj));
             }
 
 
+            const adjVoxelType = voxelRegistry[adjVoxel.Name];
             if (
-              adjVoxel.Existing === false
+              adjVoxelType.existing === false
               || (
-                adjVoxel.Opacity !== undefined 
-                && adjVoxel.Opacity < 1 
+                adjVoxelType.opacity !== undefined 
+                && adjVoxelType.opacity < 1 
                 && adjVoxel.Name !== currVoxel
               )
             ) {
+              const currFace = new RenderableFace(
+                voxelPos,
+                ADJACENT_DIRECTIONS[i],
+                1,
+                new Voxel(currVoxelType.Name),
+              );
               this.pushFace(passIndex, currFace);
             }
           }
         
-
         }
       }
     }

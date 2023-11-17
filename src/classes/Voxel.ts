@@ -4,8 +4,13 @@ import { VoxelType, voxelRegistry } from "../types/VoxelRegistry.ts";
 
 export default class Voxel {
   constructor(
-    private readonly name: VoxelType, 
+    private name: VoxelType, 
   ) {}
+
+  public update(name: VoxelType) {
+    this.name = name;
+    return this;
+  }
 
   public get Name(): VoxelType {
     return this.name;

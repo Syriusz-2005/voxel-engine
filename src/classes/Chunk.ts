@@ -100,6 +100,10 @@ export default class Chunk {
     return this.data[vec.x][vec.y][vec.z]?.type ?? 'air';
   }
 
+  public get Data() {
+    return this.data;
+  }
+
   public setVoxelAt(vec: Vector3, value: Voxel): void {
     this.data[vec.x][vec.y][vec.z] = {type: value.Name, pos: vec};
   }
