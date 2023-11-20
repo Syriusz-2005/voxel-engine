@@ -44,7 +44,10 @@ export default class GreededTransparencyPassesManager {
           const passIndex = opacity > 0 && opacity < 1 ? currVoxelType.Id : 0;
 
           for (let i = 0; i < nextFaces.length; i++) {
-            if (nextFaces[i] === false) continue;
+            if (nextFaces[i] === false) {
+              nextFaces[i] = true;
+              continue;
+            };
             const adj = adjacents[i];
             adj.copy(voxelPos);
             adj.add(ADJACENT_DIRECTIONS[i]);
@@ -87,13 +90,13 @@ export default class GreededTransparencyPassesManager {
               this.pushFace(passIndex, currFace);
             }
 
-            if (z < chunkSize - 1) {
+            if (z < chunkSize - 2) {
               const nextVoxel = chunk.getVoxelAt(
                 voxelPos
                   .clone()
                   .add(new Vector3(0, 0, 1))
               );
-              if (nextVoxel === currVoxel && currFace) {
+              if (nextVoxel === currVoxel && currFace && currFace.faceRotation.z !== 0) {
                 currFace.faceZLength++;
                 nextFaces[i] = false;
               } else {

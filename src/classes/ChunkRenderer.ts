@@ -128,10 +128,18 @@ export default class ChunkRenderer {
           (voxelPosition.y + 0.5), 
           voxelPosition.z + 0.5,
         );
-
-        if (faceRotation.y !== 0) faceObject.rotateX(-faceRotation.y * Math.PI / 2);
-        if (faceRotation.x !== 0) faceObject.rotateY(faceRotation.x * Math.PI / 2);
-        if (faceRotation.z === -1) faceObject.rotateY(Math.PI);
+        
+        if (faceRotation.y !== 0) {
+          faceObject.rotateX(-faceRotation.y * Math.PI / 2);
+          faceObject.position.setZ(voxelPosition.z + faceZLength / 2);
+          faceObject.scale.setY(faceZLength);
+        }
+        if (faceRotation.x !== 0) {
+          faceObject.rotateY(faceRotation.x * Math.PI / 2);
+        }
+        if (faceRotation.z === -1) {
+          faceObject.rotateY(Math.PI);
+        }
 
         faceObject.updateMatrix();
         faceObject.matrix.toArray(matArray);
