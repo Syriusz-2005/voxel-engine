@@ -97,6 +97,7 @@ export default class ChunkRenderer {
 
     let index = 0;
     let matArray: number[] = [];
+    this.statFacesCount = 0;
 
     for (const {faces} of transparencyPasses) {
       const geometry = new InstancedBufferGeometry();
@@ -106,7 +107,7 @@ export default class ChunkRenderer {
 
       const material = this.getMaterial(isOpaque);
       this.createMeshes(geometry, material);
-      this.statFacesCount = faces.length;
+      this.statFacesCount += faces.length;
 
       const faceObject = new Object3D();
 
@@ -128,10 +129,14 @@ export default class ChunkRenderer {
           (voxelPosition.y + 0.5), 
           voxelPosition.z + 0.5,
         );
+        faceObject.scale.setY(1);
+        if (faceZLength > 1) {
+          faceObject.position.setZ(voxelPosition.z + faceZLength / 2);
+          // faceObject.scale.setZ(faceZLength);
+        }
         
         if (faceRotation.y !== 0) {
           faceObject.rotateX(-faceRotation.y * Math.PI / 2);
-          faceObject.position.setZ(voxelPosition.z + faceZLength / 2);
           faceObject.scale.setY(faceZLength);
         }
         if (faceRotation.x !== 0) {
