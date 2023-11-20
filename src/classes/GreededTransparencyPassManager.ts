@@ -29,6 +29,7 @@ export default class GreededTransparencyPassesManager {
     let voxelWorldPos = new Vector3();
     let currVoxelType = new Voxel('unknown');
     let adjVoxel = new Voxel('unknown');
+    let nextFaces: boolean[] = new Array(6).fill(undefined).map((_) => true);
 
     for (let x = 0; x < chunkSize; x++) {
       for (let y = 0; y < chunkHeight; y++) {
@@ -42,7 +43,8 @@ export default class GreededTransparencyPassesManager {
           const opacity = currVoxelProperties.opacity ?? 1;
           const passIndex = opacity > 0 && opacity < 1 ? currVoxelType.Id : 0;
 
-          for (let i = 0; i < adjacents.length; i++) {
+          for (let i = 0; i < nextFaces.length; i++) {
+            if (nextFaces[i] === false) continue;
             const adj = adjacents[i];
             adj.copy(voxelPos);
             adj.add(ADJACENT_DIRECTIONS[i]);
@@ -66,6 +68,7 @@ export default class GreededTransparencyPassesManager {
             }
 
 
+            let currFace: RenderableFace | undefined;
             const adjVoxelType = voxelRegistry[adjVoxel.Name];
             if (
               adjVoxelType.existing === false
@@ -75,13 +78,29 @@ export default class GreededTransparencyPassesManager {
                 && adjVoxel.Name !== currVoxel
               )
             ) {
-              const currFace = new RenderableFace(
+              currFace = new RenderableFace(
                 voxelPos,
                 ADJACENT_DIRECTIONS[i],
                 1,
                 new Voxel(currVoxelType.Name),
-              );
+              ); 
               this.pushFace(passIndex, currFace);
+            }
+
+            if (z < chunkSize - 1) {
+              const nextVoxel = chunk.getVoxelAt(
+                voxelPos
+                  .clone()
+                  .add(new Vector3(0, 0, 1))
+              );
+              if (nextVoxel === currVoxel && currFace) {
+                currFace.faceZLength++;
+                nextFaces[i] = false;
+              } else {
+                nextFaces[i] = true;
+              }
+            } else {
+              nextFaces.fill(true);
             }
           }
         
