@@ -96,7 +96,7 @@ export default class GreededTransparencyPassesManager {
                   .clone()
                   .add(new Vector3(0, 0, 1))
               );
-              if (nextVoxel === currVoxel && currFace && currFace.faceRotation.z !== 0) {
+              if (nextVoxel === currVoxel && currFace && currFace.faceRotation.y !== 0) {
                 currFace.faceZLength++;
                 nextFaces[i] = false;
               } else {
