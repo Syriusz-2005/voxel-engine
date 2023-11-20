@@ -1,12 +1,14 @@
 import { Camera, Material, Matrix4, Scene, ShaderMaterial, Vector3 } from "three";
 import World from "./World";
 import WorldGenerator from "../generator/WorldGenerator";
+import { ConfigSettings } from "./Config.ts";
 
 export type WorldManagerConfig = {
   renderDistance: number;
   worldGenerator: WorldGenerator;
   chunkSize: number;
   chunkHeight: number;
+  view: ConfigSettings['VIEW'];
 }
 
 export default class WorldManager {
@@ -22,7 +24,7 @@ export default class WorldManager {
   ) {
     this.chunkSize = config.chunkSize;
     this.chunkHeight = config.chunkHeight;
-    this.world = new World(this.chunkSize, this.chunkHeight, this.scene);
+    this.world = new World(this.chunkSize, this.chunkHeight, this.scene, this);
     console.log(this);
   }
 

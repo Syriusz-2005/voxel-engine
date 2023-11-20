@@ -3,6 +3,7 @@ import Chunk from "./Chunk.ts";
 import vertex from '../shader/vertex.glsl?raw';
 import fragment from '../shader/fragment.glsl?raw';
 import World from "./World.ts";
+import { ConfigSettings } from "./Config.ts";
 
 
 export default class ChunkRenderer {
@@ -16,6 +17,7 @@ export default class ChunkRenderer {
     private readonly chunkPosition: THREE.Vector3,
     private readonly chunkSize: number,
     private readonly world: World,
+    private readonly view: ConfigSettings['VIEW'],
   ) {}
 
   public get Chunk(): Chunk {
@@ -71,6 +73,7 @@ export default class ChunkRenderer {
       depthTest: true,
       transparent: !isOpaque,
       side: FrontSide,
+      wireframe: this.view === 'wireframe',
     }); 
   }
 

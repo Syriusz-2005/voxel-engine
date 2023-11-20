@@ -85,6 +85,7 @@ let worldManager = new WorldManager(scene, {
 	renderDistance: 8,
 	chunkHeight: 64,
 	chunkSize: config.CHUNK_SIZE.getValue(),
+	view: config.view.getValue(),
 });
 
 window.addEventListener('beforeunload', () => worldManager.destroy());
@@ -101,6 +102,12 @@ config.RENDER_DISTANCE.onChange((distance) => {
 		renderDistance: distance,	
 	});
 });
+config.view.onChange((view) => {
+	worldManager = worldManager.new({
+		...worldManager.Config,
+		view,
+	})
+})
 
 
 console.timeEnd('Init');

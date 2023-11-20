@@ -5,6 +5,7 @@ import ChunkRenderer from "./ChunkRenderer.ts";
 import WorldGenerator from "../generator/WorldGenerator.ts";
 import Representation, { VectorRepresentation } from "./VectorRepresentation.ts";
 import { VoxelType } from "../types/VoxelRegistry.ts";
+import WorldManager from "./WorldManager.ts";
 
 
 
@@ -21,6 +22,7 @@ export default class World {
     private readonly chunkSize: number,
     private readonly chunkHeight: number,
     private readonly scene: Scene,  
+    private readonly manager: WorldManager,
   ) {
     this.chunkDimensions = new Vector3(chunkSize, chunkHeight, chunkSize);
   }
@@ -51,7 +53,7 @@ export default class World {
   }
 
   private setChunkAt(vec: Vector3, chunk: Chunk): ChunkRenderer {
-    const newRenderer = new ChunkRenderer(chunk, this.scene, vec, this.chunkSize, this);
+    const newRenderer = new ChunkRenderer(chunk, this.scene, vec, this.chunkSize, this, this.manager.Config.view);
     this.renderers.set(
       Representation.toRepresentation(vec), 
       newRenderer,

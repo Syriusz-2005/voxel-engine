@@ -5,6 +5,7 @@ export type ConfigSettings = {
   readonly CHUNK_SIZE: number;
   readonly RENDER_DISTANCE: number;
   readonly CONTROLS: 'orbit' | 'pointer-lock';
+  readonly VIEW: 'normal' | 'wireframe';
 }
 
 export default class Config {
@@ -14,11 +15,13 @@ export default class Config {
     CHUNK_SIZE: 20,
     CONTROLS: 'orbit',
     RENDER_DISTANCE: 10,
+    VIEW: 'normal',
   } as ConfigSettings;
 
   public CHUNK_SIZE = this.gui.add(this.settings, 'CHUNK_SIZE', 2, 30, 1);
   public CONTROLS = this.gui.add(this.settings, 'CONTROLS', ['orbit', 'pointer-lock']);
   public RENDER_DISTANCE = this.gui.add(this.settings, 'RENDER_DISTANCE', 2, 40, 1);
+  public view = this.gui.add(this.settings, 'VIEW', ['normal', 'wireframe']);
 
   private statsFolder = this.gui.addFolder('Rendering stats');
 
