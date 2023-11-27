@@ -19,7 +19,6 @@ export default class World implements WorldLike {
   }
 
   private readonly chunkDimensions: Vector3;
-
   private transformations: CoordTransformations;
 
   constructor(
