@@ -6,10 +6,12 @@ import WorldGenerator from "../generator/WorldGenerator.ts";
 import Representation, { VectorRepresentation } from "./VectorRepresentation.ts";
 import { VoxelType } from "../types/VoxelRegistry.ts";
 import WorldManager from "./WorldManager.ts";
+import CoordTransformations from "../utils/CoordTransformations.ts";
+import { WorldLike } from "../types/WorldLike.ts";
 
 
 
-export default class World {
+export default class World implements WorldLike {
   private renderers: Map<VectorRepresentation, ChunkRenderer> = new Map();
 
   public get Renderers(): Map<VectorRepresentation, ChunkRenderer> {
@@ -18,6 +20,8 @@ export default class World {
 
   private readonly chunkDimensions: Vector3;
 
+  private transformations: CoordTransformations;
+
   constructor(
     private readonly chunkSize: number,
     private readonly chunkHeight: number,
@@ -25,26 +29,9 @@ export default class World {
     private readonly manager: WorldManager,
   ) {
     this.chunkDimensions = new Vector3(chunkSize, chunkHeight, chunkSize);
+    this.transformations = new CoordTransformations(this.chunkDimensions);
   }
 
-  public transformWorldPosToChunkPos(worldPos: Vector3): Vector3 {
-    const {x, y, z} = worldPos;
-    const chunkX = Math.floor(x / this.chunkSize);
-    const chunkY = Math.floor(y / this.chunkHeight);
-    const chunkZ = Math.floor(z / this.chunkSize);
-
-    return new Vector3(chunkX, chunkY, chunkZ);
-  }
-
-  public transformWorldPosToPosInChunk(worldPos: Vector3): Vector3 {
-    
-    const chunkWorldPos = this.transformWorldPosToChunkPos(worldPos)
-      .multiply(this.chunkDimensions);
-
-    const posInChunk = worldPos.sub(chunkWorldPos);
-
-    return posInChunk;
-  }
 
   public getChunkAt(vec: Vector3): Chunk | undefined {
     const renderer = this.renderers.get(Representation.toRepresentation(vec));
@@ -107,8 +94,8 @@ export default class World {
   }
 
   public getVoxelTypeAt(worldPos: Vector3): VoxelType {
-    const chunkPos = this.transformWorldPosToChunkPos(worldPos);
-    const posInChunk = this.transformWorldPosToPosInChunk(worldPos);
+    const chunkPos = this.transformations.transformToChunkPos(worldPos);
+    const posInChunk = this.transformations.transformToPosInChunk(worldPos);
 
     const chunk = this.getChunkAt(chunkPos);
     if (!chunk || chunk.IsGenerating) return 'unknown';
@@ -118,8 +105,8 @@ export default class World {
   }
 
   public getVoxelAt(worldPos: Vector3): Voxel | undefined {
-    const chunkPos = this.transformWorldPosToChunkPos(worldPos);
-    const posInChunk = this.transformWorldPosToPosInChunk(worldPos);
+    const chunkPos = this.transformations.transformToChunkPos(worldPos);
+    const posInChunk = this.transformations.transformToPosInChunk(worldPos);
 
     const chunk = this.getChunkAt(chunkPos);
     if (!chunk || chunk.IsGenerating) return undefined;

@@ -6,7 +6,7 @@ export type WorkerData = {
 
 export type TaskData = {
   command: string;
-  data?: any;
+  data: any;
 }
 
 export type Task = {
