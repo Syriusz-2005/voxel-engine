@@ -15,6 +15,7 @@ export default class ThreadedWorldManager {
   private readonly chunkSize: number;
   private readonly chunkHeight: number;
   private readonly world: ThreadedWorld;
+  private prevCameraChunk: Vector3 | undefined;
   
   constructor(
     private readonly config: WorldManagerConfig,
@@ -58,8 +59,11 @@ export default class ThreadedWorldManager {
 
   private async updateWorld() {
     const currentChunk = this.getCameraChunk();
-
     if (!currentChunk) return;
+
+    if (this.prevCameraChunk && this.prevCameraChunk.equals(currentChunk)) return;
+
+    this.prevCameraChunk = currentChunk.clone();
 
     const chunksToDispose = this.world.findChunksOutOfRadius(currentChunk, this.Config.renderDistance);
     for (const chunk of chunksToDispose) {

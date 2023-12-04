@@ -93,11 +93,11 @@ export default class WorldController {
   }
 
   public async postNextFrame(msg: NextFrameMessage) {
-    await this.worldControllerThread.fetch(msg);
+    this.worldControllerThread.postMessage(msg);
   }
 
   public async postUpdateConfig(msg: ConfigUpdateMessage) {
-    await this.worldControllerThread.fetch(msg);
+    this.worldControllerThread.postMessage(msg);
   }
 
   private readonly generator: WorldGenerator = new RandomFlatWorldGenerator();

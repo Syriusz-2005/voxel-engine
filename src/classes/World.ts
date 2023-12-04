@@ -35,7 +35,7 @@ export default class World {
       this.chunkSize, 
       this, 
       this.manager.Config.view, 
-      vec.multiply(this.transformations.TVector),
+      vec.clone().multiply(this.transformations.TVector),
     );
     this.renderers.set(
       Representation.toRepresentation(vec), 
