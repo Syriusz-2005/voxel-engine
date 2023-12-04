@@ -5,6 +5,7 @@ import ThreadedWorldManager from "./ThreadedWorldManager.ts";
 import Representation, { VectorRepresentation } from "./VectorRepresentation.ts";
 import Voxel from "./Voxel.ts";
 import CoordTransformations from "../utils/CoordTransformations.ts";
+import WorldGenerator from "../generator/WorldGenerator.ts";
 
 
 
@@ -37,5 +38,38 @@ export default class ThreadedWorld implements WorldLike {
 
     const voxelType = chunk.getVoxelAt(posInChunk);
     return new Voxel(voxelType);
+  }
+
+  public disposeChunkAt(pos: Vector3) {
+    const representation = Representation.toRepresentation(pos);
+    const chunk = this.chunks.get(representation);
+    if (!chunk) return;
+
+    this.chunks.delete(representation);
+  }
+
+  public findChunksOutOfRadius(center: Vector3, radius: number): Chunk[] {
+    const chunks: Chunk[] = [];
+    this.chunks.forEach((chunk, vecRepresentation) => {
+      const vec = Representation.fromRepresentation(vecRepresentation);
+      const distance = center.distanceTo(vec);
+      if (distance > radius) {
+        chunks.push(chunk);
+      }
+    });
+    return chunks;
+  }
+
+  public async generateChunkAt(pos: Vector3, generator: WorldGenerator) {
+    const chunk = new Chunk(
+      this.manager.Config.chunkSize, 
+      this.manager.Config.chunkHeight,
+      this,
+      pos
+    );
+
+    await chunk.generate(generator, pos);
+    
+    return chunk;
   }
 }

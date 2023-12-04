@@ -4,6 +4,8 @@ import vertex from '../shader/vertex.glsl?raw';
 import fragment from '../shader/fragment.glsl?raw';
 import World from "./World.ts";
 import { ConfigSettings } from "./Config.ts";
+import Attribute from "../types/Attribute.ts";
+import CoordTransformations from "../utils/CoordTransformations.ts";
 
 
 export default class ChunkRenderer {
@@ -12,17 +14,13 @@ export default class ChunkRenderer {
   public statFacesCount: number = 0;
 
   constructor(
-    private readonly chunk: Chunk,
     private readonly scene: THREE.Scene,
     private readonly chunkPosition: THREE.Vector3,
     private readonly chunkSize: number,
     private readonly world: World,
     private readonly view: ConfigSettings['VIEW'],
+    private readonly worldPosition: Vector3,
   ) {}
-
-  public get Chunk(): Chunk {
-    return this.chunk;
-  }
 
   public get Position(): THREE.Vector3 {
     return this.chunkPosition;
@@ -32,11 +30,11 @@ export default class ChunkRenderer {
     return this.meshes;
   }
 
-  private getAttrArray(facesCount: number, perVertexCount: number): Float32Array {
+  private static getAttrArray(facesCount: number, perVertexCount: number): Float32Array {
     return new Float32Array(facesCount * 6 * perVertexCount);
   }
 
-  private setAttributes(geometry: InstancedBufferGeometry) {
+  private setBufferAttributes(geometry: InstancedBufferGeometry) {
     const vertices = new Float32Array([
       -0.5, -0.5,  0.5, // v0
       0.5, -0.5,  0.5, // v1
@@ -47,7 +45,7 @@ export default class ChunkRenderer {
       -0.5, -0.5,  0.5  // v5
     ]);
 
-    const chunkWorldPos = this.Chunk.WorldPos;
+    const chunkWorldPos = this.worldPosition;
     
     geometry.setAttribute('position', new BufferAttribute(vertices, 3));
     geometry.setAttribute('meshPosition', new BufferAttribute(new Float32Array([
@@ -57,13 +55,13 @@ export default class ChunkRenderer {
     ]), 3));
   }
 
-  private getMaterial(isOpaque: boolean) {
+  private getMaterial(isOpaque: boolean, view: ConfigSettings['VIEW']) {
     return new ShaderMaterial({
       vertexShader: vertex,
       fragmentShader: fragment,
       uniforms: {
         'chunkWorldPosition': {
-          value: this.Chunk.WorldPos,
+          value: this.worldPosition,
         },
         'frame': {
           value: 0,
@@ -73,41 +71,26 @@ export default class ChunkRenderer {
       depthTest: true,
       transparent: !isOpaque,
       side: FrontSide,
-      wireframe: this.view === 'wireframe',
+      wireframe: view === 'wireframe',
     }); 
   }
 
-  public createMeshes(geometry: InstancedBufferGeometry, material: ShaderMaterial) {
+  private createMesh(geometry: InstancedBufferGeometry, material: ShaderMaterial) {
     const mesh = new Mesh(geometry, material);
     mesh.frustumCulled = false;
-    mesh.position.copy(this.Chunk.WorldPos);
+    mesh.position.copy(this.worldPosition);
     this.meshes.push(mesh);
     return mesh;
   }
 
-  public async updateGreededMesh() {
-    const transparencyPasses = await this.chunk.getGreededTransparencyPasses();
-  
-    if (this.isDisposed) {
-      this.remove();
-      return;
-    };
+  public static async generateAttributesForTransparencyPasses(chunk: Chunk): Promise<Attribute[][]> {
+    const transparencyPasses = await chunk.getGreededTransparencyPasses();
 
-    this.disposeMeshes();
-
-    let index = 0;
     let matArray: number[] = [];
-    this.statFacesCount = 0;
+
+    const outPasses: Attribute[][] = [];
 
     for (const {faces} of transparencyPasses) {
-      const geometry = new InstancedBufferGeometry();
-      this.setAttributes(geometry);
-
-      const isOpaque = index++ === 0;
-
-      const material = this.getMaterial(isOpaque);
-      this.createMeshes(geometry, material);
-      this.statFacesCount += faces.length;
 
       const faceObject = new Object3D();
 
@@ -183,116 +166,37 @@ export default class ChunkRenderer {
         
         faceId += 6;
       }
-      geometry.setAttribute('instanceMatrix', new InstancedBufferAttribute(elements, 16));
-      geometry.setAttribute('faceRotation', new InstancedBufferAttribute(faceRotations, 1));
-      geometry.setAttribute('voxelColor', new InstancedBufferAttribute(colors, 4));
-      geometry.setAttribute('voxelId', new InstancedBufferAttribute(voxelId, 1));
     }
+
+    return outPasses;
   }
 
-  private async updateMesh() {
-    const {chunk} = this;
-
-    const {transparencyPasses, facesCount} = await chunk.getRenderableVoxels();
-
+  public updateMeshes(passes: Attribute[][]): void {
+  
     if (this.isDisposed) {
       this.remove();
       return;
-    };
+    }
+
     this.disposeMeshes();
 
-    let index = 0;
-    let matArray: number[] = [];
-    this.statFacesCount = facesCount;
-    for (const {voxels, facesCount} of transparencyPasses)  {
+    for (let passIndex = 0; passIndex < passes.length; passIndex++) {
       const geometry = new InstancedBufferGeometry();
-      
-      this.setAttributes(geometry);
+      const isOpaque = passIndex === 0;
+      const material = this.getMaterial(isOpaque, this.view);
+      const mesh = this.createMesh(geometry, material);
 
-      const isOpaque = index++ === 0;
+      const attributes = passes[passIndex];
 
-      const material = this.getMaterial(isOpaque);
+      this.setBufferAttributes(geometry);
 
-      this.createMeshes(geometry, material);
-
-
-      const count = voxels.length;
-  
-      const elements = this.getAttrArray(facesCount, 16);
-      const faceRotations = this.getAttrArray(facesCount, 1);
-      const colors = this.getAttrArray(facesCount, 4);
-      const voxelId = new Uint8Array(facesCount * 6);
-  
-      const object = new Object3D();
-      let voxelPosition = new Vector3();
-      let elementIndex = 0;
-      let faceId = 0;
-      let colorIndex = 0;
-      let idIndex = 0;
-      for (let i = 0; i < count; i++) {
-        const renderableVoxel = voxels[i];
-        const {PosInChunk} = renderableVoxel;
-        voxelPosition = voxelPosition.copy(PosInChunk);
-        let localFaceIndex = 0;
-        for (let face of renderableVoxel.RenderableFaces) {
-          object.rotation.set(0, 0, 0);
-          object.position.set(
-            voxelPosition.x + 0.5, 
-            (voxelPosition.y + 0.5), 
-            voxelPosition.z + 0.5,
-          );
-          object.scale.set(1, 1, 1);
-          
-          if (face.y !== 0) object.rotateX(-face.y * Math.PI / 2);
-          if (face.x !== 0) object.rotateY(face.x * Math.PI / 2);
-          if (face.z === -1) object.rotateY(Math.PI);
-  
-          object.updateMatrix();
-          object.matrix.toArray(matArray);
-
-          /*
-            bottom 0
-            top 1
-            left 2
-            right 3
-            front 4
-            back 5 
-          */
-          const rotationId = 
-            face.y === -1 ? 0
-            : face.y === 1 ? 1
-            : face.x === -1 ? 2
-            : face.x === 1 ? 3
-            : face.z === -1 ? 4
-            : 5;  
-  
-          // Each face has 6 vertices
-          for (let vertexIndex = 0; vertexIndex < 6; vertexIndex++) {
-            faceRotations[faceId + vertexIndex] = rotationId;
-            voxelId[idIndex++] = renderableVoxel.Voxel.Id;
-            
-            colors[colorIndex++] = renderableVoxel.Voxel.Color.r;
-            colors[colorIndex++] = renderableVoxel.Voxel.Color.g;
-            colors[colorIndex++] = renderableVoxel.Voxel.Color.b;
-            colors[colorIndex++] = renderableVoxel.Voxel.Opacity;
-            
-            for (let itemIndex = 0; itemIndex < matArray.length; itemIndex++) {
-              elements[elementIndex] = matArray[itemIndex];
-              elementIndex++;
-            }
-          }
-          
-          faceId += 6;
-          localFaceIndex++;
-        }
+      for (const {name, arr, itemSize} of attributes) {
+        geometry.setAttribute(name, new InstancedBufferAttribute(arr, itemSize));
       }
-      
-      geometry.setAttribute('instanceMatrix', new InstancedBufferAttribute(elements, 16));
-      geometry.setAttribute('faceRotation', new InstancedBufferAttribute(faceRotations, 1));
-      geometry.setAttribute('voxelColor', new InstancedBufferAttribute(colors, 4));
-      geometry.setAttribute('voxelId', new InstancedBufferAttribute(voxelId, 1));
+
+      mesh.frustumCulled = false;
     }
-    
+
   }
 
   private addMeshes() {
@@ -301,19 +205,19 @@ export default class ChunkRenderer {
     }
   }
 
-  public async init(): Promise<void> {
-    await this.updateGreededMesh();
+  public async init(passes: Attribute[][]): Promise<void> {
+    await this.updateMeshes(passes);
     this.addMeshes();
   }
 
-  public async update(): Promise<void> {
-    await this.init();
+  public async update(passes: Attribute[][]): Promise<void> {
+    await this.init(passes);
   }
 
   private get ChunkBox(): Box3 {
     return new Box3(
-      this.chunk.WorldPos,
-      this.chunk.WorldPos.clone().add(this.chunk.ChunkDimensions),
+      this.worldPosition,
+      this.world.transformations.TVector,
     );
   }
 

@@ -73,6 +73,10 @@ export default class Chunk {
     this.transformations = new CoordTransformations(this.chunkDimensions);
   }
 
+  public get ChunkPos(): Vector3 {
+    return this.chunkPos;
+  }
+
   public get ChunkDimensions(): Vector3 {
     return this.chunkDimensions;
   }

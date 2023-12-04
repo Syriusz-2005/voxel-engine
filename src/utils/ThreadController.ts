@@ -8,8 +8,11 @@ export default class ThreadController<M extends Message> {
 
   constructor(
     private readonly workerUrl: URL,
+    private readonly onMessage: (data: M) => void,
   ) {
-    this.pool = new WorkerPool(this.workerUrl, 1);
+    this.pool = new WorkerPool(this.workerUrl, 1, (data: Message) => {
+      this.onMessage(data as M);
+    });
   }
 
   public async fetch(message: M, transferable?: Transferable[]): Promise<M> {

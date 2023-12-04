@@ -7,10 +7,11 @@ export type WorkerData = {
 export type TaskData = {
   command: string;
   data: any;
+  spontaneus?: true;
 }
 
 export type Task = {
-  data: {command: string, data: any};
+  data: TaskData;
   transfers?: Transferable[];
   resolve: (value: any) => void;
   reject: (reason?: any) => void;
@@ -23,6 +24,7 @@ export default class WorkerPool {
   constructor(
     private readonly workersPath: URL, 
     private readonly workersCount: number,
+    private readonly onSpontaneusMessage?: (data: TaskData) => void,
   ) {
     for (let i = 0; i < this.workersCount; i++) {
       const worker = new Worker(this.workersPath, {type: 'module'});
@@ -31,6 +33,11 @@ export default class WorkerPool {
         isBusy: false,
       }
       this.workers.push(initialWorkerData);
+      worker.addEventListener('message', (event) => {
+        if (event.data.spontaneus) {
+          this.onSpontaneusMessage?.(event.data);
+        }
+      });
     }
   }
 
@@ -70,5 +77,7 @@ export default class WorkerPool {
       this.assignTaskFromQueue();
     });
   }
+
+  
 
 }

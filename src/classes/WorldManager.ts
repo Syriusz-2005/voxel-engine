@@ -74,7 +74,6 @@ export default class WorldManager {
     if (!this.visibilityPoint) {
       return {visibleChunks, chunkRenderRequests, facesCount};
     }
-    const {renderDistance, worldGenerator} = this.config;
 
     this.frameIndex++;
     for (const renderer of this.world.Renderers.values()) {
@@ -90,34 +89,7 @@ export default class WorldManager {
         }
       }
     }
-
-    const currentChunk = this.getCurrentChunk()!;
-
-    const renderers = this.world.findChunksOutOfRadius(currentChunk, renderDistance);
-    for (const renderer of renderers) {
-      this.world.disposeChunkAt(renderer.Position);
-    }
-
-    for (let x = currentChunk.x - renderDistance; x < currentChunk.x + renderDistance; x++) {
-      for (let z = currentChunk.z - renderDistance; z < currentChunk.z + renderDistance; z++) {
-        const chunkPos = new Vector3(x, 0, z);
-        if (chunkPos.distanceTo(currentChunk) < renderDistance) {
-          const chunk = this.world.getChunkAt(chunkPos);
-          if (!chunk) {
-            chunkRenderRequests++;
-            this.world.generateChunkAt(chunkPos, worldGenerator)
-              .then(async chunkRenderer => {
-                if (chunkPos.distanceTo(this.getCurrentChunk()!) < renderDistance) {
-                  await chunkRenderer.init();
-                } else {
-                  this.world.disposeChunkAt(chunkPos);
-                }
-              })
-          }
-        }
-      }
-    }
-
+    
     return {
       visibleChunks,
       chunkRenderRequests,

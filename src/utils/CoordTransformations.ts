@@ -7,6 +7,10 @@ export default class CoordTransformations {
     private readonly transformationVector: Vector3,
   ) {}
 
+  public get TVector(): Vector3 {
+    return this.transformationVector;
+  }
+
   
   public transformToChunkPos(worldPos: Vector3): Vector3 {
     const {x, y, z} = worldPos;

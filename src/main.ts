@@ -7,6 +7,7 @@ import RandomFlatWorldGenerator from './generator/RandomFlatWorldGenerator.ts';
 import Config, { ConfigSettings } from './classes/Config.ts';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 import Timer from './utils/Timer.ts';
+import WorldController from './classes/WorldController.ts';
 
 const config = new Config();
 
@@ -80,40 +81,14 @@ scene.add(axis);
 console.time('Init');
 
 
-let worldManager = new WorldManager(scene, {
-	worldGenerator: new RandomFlatWorldGenerator(),
-	renderDistance: 8,
-	chunkHeight: 64,
-	chunkSize: config.CHUNK_SIZE.getValue(),
-	view: config.view.getValue(),
-});
+let worldController = new WorldController(config, scene, 64);
 
-window.addEventListener('beforeunload', () => worldManager.destroy());
-
-config.CHUNK_SIZE.onChange((size) => {
-	worldManager = worldManager.new({
-		...worldManager.Config,
-		chunkSize: size,	
-	});
-});
-config.RENDER_DISTANCE.onChange((distance) => {
-	worldManager = worldManager.new({
-		...worldManager.Config,
-		renderDistance: distance,	
-	});
-});
-config.view.onChange((view) => {
-	worldManager = worldManager.new({
-		...worldManager.Config,
-		view,
-	})
-})
+window.addEventListener('beforeunload', () => worldController.disposeRenderers());
 
 
 console.timeEnd('Init');
 
 let frameIndex = 0;
-let chunkUpdateRequests = 0;
 
 const timer = new Timer(1);
 
@@ -126,19 +101,14 @@ function animate() {
 	
 	stats.update();
 	renderer.render( scene, camera );
-	worldManager.updateVisibilityPoint(camera.position);
-	worldManager.updateWorld(camera)
-		.then(({visibleChunks, chunkRenderRequests, facesCount}) => {
-			chunkUpdateRequests += chunkRenderRequests;
-			config.visibleChunks.setValue(visibleChunks);
-			config.facesCount.setValue(facesCount);
-			timer.useTimer(() => {
-				config.chunkUpdates.setValue(chunkUpdateRequests);
-				chunkUpdateRequests = 0;
-			});
-		});
-	// camera.position.z -= 3;
-	
+	worldController.postNextFrame({
+		command: 'nextFrame',
+		data: {
+			frameIndex,
+			cameraPos: camera.position.toArray(),
+		}
+	});
+
 	frameIndex++;
 }
 animate();
