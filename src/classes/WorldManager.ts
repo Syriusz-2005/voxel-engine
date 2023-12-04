@@ -1,4 +1,4 @@
-import { Camera, Material, Matrix4, Scene, ShaderMaterial, Vector3 } from "three";
+import { Camera, Scene, ShaderMaterial, Vector3 } from "three";
 import World from "./World";
 import WorldGenerator from "../generator/WorldGenerator";
 import { ConfigSettings } from "./Config.ts";

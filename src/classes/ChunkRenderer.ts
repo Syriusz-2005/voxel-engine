@@ -5,7 +5,6 @@ import fragment from '../shader/fragment.glsl?raw';
 import World from "./World.ts";
 import { ConfigSettings } from "./Config.ts";
 import Attribute from "../types/Attribute.ts";
-import CoordTransformations from "../utils/CoordTransformations.ts";
 
 
 export default class ChunkRenderer {

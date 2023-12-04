@@ -2,15 +2,11 @@ import { Vector3 } from "three";
 import { VoxelType, registry, voxelRegistry } from "../types/VoxelRegistry.ts";
 import Voxel from "./Voxel.ts";
 import RenderableVoxel from "./RenderableVoxel.ts";
-import ChunkError from "../errors/ChunkError.ts";
 import WorldGenerator from "../generator/WorldGenerator.ts";
 import Perf from "../utils/Perf.ts";
-import World from "./World.ts";
 import RenderableFace from "./RenderableFace.ts";
 import GreededTransparencyPassesManager from "./GreededTransparencyPassManager.ts";
 import ThreadedWorld from "./ThreadedWorld.ts";
-import CoordTransformations from "../utils/CoordTransformations.ts";
-import { WorldLike } from "../types/WorldLike.ts";
 
 const perfTest = new Perf('Voxel info generation', 400);
 
@@ -49,8 +45,6 @@ export default class Chunk {
 
   private readonly chunkDimensions: Vector3;
 
-  private readonly transformations: CoordTransformations;
-
   constructor(
     private readonly size: number,
     private readonly height: number,
@@ -70,7 +64,6 @@ export default class Chunk {
     this.data[size] = new Array(height)
       .fill(undefined)
       .map(() => new Array(size));
-    this.transformations = new CoordTransformations(this.chunkDimensions);
   }
 
   public get ChunkPos(): Vector3 {

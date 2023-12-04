@@ -1,6 +1,6 @@
-import { Scene, TypedArray, Vector3 } from "three";
+import { Scene, Vector3 } from "three";
 import ThreadController from "../utils/ThreadController.ts";
-import WorldManager, { WorldManagerConfig } from "./WorldManager.ts";
+import { WorldManagerConfig } from "./WorldManager.ts";
 import Attribute from "../types/Attribute.ts";
 import Config from "./Config.ts";
 import World from "./World.ts";

@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import WorldManager, { WorldManagerConfig } from "./WorldManager.ts";
+import { WorldManagerConfig } from "./WorldManager.ts";
 import ThreadedWorld from "./ThreadedWorld.ts";
 import ThreadReceiver from "../utils/ThreadReceiver.ts";
 import { WorldControllerMessage } from "./WorldController.ts";
