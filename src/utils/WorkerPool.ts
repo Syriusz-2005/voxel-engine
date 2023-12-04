@@ -41,6 +41,10 @@ export default class WorkerPool {
     }
   }
 
+  public get FirstWorker(): Worker {
+    return this.workers[0].worker;
+  }
+
   private assignTask(worker: WorkerData, task: Task) {
     worker.isBusy = true;
     worker.worker.postMessage(task.data, {transfer: task.transfers});

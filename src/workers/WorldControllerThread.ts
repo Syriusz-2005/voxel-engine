@@ -2,10 +2,12 @@ import { Vector3 } from "three";
 import ThreadedWorldManager from "../classes/ThreadedWorldManager.ts";
 import { WorldControllerMessage } from "../classes/WorldController.ts";
 import ThreadReceiver from "../utils/ThreadReceiver.ts";
+import RandomFlatWorldGenerator from "../generator/RandomFlatWorldGenerator.ts";
 
 
 export default class WorldControllerThread {
   private static receiver = new ThreadReceiver<WorldControllerMessage>((message) => {
+    
     switch (message.command) {
       case 'nextFrame':
         const cameraPos = new Vector3(...message.data.cameraPos);
@@ -13,7 +15,10 @@ export default class WorldControllerThread {
         break;
 
       case 'configUpdate':
-        WorldControllerThread.worldManager = new ThreadedWorldManager(message.data, WorldControllerThread.receiver);
+        WorldControllerThread.worldManager = new ThreadedWorldManager({
+          ...message.data,
+          worldGenerator: new RandomFlatWorldGenerator(),
+        }, WorldControllerThread.receiver);
         break;
     
       default:

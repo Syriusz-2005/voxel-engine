@@ -6,6 +6,7 @@ import Representation, { VectorRepresentation } from "./VectorRepresentation.ts"
 import Voxel from "./Voxel.ts";
 import CoordTransformations from "../utils/CoordTransformations.ts";
 import WorldGenerator from "../generator/WorldGenerator.ts";
+import { VoxelType } from "../types/VoxelRegistry.ts";
 
 
 
@@ -40,6 +41,16 @@ export default class ThreadedWorld implements WorldLike {
     return new Voxel(voxelType);
   }
 
+  public getVoxelTypeAt(pos: Vector3): VoxelType {
+    const chunkPos = this.transformations.transformToChunkPos(pos);
+    const posInChunk = this.transformations.transformToPosInChunk(pos);
+
+    const chunk = this.getChunkAt(chunkPos);
+    if (!chunk || chunk.IsGenerating) return 'air';
+
+    return chunk.getVoxelAt(posInChunk);
+  }
+
   public disposeChunkAt(pos: Vector3) {
     const representation = Representation.toRepresentation(pos);
     const chunk = this.chunks.get(representation);
@@ -67,6 +78,8 @@ export default class ThreadedWorld implements WorldLike {
       this,
       pos
     );
+
+    this.chunks.set(Representation.toRepresentation(pos), chunk);
 
     await chunk.generate(generator, pos);
     

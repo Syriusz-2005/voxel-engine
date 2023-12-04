@@ -54,7 +54,7 @@ export default class Chunk {
   constructor(
     private readonly size: number,
     private readonly height: number,
-    private readonly world: WorldLike,
+    private readonly world: ThreadedWorld,
     private readonly chunkPos: Vector3,
   ) {
     this.chunkDimensions = new Vector3(this.size, this.height, this.size);
@@ -185,7 +185,7 @@ export default class Chunk {
     return this.height;
   }
 
-  public get World(): WorldLike {
+  public get World(): ThreadedWorld {
     return this.world;
   }
 

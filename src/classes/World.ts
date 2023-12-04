@@ -29,7 +29,14 @@ export default class World {
   }
 
   private setChunkAt(vec: Vector3): ChunkRenderer {
-    const newRenderer = new ChunkRenderer(this.scene, vec, this.chunkSize, this, this.manager.Config.view, vec);
+    const newRenderer = new ChunkRenderer(
+      this.scene, 
+      vec, 
+      this.chunkSize, 
+      this, 
+      this.manager.Config.view, 
+      vec.multiply(this.transformations.TVector),
+    );
     this.renderers.set(
       Representation.toRepresentation(vec), 
       newRenderer,
@@ -37,15 +44,9 @@ export default class World {
     return newRenderer;
   }
 
-  private createChunkRenderer(vec: Vector3): ChunkRenderer {
-    const renderer = this.setChunkAt(vec);
-    return renderer;
-  }
-
 
   public allocateChunkRenderer(chunkPos: Vector3) {
-    const renderer = this.createChunkRenderer(chunkPos);
-
+    const renderer = this.setChunkAt(chunkPos);
     return renderer;
   }
 
@@ -84,9 +85,9 @@ export default class World {
 
 
   public renderChunkWithAttributes(chunkPos: Vector3, passes: Attribute[][]) {
-    const renderer = this.renderers.get(Representation.toRepresentation(chunkPos));
-    if (!renderer) return;
+    let renderer = this.renderers.get(Representation.toRepresentation(chunkPos));
+    if (!renderer) renderer = this.allocateChunkRenderer(chunkPos);
 
-    renderer.updateMeshes(passes);
+    renderer.update(passes);
   }
 }

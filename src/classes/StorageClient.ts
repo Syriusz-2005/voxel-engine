@@ -9,6 +9,10 @@ export default class StorageClient {
   
   private static getDb(): Promise<IDBDatabase> {
     const req = indexedDB.open('voxelData', 1);
+    req.onupgradeneeded = (event) => {
+      const db: IDBDatabase = (event.target as any).result;
+      db.createObjectStore('voxels');
+    }
     return new Promise((resolve) => {
       req.onsuccess = (event) => {
         const db: IDBDatabase = (event.target as any).result;

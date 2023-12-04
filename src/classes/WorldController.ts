@@ -17,7 +17,7 @@ export type NextFrameMessage = {
 
 export type ConfigUpdateMessage = {
   command: 'configUpdate';
-  data: WorldManagerConfig;
+  data: Omit<WorldManagerConfig, 'worldGenerator'>;
 }
 
 export type ChunkAllocateMessage = {
@@ -53,6 +53,7 @@ export default class WorldController {
   private readonly worldControllerThread = new ThreadController<WorldControllerMessage>(
     new URL('../workers/WorldControllerThread.ts', import.meta.url),
     (message) => {
+      console.log(message);
       switch (message.command) {
         case 'chunkDispose':
           this.disposeChunks(message);
@@ -112,7 +113,16 @@ export default class WorldController {
         this.chunkHeight,
         this.scene,
         this,
-      )
+      );
+      this.worldControllerThread.postMessage({
+        command: 'configUpdate',
+        data: {
+          chunkSize: this.Config.chunkSize,
+          chunkHeight: this.chunkHeight,
+          renderDistance: this.Config.renderDistance,
+          view: this.Config.view,
+        },
+      })
   }
 
   /**

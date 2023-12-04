@@ -1,8 +1,6 @@
+import { TaskData } from "./WorkerPool.ts";
 
-export type Message = {
-  command: string;
-  data: unknown;
-}
+export type Message = TaskData;
 
 
 export default class ThreadReceiver<M extends Message> {
@@ -14,7 +12,10 @@ export default class ThreadReceiver<M extends Message> {
     };
   }
 
-  public postMessage(message: M, transferable?: Transferable[]) {
+  public postMessage(message: M, spontaneus: boolean, transferable?: Transferable[]) {
+    if (spontaneus) {
+      message.spontaneus = spontaneus;
+    }
     self.postMessage(message, {transfer: transferable});
   }
 }

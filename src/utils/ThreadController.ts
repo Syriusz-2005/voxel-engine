@@ -18,4 +18,8 @@ export default class ThreadController<M extends Message> {
   public async fetch(message: M, transferable?: Transferable[]): Promise<M> {
     return this.pool.scheduleTask(message, transferable);
   }
+
+  public postMessage(message: M, transferable?: Transferable[]) {
+    this.pool.FirstWorker.postMessage(message, {transfer: transferable});
+  }
 }

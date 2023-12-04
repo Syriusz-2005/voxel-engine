@@ -90,14 +90,37 @@ export default class ChunkRenderer {
 
     const outPasses: Attribute[][] = [];
 
-    for (const {faces} of transparencyPasses) {
-
+    for (let i = 0; i < transparencyPasses.length; i++) {
+      const {faces} = transparencyPasses[i];
       const faceObject = new Object3D();
 
       const elements = this.getAttrArray(faces.length, 16);
       const faceRotations = this.getAttrArray(faces.length, 1);
       const colors = this.getAttrArray(faces.length, 4);
       const voxelId = new Uint8Array(faces.length * 6);
+
+      outPasses.push([
+        {
+          name: 'faceRotation',
+          arr: faceRotations,
+          itemSize: 1,
+        },
+        {
+          name: 'voxelId',
+          arr: voxelId,
+          itemSize: 1,
+        },
+        {
+          name: 'voxelColor',
+          arr: colors,
+          itemSize: 4,
+        },
+        {
+          name: 'instanceMatrix',
+          arr: elements,
+          itemSize: 16,
+        },
+      ]);
 
       let elementIndex = 0;
       let faceId = 0;
@@ -166,12 +189,13 @@ export default class ChunkRenderer {
         
         faceId += 6;
       }
+
     }
 
     return outPasses;
   }
 
-  public updateMeshes(passes: Attribute[][]): void {
+  private updateMeshes(passes: Attribute[][]): void {
   
     if (this.isDisposed) {
       this.remove();
@@ -205,13 +229,13 @@ export default class ChunkRenderer {
     }
   }
 
-  public async init(passes: Attribute[][]): Promise<void> {
-    await this.updateMeshes(passes);
+  public init(passes: Attribute[][]): void {
+    this.updateMeshes(passes);
     this.addMeshes();
   }
 
-  public async update(passes: Attribute[][]): Promise<void> {
-    await this.init(passes);
+  public update(passes: Attribute[][]): void {
+    this.init(passes);
   }
 
   private get ChunkBox(): Box3 {

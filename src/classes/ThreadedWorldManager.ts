@@ -66,12 +66,14 @@ export default class ThreadedWorldManager {
       this.world.disposeChunkAt(chunk.ChunkPos);
     }
 
-    this.threadReceiver.postMessage({
-      command: 'chunkDispose',
-      data: {
-        chunkPos: chunksToDispose.map(chunk => chunk.ChunkPos.toArray())
-      }
-    });
+    if (chunksToDispose.length > 0) {
+      this.threadReceiver.postMessage({
+        command: 'chunkDispose',
+        data: {
+          chunkPos: chunksToDispose.map(chunk => chunk.ChunkPos.toArray())
+        }
+      }, true);
+    }
 
     const renderDistance = this.config.renderDistance;
 
@@ -90,20 +92,25 @@ export default class ThreadedWorldManager {
         }
       }
     }
+    if (chunkPromises.length > 0) {
+      console.log(chunkPromises);
+    }
+
 
     const chunks = await Promise.all(chunkPromises);
 
     for (const chunk of chunks) {
       if (chunk.ChunkPos.distanceTo(this.getCameraChunk()!) < renderDistance) {
         const posArr = chunk.ChunkPos.toArray();
-        const attributes = await ChunkRenderer.generateAttributesForTransparencyPasses(chunk)
+        const attributes = await ChunkRenderer.generateAttributesForTransparencyPasses(chunk);
+        
         this.threadReceiver.postMessage({
           command: 'chunkRender',
           data: {
             chunkPos: posArr,
             attributes,
           }
-        });
+        }, true);
       } else {
         this.world.disposeChunkAt(chunk.ChunkPos);
       }
