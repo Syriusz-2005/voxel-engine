@@ -59,6 +59,7 @@ export default class ThreadedWorld implements WorldLike {
     this.chunks.delete(representation);
   }
 
+
   public findChunksOutOfRadius(center: Vector3, radius: number): Chunk[] {
     const chunks: Chunk[] = [];
     this.chunks.forEach((chunk, vecRepresentation) => {

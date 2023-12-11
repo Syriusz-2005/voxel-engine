@@ -24,7 +24,7 @@ export default class World {
     private readonly scene: Scene,  
     private readonly manager: WorldManager | WorldController,
   ) {
-    this.chunkDimensions = new Vector3(chunkSize, chunkHeight, chunkSize);
+    this.chunkDimensions = new Vector3(chunkSize, this.chunkHeight, chunkSize);
     this.transformations = new CoordTransformations(this.chunkDimensions);
   }
 

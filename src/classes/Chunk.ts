@@ -172,6 +172,7 @@ export default class Chunk {
     });
     
     this.isGenerating = false;
+    this.onGenerated?.();
   }
 
   public get Height(): number {

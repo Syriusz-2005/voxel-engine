@@ -24,6 +24,7 @@ export default class ThreadedWorldManager {
     this.chunkSize = config.chunkSize;
     this.chunkHeight = config.chunkHeight;
     this.world = new ThreadedWorld(this, this.chunkSize, this.chunkHeight);
+    console.log(this)
   }
 
   public get Config(): WorldManagerConfig {
@@ -66,18 +67,19 @@ export default class ThreadedWorldManager {
     this.prevCameraChunk = currentChunk.clone();
 
     const chunksToDispose = this.world.findChunksOutOfRadius(currentChunk, this.Config.renderDistance);
+    if (chunksToDispose.length > 0) {
+        this.threadReceiver.postMessage({
+          command: 'chunkDispose',
+          data: {
+            chunkPos: chunksToDispose.map(chunk => chunk.ChunkPos.toArray())
+          }
+        }, true);
+    }
+
     for (const chunk of chunksToDispose) {
       this.world.disposeChunkAt(chunk.ChunkPos);
     }
 
-    if (chunksToDispose.length > 0) {
-      this.threadReceiver.postMessage({
-        command: 'chunkDispose',
-        data: {
-          chunkPos: chunksToDispose.map(chunk => chunk.ChunkPos.toArray())
-        }
-      }, true);
-    }
 
     const renderDistance = this.config.renderDistance;
 
@@ -86,7 +88,7 @@ export default class ThreadedWorldManager {
     for (let x = currentChunk.x - renderDistance; x < currentChunk.x + renderDistance; x++) {
       for (let z = currentChunk.z - renderDistance; z < currentChunk.z + renderDistance; z++) {
         const chunkPos = new Vector3(x, 0, z);
-      
+        
         if (chunkPos.distanceTo(currentChunk) < renderDistance) {
           const chunk = this.world.getChunkAt(chunkPos);
           if (!chunk) {
@@ -96,14 +98,13 @@ export default class ThreadedWorldManager {
         }
       }
     }
-    if (chunkPromises.length > 0) {
-      console.log(chunkPromises);
-    }
+    // yeah this simple console log causes a huge memory leak that causes the engine to crash after just a few seconds of chunk loading/unloading
+    // if (chunkPromises.length > 0) {
+    //   console.log(chunkPromises);
+    // }
 
 
-    const chunks = await Promise.all(chunkPromises);
-
-    for (const chunk of chunks) {
+    for await (const chunk of chunkPromises) {
       if (chunk.ChunkPos.distanceTo(this.getCameraChunk()!) < renderDistance) {
         const posArr = chunk.ChunkPos.toArray();
         const attributes = await ChunkRenderer.generateAttributesForTransparencyPasses(chunk);
@@ -119,6 +120,7 @@ export default class ThreadedWorldManager {
         this.world.disposeChunkAt(chunk.ChunkPos);
       }
     }
+
   }
 
 }

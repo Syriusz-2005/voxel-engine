@@ -10,7 +10,5 @@ export default class WorkerVoxelAttributesProvider {
     }
   }
 
-  private constructVoxelAttributes(): Attribute[] {
-    
-  }
+  
 }

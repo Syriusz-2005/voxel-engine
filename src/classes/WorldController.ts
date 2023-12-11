@@ -53,7 +53,7 @@ export default class WorldController {
   private readonly worldControllerThread = new ThreadController<WorldControllerMessage>(
     new URL('../workers/WorldControllerThread.ts', import.meta.url),
     (message) => {
-      console.log(message);
+      // console.log(message);
       switch (message.command) {
         case 'chunkDispose':
           this.disposeChunks(message);
@@ -100,8 +100,6 @@ export default class WorldController {
     this.worldControllerThread.postMessage(msg);
   }
 
-  private readonly generator: WorldGenerator = new RandomFlatWorldGenerator();
-
   constructor(
     private readonly config: Config,
     private readonly scene: Scene,
@@ -135,13 +133,12 @@ export default class WorldController {
     }
   }
 
-  public get Config(): WorldManagerConfig {
+  public get Config() {
     return {
       chunkSize: this.config.CHUNK_SIZE.getValue(),
       chunkHeight: this.chunkHeight,
       renderDistance: this.config.RENDER_DISTANCE.getValue(),
       view: this.config.view.getValue(),
-      worldGenerator: this.generator,
     };
   }
 }
