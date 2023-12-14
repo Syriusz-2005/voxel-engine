@@ -46,7 +46,7 @@ export default class ThreadedWorld implements WorldLike {
     const posInChunk = this.transformations.transformToPosInChunk(pos);
 
     const chunk = this.getChunkAt(chunkPos);
-    if (!chunk || chunk.IsGenerating) return 'air';
+    if (!chunk || chunk.IsGenerating) return 'unknown';
 
     return chunk.getVoxelAt(posInChunk);
   }
