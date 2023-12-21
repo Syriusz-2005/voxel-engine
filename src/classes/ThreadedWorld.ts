@@ -59,6 +59,23 @@ export default class ThreadedWorld implements WorldLike {
     this.chunks.delete(representation);
   }
 
+  public getSortedChunkPositions(center: Vector3, maxRadius: number) {
+    let posArr = [];
+    
+    for (let z = center.z - maxRadius; z < center.z + maxRadius; z++) {
+      for (let x = center.x - maxRadius; x < center.x + maxRadius; x++) {
+        const chunkPos = new Vector3(x, 0, z);
+        if (chunkPos.distanceTo(center) < maxRadius) {
+          posArr.push(chunkPos);
+        }
+      }
+    }
+
+    posArr.sort((a, b) => center.distanceTo(a) - center.distanceTo(b));
+
+    return posArr;
+  }
+
 
   public findChunksOutOfRadius(center: Vector3, radius: number): Chunk[] {
     const chunks: Chunk[] = [];

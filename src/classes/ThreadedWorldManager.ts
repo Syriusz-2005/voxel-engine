@@ -85,16 +85,12 @@ export default class ThreadedWorldManager {
 
     const chunkPromises: Promise<Chunk>[] = [];
 
-    for (let x = currentChunk.x - renderDistance; x < currentChunk.x + renderDistance; x++) {
-      for (let z = currentChunk.z - renderDistance; z < currentChunk.z + renderDistance; z++) {
-        const chunkPos = new Vector3(x, 0, z);
-        
-        if (chunkPos.distanceTo(currentChunk) < renderDistance) {
-          const chunk = this.world.getChunkAt(chunkPos);
-          if (!chunk) {
-            const chunkPromise = this.world.generateChunkAt(chunkPos, this.Config.worldGenerator);
-            chunkPromises.push(chunkPromise);  
-          }
+    for (const chunkPos of this.world.getSortedChunkPositions(currentChunk, renderDistance)) {
+      if (chunkPos.distanceTo(currentChunk) < renderDistance) {
+        const chunk = this.world.getChunkAt(chunkPos);
+        if (!chunk) {
+          const chunkPromise = this.world.generateChunkAt(chunkPos, this.Config.worldGenerator);
+          chunkPromises.push(chunkPromise);  
         }
       }
     }
