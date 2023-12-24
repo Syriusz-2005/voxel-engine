@@ -40,11 +40,19 @@ export type ChunksDisposeMessage = {
   }
 }
 
+export type CameraMoveMessage = {
+  command: 'cameraMove';
+  data: {
+    cameraPos: [number, number, number];
+  }
+}
+
 export type WorldControllerMessage = 
   NextFrameMessage 
   | ConfigUpdateMessage 
   | ChunkRenderMessage 
   | ChunksDisposeMessage 
+  | CameraMoveMessage
   | ChunkAllocateMessage;
 
 export default class WorldController {
@@ -63,6 +71,10 @@ export default class WorldController {
 
         case 'chunkRender':
           this.renderChunk(message);
+        break;
+
+        case 'cameraMove':
+          this.camera.position.set(...message.data.cameraPos);
         break;
       }
     }
@@ -110,6 +122,7 @@ export default class WorldController {
     private readonly config: Config,
     private readonly scene: Scene,
     private readonly chunkHeight: number,
+    private readonly camera: THREE.Camera,
   ) {
       this.world = new World(
         this.config.CHUNK_SIZE.getValue(),

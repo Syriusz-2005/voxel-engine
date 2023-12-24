@@ -1,0 +1,9 @@
+{
+  "pluginVersion": "1.0.0",
+  "manifestVersion": 1,
+  "name": "The Vanilla plugin",
+  "description": "Internal plugin for vanilla voxel engine",
+  "capabilities": [
+    "EXECUTE_CODE"
+  ]
+}

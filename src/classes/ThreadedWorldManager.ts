@@ -5,6 +5,7 @@ import ThreadReceiver from "../utils/ThreadReceiver.ts";
 import { WorldControllerMessage } from "./WorldController.ts";
 import Chunk from "./Chunk.ts";
 import ChunkRenderer from "./ChunkRenderer.ts";
+import PluginLoader from "./PluginLoader.ts";
 
 
 
@@ -16,6 +17,7 @@ export default class ThreadedWorldManager {
   private readonly chunkHeight: number;
   private readonly world: ThreadedWorld;
   private prevCameraChunk: Vector3 | undefined;
+  private readonly pluginLoader = new PluginLoader(this);
   
   constructor(
     private readonly config: WorldManagerConfig,
@@ -24,6 +26,7 @@ export default class ThreadedWorldManager {
     this.chunkSize = config.chunkSize;
     this.chunkHeight = config.chunkHeight;
     this.world = new ThreadedWorld(this, this.chunkSize, this.chunkHeight);
+    this.pluginLoader.loadPlugin('vanilla');
     console.log(this)
   }
 
@@ -56,6 +59,16 @@ export default class ThreadedWorldManager {
     this.VisibilityPoint = visibilityPoint;
 
     this.updateWorld();
+  }
+
+  public moveCamera(newPos: Vector3) {
+    this.threadReceiver.postMessage({
+      command: 'cameraMove',
+      data: {
+        cameraPos: newPos.toArray(),
+      }
+    }, true);
+    this.VisibilityPoint = newPos;
   }
 
   private async updateWorld() {

@@ -79,7 +79,7 @@ scene.add(axis);
 console.time('Init');
 
 
-let worldController = new WorldController(config, scene, 64);
+let worldController = new WorldController(config, scene, 64, camera);
 
 window.addEventListener('beforeunload', () => worldController.disposeRenderers());
 
