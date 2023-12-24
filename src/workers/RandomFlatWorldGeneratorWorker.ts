@@ -6,43 +6,7 @@ const noise = new Noise.Noise(1);
 const seaLevel = 20;
 
 new WorkerVoxelGenerator((worldPos) => {
-
-  // if (worldPos.x % 16 === 1 && worldPos.z % 16 === 1) {
-
-  //   if (worldPos.y > 8 && worldPos.y < 11) {
-  //     return 'water';
-  //   }
-  
-  //   if (worldPos.y === 20) {
-  //     return 'dirt';
-  //   }
-  // }
-
-
-  // return 'air';
-
-  // if (worldPos.y <= (noise.simplex2(worldPos.x / 10, worldPos.z / 10) > 0.7 ? 2 : 1)) return 'dirt';
-
-  // return 'air';
-  // if (
-  //   worldPos.y < 2 
-  //   && (
-  //     (
-  //       worldPos.x % 16 === 0 
-  //       && worldPos.z % 16 === 0
-  //     ) 
-  //     || (
-  //       worldPos.x % 16 === 0 
-  //       && worldPos.z % 16 === 1
-  //     )
-  //   )
-  // ) {
-  //   return 'dirt';
-  // }
-
-  // return 'air';
   const worldHeight = noise.simplex2(worldPos.x / 100, worldPos.z / 100) * 18 + 18;
-  
 
   if (worldPos.y < worldHeight) {
     if (worldPos.y > 22) {

@@ -26,17 +26,16 @@ export default class StorageClient {
     return new StorageClient(db);
   }
   
-  private readonly voxels: IDBObjectStore;
 
   constructor(
     private readonly db: IDBDatabase
   ) {
-    this.voxels = this.db.createObjectStore('voxels')
+    
   }
 
   public async putChunk(chunk: Uint8Array) {
     for (const voxel of chunk) {
-      this.voxels.put(voxel);
+      
     }
   }
 }

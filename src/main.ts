@@ -96,7 +96,7 @@ function animate() {
 	if (controls instanceof PointerLockControls && wKeyPressed) {
 		controls.moveForward(1);
 	}
-	
+
 	stats.update();
 	renderer.render( scene, camera );
 	worldController.postNextFrame({
