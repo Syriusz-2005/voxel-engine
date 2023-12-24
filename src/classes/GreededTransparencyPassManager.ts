@@ -15,6 +15,17 @@ export default class GreededTransparencyPassesManager {
       ?.faces.push(face);
   }
 
+  public createGreededFaces(chunk: Chunk) {
+    
+    const {Size: chunkSize, Height: chunkHeight} = chunk;
+    for (let y = 0; y < chunkHeight; y++) {
+      for (let x = 0; x < chunkSize; x++) {
+        for (const faceDirection of Chunk.PRECOMPILED_ADJACENTS) {
+        }
+      }
+    }
+  }
+
   public createFaces(chunk: Chunk) {
     const ADJACENT_DIRECTIONS = Chunk.PRECOMPILED_ADJACENTS;
     const chunkWorldPos = chunk.WorldPos;
