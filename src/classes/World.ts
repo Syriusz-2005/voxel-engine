@@ -1,11 +1,9 @@
 import { Scene, Vector3 } from "three";
 import ChunkRenderer from "./ChunkRenderer.ts";
 import Representation, { VectorRepresentation } from "./VectorRepresentation.ts";
-import WorldManager from "./WorldManager.ts";
 import CoordTransformations from "../utils/CoordTransformations.ts";
 import WorldController from "./WorldController.ts";
 import Attribute from "../types/Attribute.ts";
-
 
 
 export default class World {
@@ -22,13 +20,13 @@ export default class World {
     private readonly chunkSize: number,
     private readonly chunkHeight: number,
     private readonly scene: Scene,  
-    private readonly manager: WorldManager | WorldController,
+    private readonly manager: WorldController,
   ) {
     this.chunkDimensions = new Vector3(chunkSize, this.chunkHeight, chunkSize);
     this.transformations = new CoordTransformations(this.chunkDimensions);
   }
 
-  private setChunkAt(vec: Vector3): ChunkRenderer {
+  private setRendererAt(vec: Vector3): ChunkRenderer {
     const newRenderer = new ChunkRenderer(
       this.scene, 
       vec, 
@@ -46,11 +44,11 @@ export default class World {
 
 
   public allocateChunkRenderer(chunkPos: Vector3) {
-    const renderer = this.setChunkAt(chunkPos);
+    const renderer = this.setRendererAt(chunkPos);
     return renderer;
   }
 
-  public disposeChunkAt(vec: Vector3): void {
+  public disposeRendererAt(vec: Vector3): void {
     const representation = Representation.toRepresentation(vec);
     const renderer = this.renderers.get(representation);
     if (!renderer) return;
@@ -59,7 +57,14 @@ export default class World {
     this.renderers.delete(representation);
   }
 
-  public findChunksInRadius(center: Vector3, radius: number): ChunkRenderer[] {
+  public disposeRenderers(): void {
+    this.renderers.forEach((renderer) => {
+      renderer.remove();
+    });
+    this.renderers.clear();
+  }
+
+  public findRenderersInRadius(center: Vector3, radius: number): ChunkRenderer[] {
     const renderers: ChunkRenderer[] = [];
     this.renderers.forEach((renderer, vecRepresentation) => {
       const vec = Representation.fromRepresentation(vecRepresentation);
@@ -71,7 +76,7 @@ export default class World {
     return renderers;
   }
 
-  public findChunksOutOfRadius(center: Vector3, radius: number) {
+  public findRenderersOutOfRadius(center: Vector3, radius: number) {
     const renderers: ChunkRenderer[] = [];
     this.renderers.forEach((renderer, vecRepresentation) => {
       const vec = Representation.fromRepresentation(vecRepresentation);
@@ -87,7 +92,7 @@ export default class World {
   public renderChunkWithAttributes(chunkPos: Vector3, passes: Attribute[][]) {
     let renderer = this.renderers.get(Representation.toRepresentation(chunkPos));
     if (!renderer) renderer = this.allocateChunkRenderer(chunkPos);
-
+    
     renderer.update(passes);
   }
 }

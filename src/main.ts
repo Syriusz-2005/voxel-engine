@@ -2,8 +2,6 @@ import './style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
-import WorldManager from './classes/WorldManager.ts';
-import RandomFlatWorldGenerator from './generator/RandomFlatWorldGenerator.ts';
 import Config, { ConfigSettings } from './classes/Config.ts';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 import Timer from './utils/Timer.ts';

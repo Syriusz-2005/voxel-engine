@@ -15,10 +15,15 @@ export default class WorldControllerThread {
         break;
 
       case 'configUpdate':
-        WorldControllerThread.worldManager = new ThreadedWorldManager({
+        const newConfig = {
           ...message.data,
           worldGenerator: new RandomFlatWorldGenerator(),
-        }, WorldControllerThread.receiver);
+        }
+        if (this.worldManager) {
+          this.worldManager = this.worldManager.new(newConfig);
+        } else {
+          this.worldManager = new ThreadedWorldManager(newConfig, this.receiver);
+        }
         break;
     
       default:

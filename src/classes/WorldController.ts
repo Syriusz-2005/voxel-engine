@@ -1,11 +1,9 @@
 import { Scene, Vector3 } from "three";
 import ThreadController from "../utils/ThreadController.ts";
-import { WorldManagerConfig } from "./WorldManager.ts";
+import { WorldManagerConfig } from "./WorldManagerConfig.ts";
 import Attribute from "../types/Attribute.ts";
 import Config from "./Config.ts";
 import World from "./World.ts";
-import WorldGenerator from "../generator/WorldGenerator.ts";
-import RandomFlatWorldGenerator from "../generator/RandomFlatWorldGenerator.ts";
 
 export type NextFrameMessage = {
   command: 'nextFrame';
@@ -87,7 +85,7 @@ export default class WorldController {
     const chunkCoords = msg.data.chunkPos.map(([x, y, z]) => new Vector3(x, y, z));
     
     for (const coord of chunkCoords) {
-      this.world.disposeChunkAt(coord);
+      this.world.disposeRendererAt(coord);
     }
   
   }
@@ -96,31 +94,34 @@ export default class WorldController {
     this.worldControllerThread.postMessage(msg);
   }
 
-  public async postUpdateConfig(msg: ConfigUpdateMessage) {
-    this.worldControllerThread.postMessage(msg);
+  private async postUpdateConfig() {
+    this.worldControllerThread.postMessage({
+      command: 'configUpdate',
+      data: {
+        chunkSize: this.Config.chunkSize,
+        chunkHeight: this.chunkHeight,
+        renderDistance: this.Config.renderDistance,
+        view: this.Config.view,
+      }
+    });
   }
 
   constructor(
     private readonly config: Config,
     private readonly scene: Scene,
     private readonly chunkHeight: number,
-    
-    ) {
+  ) {
       this.world = new World(
         this.config.CHUNK_SIZE.getValue(),
         this.chunkHeight,
         this.scene,
         this,
       );
-      this.worldControllerThread.postMessage({
-        command: 'configUpdate',
-        data: {
-          chunkSize: this.Config.chunkSize,
-          chunkHeight: this.chunkHeight,
-          renderDistance: this.Config.renderDistance,
-          view: this.Config.view,
-        },
-      })
+      this.postUpdateConfig();
+      config.onChange(() => {
+        this.disposeRenderers();
+        this.postUpdateConfig();
+      });
   }
 
   /**
@@ -128,9 +129,7 @@ export default class WorldController {
    * Does not dispose the actual chunks which are stored in the worldController thread not in the main thread
    */
   public disposeRenderers()  {
-    for (const [_, renderer] of this.world.Renderers) {
-      renderer.remove();
-    }
+    this.world.disposeRenderers();
   }
 
   public get Config() {

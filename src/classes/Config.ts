@@ -34,4 +34,10 @@ export default class Config {
   constructor() {
     this.gui.title('Controls & Stats');
   }
+
+  public onChange(callback: (settings: ConfigSettings) => void) {
+    this.gui.onChange(() => {
+      callback(this.settings);
+    });
+  }
 }
