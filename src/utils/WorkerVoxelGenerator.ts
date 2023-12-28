@@ -3,6 +3,7 @@ import { TaskData } from "./WorkerPool";
 import { VoxelType, voxelRegistry } from "../types/VoxelRegistry";
 import Perf from "./Perf";
 import StorageClient from "../classes/StorageClient.ts";
+import VoxelArray from "../classes/VoxelArray.ts";
 
 const workerVoxelGeneratorTimer = new Perf('Worker generation time', 400);
 
@@ -26,21 +27,22 @@ export default class WorkerVoxelGenerator {
 
       const outlinedChunkSize = chunkSize + 2;
 
-      const chunkData = new Uint8Array(outlinedChunkSize * outlinedChunkSize * chunkHeight);
+      const arr = new VoxelArray(new Vector3(chunkSize, chunkHeight, chunkSize));
 
+      const posInChunk = new Vector3();
       for (let x = 0; x < outlinedChunkSize; x++) {
         for (let z = 0; z < outlinedChunkSize; z++) {
           for (let y = 0; y < chunkHeight; y++) {
-            const index = x + z * outlinedChunkSize + y * outlinedChunkSize * outlinedChunkSize;
+            posInChunk.set(x - 1, y, z - 1);
             const worldPos = new Vector3(x, y, z).add(chunkPos);
             const voxelType = this.onGetVoxel(worldPos);
             if (voxelType === 'air') continue;
-            chunkData[index] = voxelRegistry[voxelType].id;
+            arr.setVoxelAt(posInChunk, voxelRegistry[voxelType].id);
           }
         }
       }
 
-      self.postMessage(chunkData.buffer, {transfer: [chunkData.buffer]});
+      self.postMessage(arr.Buffer, {transfer: [arr.Buffer]});
       workerVoxelGeneratorTimer.stop();
     }
   }

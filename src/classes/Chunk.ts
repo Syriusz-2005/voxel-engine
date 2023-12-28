@@ -7,7 +7,7 @@ import Perf from "../utils/Perf.ts";
 import RenderableFace from "./RenderableFace.ts";
 import GreededTransparencyPassesManager from "./GreededTransparencyPassManager.ts";
 import ThreadedWorld from "./ThreadedWorld.ts";
-import BlockArray from "./BlockArray.ts";
+import VoxelArray from "./VoxelArray.ts";
 
 const perfTest = new Perf('Voxel info generation', 400);
 
@@ -43,7 +43,7 @@ export default class Chunk {
   ] as const;
 
   private readonly chunkDimensions: Vector3;
-  private readonly voxels: BlockArray;
+  private readonly voxels: VoxelArray;
 
   constructor(
     private readonly size: number,
@@ -52,7 +52,7 @@ export default class Chunk {
     private readonly chunkPos: Vector3,
   ) {
     this.chunkDimensions = new Vector3(this.size, this.height, this.size);
-    this.voxels = new BlockArray(this.chunkDimensions);
+    this.voxels = new VoxelArray(this.chunkDimensions);
   }
 
   public get ChunkPos(): Vector3 {
@@ -166,6 +166,7 @@ export default class Chunk {
 
     const voxels = await generator.getVoxelArrayAt(chunkWorldPos, this.size, this.height);
     
+    debugger;
     this.voxels.setVoxels(voxels);
     
     this.isGenerating = false;

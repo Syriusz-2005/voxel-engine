@@ -2,15 +2,15 @@ import { Vector3 } from "three";
 import { VoxelId } from "../types/VoxelRegistry.ts";
 
 
-export default class BlockArray {
+export default class VoxelArray {
   private readonly buffer: ArrayBuffer;
-  private readonly blocks: Uint8Array;
+  private readonly voxels: Uint8Array;
   
   constructor(
     private readonly dimensions: Vector3,
   ) {
     this.buffer = new ArrayBuffer((dimensions.x + 2) * dimensions.y * (dimensions.x + 2));
-    this.blocks = new Uint8Array(this.buffer);
+    this.voxels = new Uint8Array(this.buffer);
   }
 
   private getIndex(x: number, y: number, z: number) {
@@ -18,11 +18,11 @@ export default class BlockArray {
   }
 
   public getVoxelAt(vec: Vector3): VoxelId {
-    return this.blocks[this.getIndex(vec.x + 1, vec.y, vec.z + 1)] as VoxelId;
+    return this.voxels[this.getIndex(vec.x + 1, vec.y, vec.z + 1)] as VoxelId;
   }
 
   public setVoxelAt(vec: Vector3, voxelId: VoxelId) {
-    this.blocks[this.getIndex(vec.x + 1, vec.y, vec.z + 1)] = voxelId;
+    this.voxels[this.getIndex(vec.x + 1, vec.y, vec.z + 1)] = voxelId;
   }
 
   /**
@@ -30,6 +30,10 @@ export default class BlockArray {
    * @param voxels must contain the correct amount of voxels. Must contain outline voxels. 
    */
   public setVoxels(voxels: Uint8Array) {
-    this.blocks.set(voxels);
+    this.voxels.set(voxels);
+  }
+
+  public get Buffer(): ArrayBuffer {
+    return this.buffer;
   }
 }
