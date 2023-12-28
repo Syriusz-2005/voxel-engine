@@ -7,6 +7,7 @@ import Perf from "../utils/Perf.ts";
 import RenderableFace from "./RenderableFace.ts";
 import GreededTransparencyPassesManager from "./GreededTransparencyPassManager.ts";
 import ThreadedWorld from "./ThreadedWorld.ts";
+import BlockArray from "./BlockArray.ts";
 
 const perfTest = new Perf('Voxel info generation', 400);
 
@@ -44,6 +45,7 @@ export default class Chunk {
   ] as const;
 
   private readonly chunkDimensions: Vector3;
+  private readonly blocks: BlockArray;
 
   constructor(
     private readonly size: number,
@@ -64,6 +66,7 @@ export default class Chunk {
     this.data[size] = new Array(height)
       .fill(undefined)
       .map(() => new Array(size));
+    this.blocks = new BlockArray(this.chunkDimensions);
   }
 
   public get ChunkPos(): Vector3 {
@@ -194,95 +197,5 @@ export default class Chunk {
     const manager = new GreededTransparencyPassesManager();
     const {passes} = manager.createFaces(this);
     return passes;
-  }
-
-  public async getRenderableVoxels(
-    subchunkIterator?: Generator<{
-      type: VoxelType;
-      pos: Vector3;
-    }, void, unknown>
-  ): Promise<{
-    facesCount: number,
-    transparencyPasses: TransparencyPass[],
-  }> {
-    const transparencyPasses = registry.getTransparencyPasses();
-    let facesCount = 0;
-    await this.waitForGenerationComplete();
-    
-    perfTest.start();
-    
-
-    const adjacents = Chunk.ADJACENTS_POOL;
-
-    const precompiledAdjacents = Chunk.PRECOMPILED_ADJACENTS;
-
-    const chunkWorldPos = this.WorldPos;
-
-    
-    for (const {type: voxelType, pos: vec} of subchunkIterator ?? this.each()) {
-      const renderableFaces: Vector3[] = [];
-  
-      for (let i = 0; i < adjacents.length; i++) {
-        const adj = adjacents[i];
-        adj.copy(vec);
-        adj.add(precompiledAdjacents[i]);
-  
-        const {x, y, z} = adj;
-        if (y < 0 || y > this.height) {
-          renderableFaces.push(precompiledAdjacents[i]);
-          continue;
-        }
-
-        let voxelNear: Voxel | undefined;
-        if (x < 0 || z < 0 || x >= this.size || z >= this.size) {
-          voxelNear = this.world.getVoxelAt(
-            chunkWorldPos
-              .clone()
-              .add(adj)
-          );
-        }
-        
-        if (!voxelNear) {
-          voxelNear = new Voxel(this.getVoxelAt(adj));
-        }
-
-        if (voxelNear) {
-          const currVoxelType = voxelRegistry[voxelNear.Name];
-          if (
-            currVoxelType.existing === false 
-            || (
-              currVoxelType.opacity !== undefined 
-              && currVoxelType.opacity < 1 
-              && voxelNear.Name !== voxelType
-              )
-          ) {
-            renderableFaces.push(precompiledAdjacents[i]);
-          }
-          
-        }
-      }
-      
-      if (renderableFaces.length === 0) continue;
-  
-      facesCount += renderableFaces.length;
-      const voxel = new Voxel(voxelType);
-      const renderableVoxel = new RenderableVoxel(voxel, vec, renderableFaces);
-
-      const passId = voxel.Opacity > 0 && voxel.Opacity < 1 ? voxel.Id : 0;
-
-      const prevTransparencyPass = transparencyPasses.get(passId)!;
-      prevTransparencyPass.facesCount += renderableFaces.length;
-      prevTransparencyPass.voxels.push(renderableVoxel);
-
-    }
-
-
-    perfTest.stop();
-
-    
-    return {
-      facesCount,
-      transparencyPasses: Array.from(transparencyPasses.values()),
-    };
   }
 }

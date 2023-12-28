@@ -21,6 +21,9 @@ export default class GreededTransparencyPassesManager {
     for (let y = 0; y < chunkHeight; y++) {
       for (let x = 0; x < chunkSize; x++) {
         for (const faceDirection of Chunk.PRECOMPILED_ADJACENTS) {
+          for (let z = 0; z < chunkSize; z++) {
+            
+          }
         }
       }
     }
