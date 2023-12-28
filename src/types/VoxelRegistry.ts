@@ -9,34 +9,39 @@ export type VoxelData = {
   isLiquid?: boolean;
 }
 
+function fabricateVoxelType(data: VoxelData) {
+  return data;
+}
+
 export const voxelRegistry = {
-  'unknown': {
-    id: 9999,
-    color: new Color(0, 0, 0),
-  } as VoxelData,
-  'air': {
+  'unknown': fabricateVoxelType({
+    id: 99,
+    color: new Color(255, 0, 255),
+  }),
+  'air': fabricateVoxelType({
     existing: false, 
     color: new Color(0, 0, 0), 
     id: 0,
-  } as VoxelData,
-  'grass': {
+  }),
+  'grass': fabricateVoxelType({
     color: new Color(0, 255, 0), 
     id: 1,
-  } as VoxelData,
-  'dirt': {
+  }),
+  'dirt': fabricateVoxelType({
     color: new Color(235, 143, 52), 
     id: 2,
-  } as VoxelData,
-  'water': {
+  }),
+  'water': fabricateVoxelType({
     color: new Color(0, 80, 255), 
     id: 3, 
     opacity: .2,
     isLiquid: true,
-  } as VoxelData,
+  }),
 } as const;
 
 
 export type VoxelType = keyof typeof voxelRegistry;
+export type VoxelId = number;
 
 export const voxelNamesRegistryById: {[key in number]: VoxelType} = Object.fromEntries(
   Object.entries(voxelRegistry)

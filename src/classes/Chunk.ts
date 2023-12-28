@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import { VoxelType, registry, voxelRegistry } from "../types/VoxelRegistry.ts";
+import { VoxelId, VoxelType, registry, voxelRegistry } from "../types/VoxelRegistry.ts";
 import Voxel from "./Voxel.ts";
 import RenderableVoxel from "./RenderableVoxel.ts";
 import WorldGenerator from "../generator/WorldGenerator.ts";
@@ -7,6 +7,7 @@ import Perf from "../utils/Perf.ts";
 import RenderableFace from "./RenderableFace.ts";
 import GreededTransparencyPassesManager from "./GreededTransparencyPassManager.ts";
 import ThreadedWorld from "./ThreadedWorld.ts";
+import VoxelArray from "./VoxelArray.ts";
 
 const perfTest = new Perf('Voxel info generation', 400);
 
@@ -20,8 +21,6 @@ export type GreededTransparencyPass = {
 }
 
 export default class Chunk {
-  private readonly data: ({type: VoxelType, pos: Vector3} | undefined)[][][];
-
   private isGenerating: boolean = false;
   private onGenerated?: () => void;
 
@@ -44,6 +43,7 @@ export default class Chunk {
   ] as const;
 
   private readonly chunkDimensions: Vector3;
+  private readonly voxels: VoxelArray;
 
   constructor(
     private readonly size: number,
@@ -52,18 +52,7 @@ export default class Chunk {
     private readonly chunkPos: Vector3,
   ) {
     this.chunkDimensions = new Vector3(this.size, this.height, this.size);
-    this.data = new Array(size)
-      .fill(undefined)
-      .map(() => new Array(height)
-        .fill(undefined)
-        .map(() => new Array(size))
-      );
-    this.data[-1] = new Array(height)
-      .fill(undefined)
-      .map(() => new Array(size))
-    this.data[size] = new Array(height)
-      .fill(undefined)
-      .map(() => new Array(size));
+    this.voxels = new VoxelArray(this.chunkDimensions);
   }
 
   public get ChunkPos(): Vector3 {
@@ -98,42 +87,52 @@ export default class Chunk {
     return this.isGenerating;
   }
 
-  public getVoxelAt(vec: Vector3): VoxelType {
+  public getVoxelTypeAt(vec: Vector3): VoxelType {
     if (vec.y > this.height) return 'air';
-    return this.data[vec.x][vec.y][vec.z]?.type ?? 'air';
-  }
-
-  public get Data() {
-    return this.data;
+    const id = this.voxels.getVoxelAt(vec);
+    const voxelName = registry.getVoxelNameById(id);
+    return voxelName;
   }
 
   public setVoxelAt(vec: Vector3, value: Voxel): void {
-    this.data[vec.x][vec.y][vec.z] = {type: value.Name, pos: vec};
+    if (vec.y > this.height) return;
+    this.voxels.setVoxelAt(vec, value.Id);
   }
 
-  public removeBlockAt(vec: Vector3): void {
-    this.data[vec.x][vec.y][vec.z] = {type: 'air', pos: vec};
+  public removeVoxelAt(vec: Vector3): void {
+    this.voxels.setVoxelAt(vec, 0);
   }
 
-  public *each() {
+  /**
+   * Iterates for each voxel in the chunk. Skips the air voxels
+   */
+  public *each(): Generator<VoxelId> {
+    let vec = new Vector3();
     for (let x = 0; x < this.size; x++) {
       for (let z = 0; z < this.size; z++) {
         for (let y = 0; y < this.height; y++) {
-          const voxel = this.data[x][y][z];
-          if (voxel) {
-            yield voxel;
+          vec.set(x, y, z);
+          const voxelId = this.voxels.getVoxelAt(vec);
+          if (voxelId !== 0) {
+            yield voxelId;
           }
         }
       }
     }
   }
 
-  public *iterateThroughChunk() {
+  /**
+   * Iterates for each voxel in the chunk regardless of the voxel type
+   * Does not skip the air voxels
+   */
+  public *iterateThroughChunk(): Generator<VoxelId> {
+    const vec = new Vector3();
     for (let x = 0; x < this.size; x++) {
       for (let y = 0; y < this.height; y++) {
         for (let z = 0; z < this.size; z++) {
-          const voxel = this.data[x][y][z];
-          yield voxel;
+          vec.set(x, y, z);
+          const voxelId = this.voxels.getVoxelAt(vec);
+          yield voxelId;
         }
       }
     }
@@ -150,13 +149,13 @@ export default class Chunk {
   }
 
   public *subchunk(yTop: number, yBottom: number) {
+    const vec = new Vector3();
     for (let x = 0; x < this.size; x++) {
       for (let z = 0; z < this.size; z++) {
         for (let y = yBottom; y < yTop; y++) {
-          const voxel = this.data[x][y][z];
-          if (voxel) {
-            yield voxel;
-          }
+          vec.set(x, y, z);
+          const voxelId = this.voxels.getVoxelAt(vec);
+          yield voxelId;
         }
       }
     }
@@ -165,11 +164,9 @@ export default class Chunk {
   public async generate(generator: WorldGenerator, chunkWorldPos: Vector3): Promise<void> {
     this.isGenerating = true;
 
-    const voxels = await generator.getChunkAt(chunkWorldPos, this.size, this.height);
+    const voxels = await generator.getVoxelArrayAt(chunkWorldPos, this.size, this.height);
     
-    voxels.forEach(({posInChunk, voxel}) => {
-      this.setVoxelAt(posInChunk, voxel);
-    });
+    this.voxels.setVoxels(voxels);
     
     this.isGenerating = false;
     this.onGenerated?.();
@@ -194,95 +191,5 @@ export default class Chunk {
     const manager = new GreededTransparencyPassesManager();
     const {passes} = manager.createFaces(this);
     return passes;
-  }
-
-  public async getRenderableVoxels(
-    subchunkIterator?: Generator<{
-      type: VoxelType;
-      pos: Vector3;
-    }, void, unknown>
-  ): Promise<{
-    facesCount: number,
-    transparencyPasses: TransparencyPass[],
-  }> {
-    const transparencyPasses = registry.getTransparencyPasses();
-    let facesCount = 0;
-    await this.waitForGenerationComplete();
-    
-    perfTest.start();
-    
-
-    const adjacents = Chunk.ADJACENTS_POOL;
-
-    const precompiledAdjacents = Chunk.PRECOMPILED_ADJACENTS;
-
-    const chunkWorldPos = this.WorldPos;
-
-    
-    for (const {type: voxelType, pos: vec} of subchunkIterator ?? this.each()) {
-      const renderableFaces: Vector3[] = [];
-  
-      for (let i = 0; i < adjacents.length; i++) {
-        const adj = adjacents[i];
-        adj.copy(vec);
-        adj.add(precompiledAdjacents[i]);
-  
-        const {x, y, z} = adj;
-        if (y < 0 || y > this.height) {
-          renderableFaces.push(precompiledAdjacents[i]);
-          continue;
-        }
-
-        let voxelNear: Voxel | undefined;
-        if (x < 0 || z < 0 || x >= this.size || z >= this.size) {
-          voxelNear = this.world.getVoxelAt(
-            chunkWorldPos
-              .clone()
-              .add(adj)
-          );
-        }
-        
-        if (!voxelNear) {
-          voxelNear = new Voxel(this.getVoxelAt(adj));
-        }
-
-        if (voxelNear) {
-          const currVoxelType = voxelRegistry[voxelNear.Name];
-          if (
-            currVoxelType.existing === false 
-            || (
-              currVoxelType.opacity !== undefined 
-              && currVoxelType.opacity < 1 
-              && voxelNear.Name !== voxelType
-              )
-          ) {
-            renderableFaces.push(precompiledAdjacents[i]);
-          }
-          
-        }
-      }
-      
-      if (renderableFaces.length === 0) continue;
-  
-      facesCount += renderableFaces.length;
-      const voxel = new Voxel(voxelType);
-      const renderableVoxel = new RenderableVoxel(voxel, vec, renderableFaces);
-
-      const passId = voxel.Opacity > 0 && voxel.Opacity < 1 ? voxel.Id : 0;
-
-      const prevTransparencyPass = transparencyPasses.get(passId)!;
-      prevTransparencyPass.facesCount += renderableFaces.length;
-      prevTransparencyPass.voxels.push(renderableVoxel);
-
-    }
-
-
-    perfTest.stop();
-
-    
-    return {
-      facesCount,
-      transparencyPasses: Array.from(transparencyPasses.values()),
-    };
   }
 }

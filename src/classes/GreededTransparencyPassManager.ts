@@ -21,6 +21,9 @@ export default class GreededTransparencyPassesManager {
     for (let y = 0; y < chunkHeight; y++) {
       for (let x = 0; x < chunkSize; x++) {
         for (const faceDirection of Chunk.PRECOMPILED_ADJACENTS) {
+          for (let z = 0; z < chunkSize; z++) {
+            
+          }
         }
       }
     }
@@ -38,21 +41,21 @@ export default class GreededTransparencyPassesManager {
     const chunkHeight = chunk.ChunkDimensions.y;
 
     let voxelWorldPos = new Vector3();
-    let currVoxelType = new Voxel('unknown');
+    let currVoxel = new Voxel('unknown');
     let adjVoxel = new Voxel('unknown');
     let nextFaces: boolean[] = new Array(6).fill(undefined).map((_) => true);
+    const voxelPos = new Vector3();
 
     for (let x = 0; x < chunkSize; x++) {
       for (let y = 0; y < chunkHeight; y++) {
         for (let z = 0; z < chunkSize; z++) {
-          const voxelData = chunk.Data[x][y][z];
-          if (!voxelData) continue;
-          const {type: currVoxel, pos: voxelPos} = voxelData;
-
-          currVoxelType.update(currVoxel);
-          const currVoxelProperties = voxelRegistry[currVoxel];
+          voxelPos.set(x, y, z);
+          const currVoxelName = chunk.getVoxelTypeAt(voxelPos);
+          if (currVoxelName == 'air') continue;
+          currVoxel.update(currVoxelName);
+          const currVoxelProperties = voxelRegistry[currVoxelName];
           const opacity = currVoxelProperties.opacity ?? 1;
-          const passIndex = opacity > 0 && opacity < 1 ? currVoxelType.Id : 0;
+          const passIndex = opacity > 0 && opacity < 1 ? currVoxel.Id : 0;
 
           for (let i = 0; i < nextFaces.length; i++) {
             if (nextFaces[i] === false) {
@@ -78,7 +81,7 @@ export default class GreededTransparencyPassesManager {
 
 
             if (adjVoxel.Name === 'unknown') {
-              adjVoxel.update(chunk.getVoxelAt(adj));
+              adjVoxel.update(chunk.getVoxelTypeAt(adj));
             }
 
 
@@ -89,26 +92,24 @@ export default class GreededTransparencyPassesManager {
               || (
                 adjVoxelType.opacity !== undefined 
                 && adjVoxelType.opacity < 1 
-                && adjVoxel.Name !== currVoxel
+                && adjVoxel.Name !== currVoxel.Name
               )
             ) {
               currFace = new RenderableFace(
-                voxelPos,
+                voxelPos.clone(),
                 ADJACENT_DIRECTIONS[i],
                 1,
-                new Voxel(currVoxelType.Name),
+                new Voxel(currVoxel.Name),
               ); 
               this.pushFace(passIndex, currFace);
             }
 
             if (z < chunkSize - 2) {
-              const nextVoxel = chunk.getVoxelAt(
-                voxelPos
-                  .clone()
-                  .add(new Vector3(0, 0, 1))
+              const nextVoxel = chunk.getVoxelTypeAt(
+                voxelPos.clone().add(new Vector3(0, 0, 1))
               );
               if (
-                nextVoxel === currVoxel 
+                nextVoxel === currVoxel.Name 
                 && currFace
                 && currFace.faceRotation.y !== 0
                 ) {
@@ -125,7 +126,6 @@ export default class GreededTransparencyPassesManager {
         }
       }
     }
-
 
     return {
       passes: Array.from(passes.values()),

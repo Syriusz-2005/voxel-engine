@@ -17,6 +17,18 @@ export abstract class Generator implements WorldGenerator {
     this.pool = new WorkerPool(this.url, this.workersCount);
   }
 
+  public async getVoxelArrayAt(chunkPos: Vector3, chunkSize: number, chunkHeight: number): Promise<Uint8Array> {
+    const chunkDataBuffer = await this.pool.scheduleTask({
+      command: 'generateChunk',
+      data: {
+        chunkPos,
+        chunkSize,
+        chunkHeight,
+      },
+    }) as ArrayBufferLike;
+    return new Uint8Array(chunkDataBuffer);
+  }
+
   public async getChunkAt(chunkPos: Vector3, chunkSize: number, chunkHeight: number): Promise<VoxelPromiseResult[]> {
     const chunkDataBuffer = await this.pool.scheduleTask({
       command: 'generateChunk',
@@ -61,4 +73,6 @@ export default abstract class WorldGenerator {
    * @returns A promise that resolves to an array of voxel data.
    */
   public abstract getChunkAt: (chunkPos: Vector3, chunkSize: number, chunkHeight: number) => Promise<VoxelPromiseResult[]>;
+  public abstract getVoxelArrayAt: (chunkPos: Vector3, chunkSize: number, chunkHeight: number) => Promise<Uint8Array>;
+
 }

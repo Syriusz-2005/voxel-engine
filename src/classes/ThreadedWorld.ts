@@ -37,7 +37,7 @@ export default class ThreadedWorld implements WorldLike {
     const chunk = this.getChunkAt(chunkPos);
     if (!chunk || chunk.IsGenerating) return undefined;
 
-    const voxelType = chunk.getVoxelAt(posInChunk);
+    const voxelType = chunk.getVoxelTypeAt(posInChunk);
     return new Voxel(voxelType);
   }
 
@@ -48,7 +48,7 @@ export default class ThreadedWorld implements WorldLike {
     const chunk = this.getChunkAt(chunkPos);
     if (!chunk || chunk.IsGenerating) return 'unknown';
 
-    return chunk.getVoxelAt(posInChunk);
+    return chunk.getVoxelTypeAt(posInChunk);
   }
 
   public disposeChunkAt(pos: Vector3) {
