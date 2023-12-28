@@ -96,7 +96,7 @@ export default class GreededTransparencyPassesManager {
               )
             ) {
               currFace = new RenderableFace(
-                voxelPos,
+                voxelPos.clone(),
                 ADJACENT_DIRECTIONS[i],
                 1,
                 new Voxel(currVoxel.Name),
@@ -106,9 +106,7 @@ export default class GreededTransparencyPassesManager {
 
             if (z < chunkSize - 2) {
               const nextVoxel = chunk.getVoxelTypeAt(
-                voxelPos
-                  .clone()
-                  .add(new Vector3(0, 0, 1))
+                voxelPos.clone().add(new Vector3(0, 0, 1))
               );
               if (
                 nextVoxel === currVoxel.Name 
@@ -128,7 +126,6 @@ export default class GreededTransparencyPassesManager {
         }
       }
     }
-
 
     return {
       passes: Array.from(passes.values()),

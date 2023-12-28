@@ -14,11 +14,12 @@ export default class VoxelArray {
   }
 
   private getIndex(x: number, y: number, z: number) {
-    return x + (y * this.dimensions.x) + (z * this.dimensions.x * this.dimensions.y);
+    const outlinedChunkSize = this.dimensions.x + 2;
+    return x + (y * outlinedChunkSize) + (z * outlinedChunkSize * this.dimensions.y);
   }
 
   public getVoxelAt(vec: Vector3): VoxelId {
-    return this.voxels[this.getIndex(vec.x + 1, vec.y, vec.z + 1)] as VoxelId;
+    return this.voxels[this.getIndex(vec.x + 1, vec.y, vec.z + 1)];
   }
 
   public setVoxelAt(vec: Vector3, voxelId: VoxelId) {

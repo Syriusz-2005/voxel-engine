@@ -88,14 +88,14 @@ export default class Chunk {
   }
 
   public getVoxelTypeAt(vec: Vector3): VoxelType {
-    if (vec.y > this.height || vec.y < 0) return 'air';
+    if (vec.y > this.height) return 'air';
     const id = this.voxels.getVoxelAt(vec);
     const voxelName = registry.getVoxelNameById(id);
     return voxelName;
   }
 
   public setVoxelAt(vec: Vector3, value: Voxel): void {
-    if (vec.y > this.height || vec.y < 0) return;
+    if (vec.y > this.height) return;
     this.voxels.setVoxelAt(vec, value.Id);
   }
 
@@ -166,7 +166,6 @@ export default class Chunk {
 
     const voxels = await generator.getVoxelArrayAt(chunkWorldPos, this.size, this.height);
     
-    debugger;
     this.voxels.setVoxels(voxels);
     
     this.isGenerating = false;

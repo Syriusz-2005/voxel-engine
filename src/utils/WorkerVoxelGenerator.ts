@@ -18,22 +18,21 @@ export default class WorkerVoxelGenerator {
       
       const data: TaskData = event.data;
 
-      // console.time('Chunk generation');
       workerVoxelGeneratorTimer.start();
       const {chunkPos: chunkPosRepresentation, chunkSize, chunkHeight} = data.data as {chunkPos: {x: number; y: number; z: number}, chunkSize: number, chunkHeight: number};
 
       const chunkPos = new Vector3(chunkPosRepresentation.x, chunkPosRepresentation.y, chunkPosRepresentation.z)
         .multiplyScalar(chunkSize);
 
-      const outlinedChunkSize = chunkSize + 2;
+      const outlinedChunkSize = chunkSize + 1;
 
       const arr = new VoxelArray(new Vector3(chunkSize, chunkHeight, chunkSize));
 
       const posInChunk = new Vector3();
-      for (let x = 0; x < outlinedChunkSize; x++) {
-        for (let z = 0; z < outlinedChunkSize; z++) {
+      for (let x = -1; x < outlinedChunkSize; x++) {
+        for (let z = -1; z < outlinedChunkSize; z++) {
           for (let y = 0; y < chunkHeight; y++) {
-            posInChunk.set(x - 1, y, z - 1);
+            posInChunk.set(x, y, z);
             const worldPos = new Vector3(x, y, z).add(chunkPos);
             const voxelType = this.onGetVoxel(worldPos);
             if (voxelType === 'air') continue;
