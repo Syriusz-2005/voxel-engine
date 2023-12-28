@@ -43,7 +43,7 @@ export default class GreededTransparencyPassesManager {
     let voxelWorldPos = new Vector3();
     let currVoxel = new Voxel('unknown');
     let adjVoxel = new Voxel('unknown');
-    let nextFaces: boolean[] = new Array(6).fill(undefined).map((_) => true);
+    let nextFaces: number[] = new Array(6).fill(undefined).map((_) => 0);
     const voxelPos = new Vector3();
 
     for (let x = 0; x < chunkSize; x++) {
@@ -58,8 +58,8 @@ export default class GreededTransparencyPassesManager {
           const passIndex = opacity > 0 && opacity < 1 ? currVoxel.Id : 0;
 
           for (let i = 0; i < nextFaces.length; i++) {
-            if (nextFaces[i] === false) {
-              nextFaces[i] = true;
+            if (nextFaces[i] > 0) {
+              nextFaces[i]--;
               continue;
             };
             const adj = adjacents[i];
@@ -105,21 +105,24 @@ export default class GreededTransparencyPassesManager {
             }
 
             if (z < chunkSize - 2) {
-              const nextVoxel = chunk.getVoxelTypeAt(
-                voxelPos.clone().add(new Vector3(0, 0, 1))
-              );
-              if (
-                nextVoxel === currVoxel.Name 
-                && currFace
-                && currFace.faceRotation.y !== 0
+              let offsetZ = 1;
+              for (let index = z; z < chunkSize; z++) {
+                const nextVoxel = chunk.getVoxelTypeAt(
+                  voxelPos.clone().add(new Vector3(0, 0, offsetZ++))
+                );
+                if (
+                  nextVoxel === currVoxel.Name 
+                  && currFace
+                  && currFace.faceRotation.y !== 0
                 ) {
-                currFace.faceZLength++;
-                nextFaces[i] = false;
-              } else {
-                nextFaces[i] = true;
+                  currFace.faceZLength++;
+                  nextFaces[i]++;
+                } else {
+                  break;
+                }
               }
             } else {
-              nextFaces.fill(true);
+              nextFaces.fill(0);
             }
           }
         
