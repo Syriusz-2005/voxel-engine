@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import { VoxelType, registry, voxelRegistry } from "../types/VoxelRegistry.ts";
+import { VoxelId, VoxelType, registry, voxelRegistry } from "../types/VoxelRegistry.ts";
 import Voxel from "./Voxel.ts";
 import RenderableVoxel from "./RenderableVoxel.ts";
 import WorldGenerator from "../generator/WorldGenerator.ts";
@@ -21,8 +21,6 @@ export type GreededTransparencyPass = {
 }
 
 export default class Chunk {
-  private readonly data: ({type: VoxelType, pos: Vector3} | undefined)[][][];
-
   private isGenerating: boolean = false;
   private onGenerated?: () => void;
 
@@ -45,7 +43,7 @@ export default class Chunk {
   ] as const;
 
   private readonly chunkDimensions: Vector3;
-  private readonly blocks: BlockArray;
+  private readonly voxels: BlockArray;
 
   constructor(
     private readonly size: number,
@@ -54,19 +52,7 @@ export default class Chunk {
     private readonly chunkPos: Vector3,
   ) {
     this.chunkDimensions = new Vector3(this.size, this.height, this.size);
-    this.data = new Array(size)
-      .fill(undefined)
-      .map(() => new Array(height)
-        .fill(undefined)
-        .map(() => new Array(size))
-      );
-    this.data[-1] = new Array(height)
-      .fill(undefined)
-      .map(() => new Array(size))
-    this.data[size] = new Array(height)
-      .fill(undefined)
-      .map(() => new Array(size));
-    this.blocks = new BlockArray(this.chunkDimensions);
+    this.voxels = new BlockArray(this.chunkDimensions);
   }
 
   public get ChunkPos(): Vector3 {
@@ -101,42 +87,52 @@ export default class Chunk {
     return this.isGenerating;
   }
 
-  public getVoxelAt(vec: Vector3): VoxelType {
-    if (vec.y > this.height) return 'air';
-    return this.data[vec.x][vec.y][vec.z]?.type ?? 'air';
-  }
-
-  public get Data() {
-    return this.data;
+  public getVoxelTypeAt(vec: Vector3): VoxelType {
+    if (vec.y > this.height || vec.y < 0) return 'air';
+    const id = this.voxels.getVoxelAt(vec);
+    const voxelName = registry.getVoxelNameById(id);
+    return voxelName;
   }
 
   public setVoxelAt(vec: Vector3, value: Voxel): void {
-    this.data[vec.x][vec.y][vec.z] = {type: value.Name, pos: vec};
+    if (vec.y > this.height || vec.y < 0) return;
+    this.voxels.setVoxelAt(vec, value.Id);
   }
 
-  public removeBlockAt(vec: Vector3): void {
-    this.data[vec.x][vec.y][vec.z] = {type: 'air', pos: vec};
+  public removeVoxelAt(vec: Vector3): void {
+    this.voxels.setVoxelAt(vec, 0);
   }
 
-  public *each() {
+  /**
+   * Iterates for each voxel in the chunk. Skips the air voxels
+   */
+  public *each(): Generator<VoxelId> {
+    let vec = new Vector3();
     for (let x = 0; x < this.size; x++) {
       for (let z = 0; z < this.size; z++) {
         for (let y = 0; y < this.height; y++) {
-          const voxel = this.data[x][y][z];
-          if (voxel) {
-            yield voxel;
+          vec.set(x, y, z);
+          const voxelId = this.voxels.getVoxelAt(vec);
+          if (voxelId !== 0) {
+            yield voxelId;
           }
         }
       }
     }
   }
 
-  public *iterateThroughChunk() {
+  /**
+   * Iterates for each voxel in the chunk regardless of the voxel type
+   * Does not skip the air voxels
+   */
+  public *iterateThroughChunk(): Generator<VoxelId> {
+    const vec = new Vector3();
     for (let x = 0; x < this.size; x++) {
       for (let y = 0; y < this.height; y++) {
         for (let z = 0; z < this.size; z++) {
-          const voxel = this.data[x][y][z];
-          yield voxel;
+          vec.set(x, y, z);
+          const voxelId = this.voxels.getVoxelAt(vec);
+          yield voxelId;
         }
       }
     }
@@ -153,13 +149,13 @@ export default class Chunk {
   }
 
   public *subchunk(yTop: number, yBottom: number) {
+    const vec = new Vector3();
     for (let x = 0; x < this.size; x++) {
       for (let z = 0; z < this.size; z++) {
         for (let y = yBottom; y < yTop; y++) {
-          const voxel = this.data[x][y][z];
-          if (voxel) {
-            yield voxel;
-          }
+          vec.set(x, y, z);
+          const voxelId = this.voxels.getVoxelAt(vec);
+          yield voxelId;
         }
       }
     }
@@ -168,11 +164,9 @@ export default class Chunk {
   public async generate(generator: WorldGenerator, chunkWorldPos: Vector3): Promise<void> {
     this.isGenerating = true;
 
-    const voxels = await generator.getChunkAt(chunkWorldPos, this.size, this.height);
+    const voxels = await generator.getVoxelArrayAt(chunkWorldPos, this.size, this.height);
     
-    voxels.forEach(({posInChunk, voxel}) => {
-      this.setVoxelAt(posInChunk, voxel);
-    });
+    this.voxels.setVoxels(voxels);
     
     this.isGenerating = false;
     this.onGenerated?.();

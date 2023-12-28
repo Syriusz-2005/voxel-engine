@@ -24,4 +24,12 @@ export default class BlockArray {
   public setVoxelAt(vec: Vector3, voxelId: VoxelId) {
     this.blocks[this.getIndex(vec.x + 1, vec.y, vec.z + 1)] = voxelId;
   }
+
+  /**
+   * 
+   * @param voxels must contain the correct amount of voxels. Must contain outline voxels. 
+   */
+  public setVoxels(voxels: Uint8Array) {
+    this.blocks.set(voxels);
+  }
 }
