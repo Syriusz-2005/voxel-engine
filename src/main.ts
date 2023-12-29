@@ -6,6 +6,7 @@ import Config, { ConfigSettings } from './classes/Config.ts';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 import Timer from './utils/Timer.ts';
 import WorldController from './classes/WorldController.ts';
+import CustomPointerLockControls from './utils/CustomPointerLockControls.ts';
 
 const config = new Config();
 
@@ -25,9 +26,15 @@ camera.position.z = 8;
 camera.position.y = 100;
 camera.rotation.x = -0.3;
 
-let controls: OrbitControls | PointerLockControls | undefined;
+let controls: OrbitControls | PointerLockControls | undefined = new PointerLockControls(camera, document.body);
 let wKeyPressed = false;
 
+scene.add(controls.getObject());
+
+window.addEventListener('click', () => {
+	//@ts-ignore
+	controls?.lock();
+})
 
 
 function updateControls(type: ConfigSettings['CONTROLS']) {
@@ -44,7 +51,7 @@ function updateControls(type: ConfigSettings['CONTROLS']) {
 			break;
 	}
 }
-updateControls(config.CONTROLS.getValue());
+// updateControls(config.CONTROLS.getValue());
 
 config.CONTROLS.onChange(updateControls);
 
