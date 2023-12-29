@@ -104,9 +104,9 @@ export default class GreededTransparencyPassesManager {
               this.pushFace(passIndex, currFace);
             }
 
-            if (z < chunkSize - 2) {
+            if (z < chunkSize) {
               let offsetZ = 1;
-              for (let index = z; z < chunkSize; z++) {
+              for (let index = z; index < chunkSize - 1; index++) {
                 const nextVoxel = chunk.getVoxelTypeAt(
                   voxelPos.clone().add(new Vector3(0, 0, offsetZ++))
                 );
