@@ -1,6 +1,6 @@
 import { Vector3 } from "three";
 import { WorldManagerConfig } from "./WorldManagerConfig.ts";
-import ThreadedWorld from "./ThreadedWorld.ts";
+import ThreadedScene from "./ThreadedScene.ts";
 import ThreadReceiver from "../utils/ThreadReceiver.ts";
 import { WorldControllerMessage } from "./WorldController.ts";
 import Chunk from "./Chunk.ts";
@@ -10,14 +10,13 @@ import PluginLoader from "./PluginLoader.ts";
 
 
 
-export default class ThreadedWorldManager {
+export default class ThreadedSceneManager {
   private visibilityPoint: Vector3 | undefined;
   private frameIndex = 0;
   private readonly chunkSize: number;
   private readonly chunkHeight: number;
-  private readonly world: ThreadedWorld;
+  private readonly world: ThreadedScene;
   private prevCameraChunk: Vector3 | undefined;
-  private readonly pluginLoader = new PluginLoader(this);
   
   constructor(
     private readonly config: WorldManagerConfig,
@@ -25,8 +24,7 @@ export default class ThreadedWorldManager {
   ) {
     this.chunkSize = config.chunkSize;
     this.chunkHeight = config.chunkHeight;
-    this.world = new ThreadedWorld(this, this.chunkSize, this.chunkHeight);
-    this.pluginLoader.loadPlugin('vanilla');
+    this.world = new ThreadedScene(this, this.chunkSize, this.chunkHeight);
     console.log(this)
   }
 
@@ -38,8 +36,8 @@ export default class ThreadedWorldManager {
     this.frameIndex = index;
   }
 
-  public new(config: WorldManagerConfig): ThreadedWorldManager {
-    return new ThreadedWorldManager(config, this.threadReceiver);
+  public new(config: WorldManagerConfig): ThreadedSceneManager {
+    return new ThreadedSceneManager(config, this.threadReceiver);
   }
 
   public set VisibilityPoint(pos: Vector3) {
@@ -107,11 +105,6 @@ export default class ThreadedWorldManager {
         }
       }
     }
-    // yeah this simple console log causes a huge memory leak that causes the engine to crash after just a few seconds of chunk loading/unloading
-    // if (chunkPromises.length > 0) {
-    //   console.log(chunkPromises);
-    // }
-
 
     for await (const chunk of chunkPromises) {
       if (chunk.ChunkPos.distanceTo(this.getCameraChunk()!) < renderDistance) {

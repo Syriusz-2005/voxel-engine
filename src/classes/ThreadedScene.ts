@@ -1,7 +1,7 @@
 import { Vector3 } from "three";
 import { WorldLike } from "../types/WorldLike.ts";
 import Chunk from "./Chunk.ts";
-import ThreadedWorldManager from "./ThreadedWorldManager.ts";
+import ThreadedSceneManager from "./ThreadedSceneManager.ts";
 import Representation, { VectorRepresentation } from "./VectorRepresentation.ts";
 import Voxel from "./Voxel.ts";
 import CoordTransformations from "../utils/CoordTransformations.ts";
@@ -10,7 +10,7 @@ import { VoxelType } from "../types/VoxelRegistry.ts";
 
 
 
-export default class ThreadedWorld implements WorldLike {
+export default class ThreadedScene implements WorldLike {
   private chunks: Map<VectorRepresentation, Chunk> = new Map();
   
   private readonly chunkDimensions: Vector3;
@@ -18,7 +18,7 @@ export default class ThreadedWorld implements WorldLike {
 
 
   constructor(
-    private readonly manager: ThreadedWorldManager,
+    private readonly manager: ThreadedSceneManager,
     chunkSize: number,
     chunkHeight: number,
   ) {

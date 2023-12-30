@@ -2,7 +2,7 @@ import { BufferAttribute, InstancedBufferGeometry, Mesh, Object3D, ShaderMateria
 import Chunk from "./Chunk.ts";
 import vertex from '../shader/vertex.glsl?raw';
 import fragment from '../shader/fragment.glsl?raw';
-import World from "./World.ts";
+import WorldScene from "./WorldScene.ts";
 import { ConfigSettings } from "./Config.ts";
 import Attribute from "../types/Attribute.ts";
 
@@ -16,7 +16,7 @@ export default class ChunkRenderer {
     private readonly scene: THREE.Scene,
     private readonly chunkPosition: THREE.Vector3,
     private readonly chunkSize: number,
-    private readonly world: World,
+    private readonly world: WorldScene,
     private readonly view: ConfigSettings['VIEW'],
     private readonly worldPosition: Vector3,
   ) {}

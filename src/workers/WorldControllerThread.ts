@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import ThreadedWorldManager from "../classes/ThreadedWorldManager.ts";
+import ThreadedSceneManager from "../classes/ThreadedSceneManager.ts";
 import { WorldControllerMessage } from "../classes/WorldController.ts";
 import ThreadReceiver from "../utils/ThreadReceiver.ts";
 import RandomFlatWorldGenerator from "../generator/RandomFlatWorldGenerator.ts";
@@ -22,7 +22,7 @@ export default class WorldControllerThread {
         if (this.worldManager) {
           this.worldManager = this.worldManager.new(newConfig);
         } else {
-          this.worldManager = new ThreadedWorldManager(newConfig, this.receiver);
+          this.worldManager = new ThreadedSceneManager(newConfig, this.receiver);
         }
         break;
     
@@ -31,7 +31,7 @@ export default class WorldControllerThread {
     }
   });
   
-  private static worldManager: ThreadedWorldManager | undefined;
+  private static worldManager: ThreadedSceneManager | undefined;
 
   
 }

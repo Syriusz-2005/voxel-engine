@@ -6,7 +6,7 @@ import WorldController from "./WorldController.ts";
 import Attribute from "../types/Attribute.ts";
 
 
-export default class World {
+export default class WorldScene {
   private renderers: Map<VectorRepresentation, ChunkRenderer> = new Map();
 
   public get Renderers(): Map<VectorRepresentation, ChunkRenderer> {

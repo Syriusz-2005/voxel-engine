@@ -6,7 +6,6 @@ import Config, { ConfigSettings } from './classes/Config.ts';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 import Timer from './utils/Timer.ts';
 import WorldController from './classes/WorldController.ts';
-import CustomPointerLockControls from './utils/CustomPointerLockControls.ts';
 
 const config = new Config();
 
@@ -28,13 +27,36 @@ camera.rotation.x = -0.3;
 
 let controls: OrbitControls | PointerLockControls | undefined = new PointerLockControls(camera, document.body);
 let wKeyPressed = false;
+let isMenuOpened = true;
 
 scene.add(controls.getObject());
 
-window.addEventListener('click', () => {
-	//@ts-ignore
-	controls?.lock();
-})
+window.addEventListener('keydown', (event) => {
+	if (event.key !== 'Enter') return;
+	const menu = document.querySelector('.menu')
+	
+	if (controls instanceof PointerLockControls) {
+		menu?.classList.toggle('hidden', !controls.isLocked);
+		isMenuOpened = controls.isLocked;
+		if (controls.isLocked) {
+			updateMenu();
+			controls.unlock();
+		} else {
+			controls.lock();
+		}
+	}
+});
+
+function updateMenu() {
+	const menu = document.querySelector('.menu')!;
+
+	const addWorldButton = menu.querySelector<HTMLButtonElement>('.add-world')!;
+
+	addWorldButton.onclick = () => {
+		const worldName = prompt('World name');
+		
+	}
+}
 
 
 function updateControls(type: ConfigSettings['CONTROLS']) {
@@ -86,7 +108,7 @@ scene.add(axis);
 console.time('Init');
 
 
-let worldController = new WorldController(config, scene, 64, camera);
+let worldController = new WorldController(config, scene, 64, camera, 'not-saved');
 
 window.addEventListener('beforeunload', () => worldController.disposeRenderers());
 
@@ -99,6 +121,8 @@ const timer = new Timer(1);
 
 function animate() {
 	requestAnimationFrame( animate );
+
+	if (isMenuOpened) return;
 	
 	if (controls instanceof PointerLockControls && wKeyPressed) {
 		controls.moveForward(1);

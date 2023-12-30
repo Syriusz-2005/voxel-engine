@@ -1,14 +1,14 @@
 import CameraApi from "../api/Camera";
-import ThreadedWorldManager from "./ThreadedWorldManager";
+import ThreadedSceneManager from "./ThreadedSceneManager";
 
 
 
 export default class PluginApiProvider {
-  #world: ThreadedWorldManager;
+  #world: ThreadedSceneManager;
   #camera: CameraApi;
 
   constructor(
-    world: ThreadedWorldManager,
+    world: ThreadedSceneManager,
   ) {
     this.#world = world;
     this.#camera = new CameraApi(this.#world);

@@ -3,7 +3,7 @@ import ThreadController from "../utils/ThreadController.ts";
 import { WorldManagerConfig } from "./WorldManagerConfig.ts";
 import Attribute from "../types/Attribute.ts";
 import Config from "./Config.ts";
-import World from "./World.ts";
+import WorldScene from "./WorldScene.ts";
 
 export type NextFrameMessage = {
   command: 'nextFrame';
@@ -79,7 +79,7 @@ export default class WorldController {
       }
     }
   );
-  private readonly world: World;
+  private readonly world: WorldScene;
 
   private renderChunk(msg: ChunkRenderMessage) {
     const chunkPos = new Vector3(...msg.data.chunkPos);
@@ -99,7 +99,6 @@ export default class WorldController {
     for (const coord of chunkCoords) {
       this.world.disposeRendererAt(coord);
     }
-  
   }
 
   public async postNextFrame(msg: NextFrameMessage) {
@@ -123,8 +122,9 @@ export default class WorldController {
     private readonly scene: Scene,
     private readonly chunkHeight: number,
     private readonly camera: THREE.Camera,
+    private readonly worldId: string,
   ) {
-      this.world = new World(
+      this.world = new WorldScene(
         this.config.CHUNK_SIZE.getValue(),
         this.chunkHeight,
         this.scene,

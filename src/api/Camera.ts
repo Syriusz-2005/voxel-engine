@@ -1,11 +1,11 @@
 import { Vector3 } from "three";
-import ThreadedWorldManager from "../classes/ThreadedWorldManager";
+import ThreadedSceneManager from "../classes/ThreadedSceneManager";
 
 
 export default class CameraApi {
-  #manager: ThreadedWorldManager;
+  #manager: ThreadedSceneManager;
 
-  constructor(manager: ThreadedWorldManager) {
+  constructor(manager: ThreadedSceneManager) {
     this.#manager = manager;
   }
 

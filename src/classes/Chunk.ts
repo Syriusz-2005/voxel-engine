@@ -6,7 +6,7 @@ import WorldGenerator from "../generator/WorldGenerator.ts";
 import Perf from "../utils/Perf.ts";
 import RenderableFace from "./RenderableFace.ts";
 import GreededTransparencyPassesManager from "./GreededTransparencyPassManager.ts";
-import ThreadedWorld from "./ThreadedWorld.ts";
+import ThreadedScene from "./ThreadedScene.ts";
 import VoxelArray from "./VoxelArray.ts";
 
 const perfTest = new Perf('Voxel info generation', 400);
@@ -48,7 +48,7 @@ export default class Chunk {
   constructor(
     private readonly size: number,
     private readonly height: number,
-    private readonly world: ThreadedWorld,
+    private readonly world: ThreadedScene,
     private readonly chunkPos: Vector3,
   ) {
     this.chunkDimensions = new Vector3(this.size, this.height, this.size);
@@ -176,7 +176,7 @@ export default class Chunk {
     return this.height;
   }
 
-  public get World(): ThreadedWorld {
+  public get World(): ThreadedScene {
     return this.world;
   }
 

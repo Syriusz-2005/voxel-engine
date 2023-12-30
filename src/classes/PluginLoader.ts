@@ -1,6 +1,7 @@
+import World from "../server/World.ts";
 import Log from "../utils/Log";
 import PluginApiProvider from "./PluginApiProvider";
-import ThreadedWorldManager from "./ThreadedWorldManager";
+import ThreadedSceneManager from "./ThreadedSceneManager";
 
 export type Capability = 'EXECUTE_CODE' | 'EXECUTE_CODE_IN_ISOLATION';
 
@@ -17,7 +18,7 @@ export default class PluginLoader {
   
 
   constructor(
-    private readonly manager: ThreadedWorldManager,
+    private readonly manager: World,
   ) {}
 
   public async loadPlugin(name: string) {
