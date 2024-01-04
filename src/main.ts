@@ -15,7 +15,7 @@ document.body.appendChild( stats.dom );
 
 const scene = new THREE.Scene();
 
-const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
@@ -28,6 +28,8 @@ camera.rotation.x = -0.3;
 let controls: OrbitControls | PointerLockControls | undefined = new PointerLockControls(camera, document.body);
 let wKeyPressed = false;
 let isMenuOpened = true;
+let isShiftPressed = false;
+let isSpacePressed = false;
 
 scene.add(controls.getObject());
 
@@ -77,17 +79,31 @@ function updateControls(type: ConfigSettings['CONTROLS']) {
 
 config.CONTROLS.onChange(updateControls);
 
-function onKeyDown(event: any) {
+document.addEventListener('keydown', (event) => {
 	if (event.key === 'w') {
 		wKeyPressed = true;
 	}
-}
 
-document.addEventListener('keydown', onKeyDown);	
+	if (event.key === 'Shift') {
+		isShiftPressed = true;
+	}
+
+	if (event.key === ' ') {
+		isSpacePressed = true;
+	}
+});	
 
 document.addEventListener('keyup', (event) => {
 	if (event.key === 'w') {
 		wKeyPressed = false;
+	}
+
+	if (event.key === 'Shift') {
+		isShiftPressed = false;
+	}
+	
+	if (event.key === ' ') {
+		isSpacePressed = false;
 	}
 });
 
@@ -124,8 +140,18 @@ function animate() {
 
 	if (isMenuOpened) return;
 	
-	if (controls instanceof PointerLockControls && wKeyPressed) {
-		controls.moveForward(1);
+	if (controls instanceof PointerLockControls) {
+		if (wKeyPressed) {
+			controls.moveForward(1);
+		}
+
+		if (isShiftPressed) {
+			camera.position.y -= .3;
+		}
+
+		if (isSpacePressed) {
+			camera.position.y += .3;
+		}
 	}
 
 	stats.update();
