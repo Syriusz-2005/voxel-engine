@@ -11,14 +11,12 @@ import TickingService from "./TickingService.ts";
 export default class World implements WorldDataProvider {
   private readonly pluginLoader: PluginLoader = new PluginLoader(this);
   private readonly tickingService = new TickingService(20);
-  private readonly networkManager = new NetworkManager((message) => {
-    console.log(message);
-  });
   private readonly scene: ThreadedSceneManager;
 
 
   constructor(
     private readonly config: Config,
+    private readonly networkManager: NetworkManager,
   ) {
     this.scene = new ThreadedSceneManager(config.getWorldConfig(), this.networkManager);
     this.pluginLoader.loadPlugin('vanilla');
