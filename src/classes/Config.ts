@@ -1,4 +1,6 @@
 import {GUI} from 'three/addons/libs/lil-gui.module.min.js';
+import { WorldManagerConfig } from './WorldManagerConfig';
+import RandomFlatWorldGenerator from '../generator/RandomFlatWorldGenerator';
 
 
 export type ConfigSettings = {
@@ -39,5 +41,15 @@ export default class Config {
     this.gui.onChange(() => {
       callback(this.settings);
     });
+  }
+
+  public getWorldConfig(): WorldManagerConfig {
+    return {
+      chunkSize: this.CHUNK_SIZE.getValue(),
+      chunkHeight: 64,
+      renderDistance: this.RENDER_DISTANCE.getValue(),
+      view: this.view.getValue(),
+      worldGenerator: new RandomFlatWorldGenerator(),
+    }
   }
 }

@@ -1,7 +1,7 @@
 import World from "../server/World.ts";
 import Log from "../utils/Log";
 import PluginApiProvider from "./PluginApiProvider";
-import ThreadedSceneManager from "./ThreadedSceneManager";
+import ThreadedSceneManager from "../server/ThreadedSceneManager.ts";
 
 export type Capability = 'EXECUTE_CODE' | 'EXECUTE_CODE_IN_ISOLATION';
 

@@ -1,7 +1,7 @@
 import { Vector3 } from "three";
 import { WorldLike } from "../types/WorldLike.ts";
 import Chunk from "./Chunk.ts";
-import ThreadedSceneManager from "./ThreadedSceneManager.ts";
+import ThreadedSceneManager from "../server/ThreadedSceneManager.ts";
 import Representation, { VectorRepresentation } from "./VectorRepresentation.ts";
 import Voxel from "./Voxel.ts";
 import CoordTransformations from "../utils/CoordTransformations.ts";

@@ -1,5 +1,5 @@
 import CameraApi from "../api/Camera";
-import ThreadedSceneManager from "./ThreadedSceneManager";
+import ThreadedSceneManager from "../server/ThreadedSceneManager";
 
 
 

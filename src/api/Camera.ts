@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import ThreadedSceneManager from "../classes/ThreadedSceneManager";
+import ThreadedSceneManager from "../server/ThreadedSceneManager";
 
 
 export default class CameraApi {

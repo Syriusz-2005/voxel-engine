@@ -1,27 +1,29 @@
-import { Vector3 } from "three";
-import { WorldManagerConfig } from "./WorldManagerConfig.ts";
-import ThreadedScene from "./ThreadedScene.ts";
+import { EventDispatcher, Vector3 } from "three";
+import { WorldManagerConfig } from "../classes/WorldManagerConfig.ts";
+import ThreadedScene from "../classes/ThreadedScene.ts";
 import ThreadReceiver from "../utils/ThreadReceiver.ts";
-import { WorldControllerMessage } from "./WorldController.ts";
-import Chunk from "./Chunk.ts";
-import ChunkRenderer from "./ChunkRenderer.ts";
-import PluginLoader from "./PluginLoader.ts";
+import { WorldControllerMessage } from "../classes/WorldController.ts";
+import Chunk from "../classes/Chunk.ts";
+import ChunkRenderer from "../classes/ChunkRenderer.ts";
+import PluginLoader from "../classes/PluginLoader.ts";
+import EntityList from "./EntityList.ts";
 
 
 
 
-export default class ThreadedSceneManager {
+export default class ThreadedSceneManager extends EventDispatcher<{'chunkUpdate': {chunkPos: Vector3}}> {
   private visibilityPoint: Vector3 | undefined;
-  private frameIndex = 0;
   private readonly chunkSize: number;
   private readonly chunkHeight: number;
   private readonly world: ThreadedScene;
+  private readonly entities = new EntityList([]);
   private prevCameraChunk: Vector3 | undefined;
   
   constructor(
     private readonly config: WorldManagerConfig,
     private readonly threadReceiver: ThreadReceiver<WorldControllerMessage>,
   ) {
+    super();
     this.chunkSize = config.chunkSize;
     this.chunkHeight = config.chunkHeight;
     this.world = new ThreadedScene(this, this.chunkSize, this.chunkHeight);
@@ -30,10 +32,6 @@ export default class ThreadedSceneManager {
 
   public get Config(): WorldManagerConfig {
     return this.config;
-  }
-
-  public set FrameIndex(index: number) {
-    this.frameIndex = index;
   }
 
   public new(config: WorldManagerConfig): ThreadedSceneManager {
@@ -52,15 +50,15 @@ export default class ThreadedSceneManager {
       .floor();
   }
 
-  public processFrame(frameIndex: number, visibilityPoint: Vector3) {
-    this.FrameIndex = frameIndex;
+  public processTick(visibilityPoint: Vector3) {
     this.VisibilityPoint = visibilityPoint;
 
     this.updateWorld();
   }
 
   public moveCamera(newPos: Vector3) {
-    this.threadReceiver.postMessage({
+    const players = this.entities.getPlayers();
+    this.threadReceiver.postMessage(players, {
       command: 'cameraMove',
       data: {
         cameraPos: newPos.toArray(),
@@ -76,10 +74,11 @@ export default class ThreadedSceneManager {
     if (this.prevCameraChunk && this.prevCameraChunk.equals(currentChunk)) return;
 
     this.prevCameraChunk = currentChunk.clone();
+    const players = this.entities.getPlayers();
 
     const chunksToDispose = this.world.findChunksOutOfRadius(currentChunk, this.Config.renderDistance);
     if (chunksToDispose.length > 0) {
-        this.threadReceiver.postMessage({
+        this.threadReceiver.postMessage(players, {
           command: 'chunkDispose',
           data: {
             chunkPos: chunksToDispose.map(chunk => chunk.ChunkPos.toArray())
@@ -111,7 +110,7 @@ export default class ThreadedSceneManager {
         const posArr = chunk.ChunkPos.toArray();
         const attributes = await ChunkRenderer.generateAttributesForTransparencyPasses(chunk);
         
-        this.threadReceiver.postMessage({
+        this.threadReceiver.postMessage(players, {
           command: 'chunkRender',
           data: {
             chunkPos: posArr,

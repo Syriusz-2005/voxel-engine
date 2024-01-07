@@ -1,3 +1,4 @@
+import Player from "../server/Player.ts";
 import { TaskData } from "./WorkerPool.ts";
 
 export type Message = TaskData;
@@ -12,7 +13,7 @@ export default class ThreadReceiver<M extends Message> {
     };
   }
 
-  public postMessage(message: M, spontaneus: boolean, transferable?: Transferable[]) {
+  public postMessage(to: Player[], message: M, spontaneus: boolean, transferable?: Transferable[]) {
     if (spontaneus) {
       message.spontaneus = spontaneus;
     }

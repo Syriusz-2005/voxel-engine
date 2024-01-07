@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import ThreadedSceneManager from "../classes/ThreadedSceneManager.ts";
+import ThreadedSceneManager from "../server/ThreadedSceneManager.ts";
 import { WorldControllerMessage } from "../classes/WorldController.ts";
 import ThreadReceiver from "../utils/ThreadReceiver.ts";
 import RandomFlatWorldGenerator from "../generator/RandomFlatWorldGenerator.ts";
@@ -11,7 +11,7 @@ export default class WorldControllerThread {
     switch (message.command) {
       case 'nextFrame':
         const cameraPos = new Vector3(...message.data.cameraPos);
-        WorldControllerThread.worldManager?.processFrame(message.data.frameIndex, cameraPos);
+        WorldControllerThread.worldManager?.processTick(cameraPos);
         break;
 
       case 'configUpdate':
