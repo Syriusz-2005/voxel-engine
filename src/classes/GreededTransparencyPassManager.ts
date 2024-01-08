@@ -1,8 +1,8 @@
 import { Vector3 } from "three";
-import Chunk, { GreededTransparencyPass } from "./Chunk.ts";
-import RenderableFace from "./RenderableFace.ts";
-import Voxel from "./Voxel.ts";
-import { registry, voxelRegistry } from "../types/VoxelRegistry.ts";
+import Chunk, { GreededTransparencyPass } from "./Chunk";
+import RenderableFace from "./RenderableFace";
+import Voxel from "./Voxel";
+import { registry, voxelRegistry } from "../types/VoxelRegistry";
 
 
 

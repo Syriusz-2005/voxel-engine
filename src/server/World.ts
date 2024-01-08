@@ -1,10 +1,11 @@
 import { Vector3 } from "three";
-import Config, { ConfigSettings } from "../classes/Config.ts";
-import PluginLoader from "../classes/PluginLoader.ts";
-import ThreadedSceneManager from "./ThreadedSceneManager.ts";
-import { WorldDataProvider } from "../types/WorldDataProvider.ts";
-import NetworkManager from "./NetworkManager.ts";
-import TickingService from "./TickingService.ts";
+import Config, { ConfigSettings } from "../classes/Config";
+import PluginLoader from "../classes/PluginLoader";
+import ThreadedSceneManager from "./ThreadedSceneManager";
+import { WorldDataProvider } from "../types/WorldDataProvider";
+import NetworkManager from "./NetworkManager";
+import TickingService from "./TickingService";
+import { PlayerProxy } from "../types/PlayerProxy";
 
 
 
@@ -17,6 +18,7 @@ export default class World implements WorldDataProvider {
   constructor(
     private readonly config: Config,
     private readonly networkManager: NetworkManager,
+    private readonly proxy: PlayerProxy,
   ) {
     this.scene = new ThreadedSceneManager(config.getWorldConfig(), this.networkManager);
     this.pluginLoader.loadPlugin('vanilla');

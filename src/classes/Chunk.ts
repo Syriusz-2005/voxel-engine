@@ -1,13 +1,13 @@
 import { Vector3 } from "three";
-import { VoxelId, VoxelType, registry, voxelRegistry } from "../types/VoxelRegistry.ts";
-import Voxel from "./Voxel.ts";
-import RenderableVoxel from "./RenderableVoxel.ts";
-import WorldGenerator from "../generator/WorldGenerator.ts";
-import Perf from "../utils/Perf.ts";
-import RenderableFace from "./RenderableFace.ts";
-import GreededTransparencyPassesManager from "./GreededTransparencyPassManager.ts";
-import ThreadedScene from "./ThreadedScene.ts";
-import VoxelArray from "./VoxelArray.ts";
+import { VoxelId, VoxelType, registry, voxelRegistry } from "../types/VoxelRegistry";
+import Voxel from "./Voxel";
+import RenderableVoxel from "./RenderableVoxel";
+import WorldGenerator from "../generator/WorldGenerator";
+import Perf from "../utils/Perf";
+import RenderableFace from "./RenderableFace";
+import GreededTransparencyPassesManager from "./GreededTransparencyPassManager";
+import ThreadedScene from "./ThreadedScene";
+import VoxelArray from "./VoxelArray";
 
 const perfTest = new Perf('Voxel info generation', 400);
 

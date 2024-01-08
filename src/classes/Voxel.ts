@@ -1,5 +1,5 @@
 import { Color } from "three";
-import { VoxelType, voxelRegistry } from "../types/VoxelRegistry.ts";
+import { VoxelType, voxelRegistry } from "../types/VoxelRegistry";
 
 
 export default class Voxel {

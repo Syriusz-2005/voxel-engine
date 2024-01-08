@@ -1,5 +1,5 @@
-import { Message } from "./ThreadReceiver.ts";
-import WorkerPool from "./WorkerPool.ts";
+import { Message } from "./ThreadReceiver";
+import WorkerPool from "./WorkerPool";
 
 
 export default class ThreadController<M extends Message> {

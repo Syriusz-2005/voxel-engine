@@ -2,10 +2,10 @@ import './style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
-import Config, { ConfigSettings } from './classes/Config.ts';
+import Config, { ConfigSettings } from './classes/Config';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
-import Timer from './utils/Timer.ts';
-import WorldController from './classes/WorldController.ts';
+import Timer from './utils/Timer';
+import WorldController from './classes/WorldController';
 
 const config = new Config();
 

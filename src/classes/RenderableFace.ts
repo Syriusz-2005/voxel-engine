@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import Voxel from "./Voxel.ts";
+import Voxel from "./Voxel";
 
 
 

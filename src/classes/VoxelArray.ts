@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import { VoxelId } from "../types/VoxelRegistry.ts";
+import { VoxelId } from "../types/VoxelRegistry";
 
 
 export default class VoxelArray {

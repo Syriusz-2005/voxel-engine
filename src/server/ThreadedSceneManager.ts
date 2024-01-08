@@ -1,12 +1,12 @@
 import { EventDispatcher, Vector3 } from "three";
-import { WorldManagerConfig } from "../classes/WorldManagerConfig.ts";
-import ThreadedScene from "../classes/ThreadedScene.ts";
-import ThreadReceiver from "../utils/ThreadReceiver.ts";
-import { WorldControllerMessage } from "../classes/WorldController.ts";
-import Chunk from "../classes/Chunk.ts";
-import ChunkRenderer from "../classes/ChunkRenderer.ts";
-import PluginLoader from "../classes/PluginLoader.ts";
-import EntityList from "./EntityList.ts";
+import { WorldManagerConfig } from "../classes/WorldManagerConfig";
+import ThreadedScene from "../classes/ThreadedScene";
+import ThreadReceiver from "../utils/ThreadReceiver";
+import { WorldControllerMessage } from "../classes/WorldController";
+import Chunk from "../classes/Chunk";
+import ChunkRenderer from "../classes/ChunkRenderer";
+import PluginLoader from "../classes/PluginLoader";
+import EntityList from "./EntityList";
 
 
 

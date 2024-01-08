@@ -1,4 +1,4 @@
-import WorldController from "./WorldController.ts";
+import WorldController from "./WorldController";
 
 
 

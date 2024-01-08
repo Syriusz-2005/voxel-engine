@@ -1,12 +1,12 @@
 import { Vector3 } from "three";
-import { WorldLike } from "../types/WorldLike.ts";
-import Chunk from "./Chunk.ts";
-import ThreadedSceneManager from "../server/ThreadedSceneManager.ts";
-import Representation, { VectorRepresentation } from "./VectorRepresentation.ts";
-import Voxel from "./Voxel.ts";
-import CoordTransformations from "../utils/CoordTransformations.ts";
-import WorldGenerator from "../generator/WorldGenerator.ts";
-import { VoxelType } from "../types/VoxelRegistry.ts";
+import { WorldLike } from "../types/WorldLike";
+import Chunk from "./Chunk";
+import ThreadedSceneManager from "../server/ThreadedSceneManager";
+import Representation, { VectorRepresentation } from "./VectorRepresentation";
+import Voxel from "./Voxel";
+import CoordTransformations from "../utils/CoordTransformations";
+import WorldGenerator from "../generator/WorldGenerator";
+import { VoxelType } from "../types/VoxelRegistry";
 
 
 

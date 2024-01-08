@@ -1,7 +1,7 @@
-import World from "../server/World.ts";
+import World from "../server/World";
 import Log from "../utils/Log";
 import PluginApiProvider from "./PluginApiProvider";
-import ThreadedSceneManager from "../server/ThreadedSceneManager.ts";
+import ThreadedSceneManager from "../server/ThreadedSceneManager";
 
 export type Capability = 'EXECUTE_CODE' | 'EXECUTE_CODE_IN_ISOLATION';
 
@@ -45,7 +45,7 @@ export default class PluginLoader {
 
     
     if (willExecuteCode) {
-      const {main} = await import(`../plugins/${name}/load.ts`) as {main: (provider: PluginApiProvider) => void};
+      const {main} = await import(`../plugins/${name}/load`) as {main: (provider: PluginApiProvider) => void};
       const provider = new PluginApiProvider(this.manager);
       main(provider);
     }

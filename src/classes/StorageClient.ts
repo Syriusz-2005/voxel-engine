@@ -1,5 +1,5 @@
-import { WorldConfig } from "../types/WorldConfig.ts";
-import WorldScene from "./WorldScene.ts";
+import { WorldConfig } from "../types/WorldConfig";
+import WorldScene from "./WorldScene";
 
 export type StoredChunk = {
   size: number;

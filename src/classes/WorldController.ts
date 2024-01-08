@@ -1,9 +1,9 @@
 import { Scene, Vector3 } from "three";
-import ThreadController from "../utils/ThreadController.ts";
-import { WorldManagerConfig } from "./WorldManagerConfig.ts";
-import Attribute from "../types/Attribute.ts";
-import Config from "./Config.ts";
-import WorldScene from "./WorldScene.ts";
+import ThreadController from "../utils/ThreadController";
+import { WorldManagerConfig } from "./WorldManagerConfig";
+import Attribute from "../types/Attribute";
+import Config from "./Config";
+import WorldScene from "./WorldScene";
 
 export type NextFrameMessage = {
   command: 'nextFrame';
@@ -57,7 +57,7 @@ export type WorldControllerMessage =
 
 export default class WorldController {
   private readonly worldControllerThread = new ThreadController<WorldControllerMessage>(
-    new URL('../workers/WorldControllerThread.ts', import.meta.url),
+    new URL('../workers/WorldControllerThread', import.meta.url),
     (message) => {
       // console.log(message);
       switch (message.command) {

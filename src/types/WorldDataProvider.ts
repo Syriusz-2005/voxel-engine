@@ -1,4 +1,4 @@
-import { ConfigSettings } from "../classes/Config.ts";
+import { ConfigSettings } from "../classes/Config";
 
 
 

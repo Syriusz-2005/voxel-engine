@@ -1,8 +1,8 @@
 import { Vector3 } from "three";
-import ThreadedSceneManager from "../server/ThreadedSceneManager.ts";
-import { WorldControllerMessage } from "../classes/WorldController.ts";
-import ThreadReceiver from "../utils/ThreadReceiver.ts";
-import RandomFlatWorldGenerator from "../generator/RandomFlatWorldGenerator.ts";
+import ThreadedSceneManager from "../server/ThreadedSceneManager";
+import { WorldControllerMessage } from "../classes/WorldController";
+import ThreadReceiver from "../utils/ThreadReceiver";
+import RandomFlatWorldGenerator from "../generator/RandomFlatWorldGenerator";
 
 
 export default class WorldControllerThread {

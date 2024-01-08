@@ -1,4 +1,4 @@
-import { WorldDataProvider } from "../types/WorldDataProvider.ts";
+import { WorldDataProvider } from "../types/WorldDataProvider";
 
 
 

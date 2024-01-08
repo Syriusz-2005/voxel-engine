@@ -1,10 +1,10 @@
 import { BufferAttribute, InstancedBufferGeometry, Mesh, Object3D, ShaderMaterial, Vector3, InstancedBufferAttribute, Matrix4, FrontSide, Box3, Camera, Frustum } from "three";
-import Chunk from "./Chunk.ts";
+import Chunk from "./Chunk";
 import vertex from '../shader/vertex.glsl?raw';
 import fragment from '../shader/fragment.glsl?raw';
-import WorldScene from "./WorldScene.ts";
-import { ConfigSettings } from "./Config.ts";
-import Attribute from "../types/Attribute.ts";
+import WorldScene from "./WorldScene";
+import { ConfigSettings } from "./Config";
+import Attribute from "../types/Attribute";
 
 
 export default class ChunkRenderer {

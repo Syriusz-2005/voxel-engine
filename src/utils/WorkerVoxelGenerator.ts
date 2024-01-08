@@ -2,8 +2,8 @@ import { Vector3 } from "three";
 import { TaskData } from "./WorkerPool";
 import { VoxelType, voxelRegistry } from "../types/VoxelRegistry";
 import Perf from "./Perf";
-import StorageClient from "../classes/StorageClient.ts";
-import VoxelArray from "../classes/VoxelArray.ts";
+import StorageClient from "../classes/StorageClient";
+import VoxelArray from "../classes/VoxelArray";
 
 const workerVoxelGeneratorTimer = new Perf('Worker generation time', 400);
 

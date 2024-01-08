@@ -1,5 +1,4 @@
-import { TypedArray } from "three";
-import Attribute from "../types/Attribute.ts";
+
 
 
 

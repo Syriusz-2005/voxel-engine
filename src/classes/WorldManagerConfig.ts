@@ -1,5 +1,5 @@
-import WorldGenerator from "../generator/WorldGenerator.ts";
-import { ConfigSettings } from "./Config.ts";
+import WorldGenerator from "../generator/WorldGenerator";
+import { ConfigSettings } from "./Config";
 
 export type WorldManagerConfig = {
   renderDistance: number;

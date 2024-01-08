@@ -1,9 +1,9 @@
 import { Scene, Vector3 } from "three";
-import ChunkRenderer from "./ChunkRenderer.ts";
-import Representation, { VectorRepresentation } from "./VectorRepresentation.ts";
-import CoordTransformations from "../utils/CoordTransformations.ts";
-import WorldController from "./WorldController.ts";
-import Attribute from "../types/Attribute.ts";
+import ChunkRenderer from "./ChunkRenderer";
+import Representation, { VectorRepresentation } from "./VectorRepresentation";
+import CoordTransformations from "../utils/CoordTransformations";
+import WorldController from "./WorldController";
+import Attribute from "../types/Attribute";
 
 
 export default class WorldScene {
