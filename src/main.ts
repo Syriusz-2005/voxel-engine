@@ -6,10 +6,12 @@ import Config, { ConfigSettings } from './classes/Config.js';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 import Timer from './utils/Timer.js';
 import WorldController from './classes/WorldController.js';
+import {io} from 'socket.io-client';
 
 const config = new Config();
 
-
+const socket = io('http://localhost:3000');
+console.log(socket);
 const stats = new Stats();
 document.body.appendChild( stats.dom );
 
