@@ -1,11 +1,11 @@
 import { Vector3 } from "three";
-import Config, { ConfigSettings } from "../classes/Config";
-import PluginLoader from "../classes/PluginLoader";
-import ThreadedSceneManager from "./ThreadedSceneManager";
-import { WorldDataProvider } from "../types/WorldDataProvider";
-import NetworkManager from "./NetworkManager";
-import TickingService from "./TickingService";
-import { PlayerProxy } from "../types/PlayerProxy";
+import Config, { ConfigSettings } from "../classes/Config.js";
+import PluginLoader from "../classes/PluginLoader.js";
+import ThreadedSceneManager from "./ThreadedSceneManager.js";
+import { WorldDataProvider } from "../types/WorldDataProvider.js";
+import NetworkManager from "./NetworkManager.js";
+import TickingService from "./TickingService.js";
+import { PlayerProxy } from "../types/PlayerProxy.js";
 
 
 

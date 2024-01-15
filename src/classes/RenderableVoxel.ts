@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import Voxel from "./Voxel";
+import Voxel from "./Voxel.js";
 
 
 export default class RenderableVoxel {

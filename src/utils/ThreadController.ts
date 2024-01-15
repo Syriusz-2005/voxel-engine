@@ -1,5 +1,5 @@
-import { Message } from "./ThreadReceiver";
-import WorkerPool from "./WorkerPool";
+import { Message } from "./ThreadReceiver.js";
+import WorkerPool from "./WorkerPool.js";
 
 
 export default class ThreadController<M extends Message> {

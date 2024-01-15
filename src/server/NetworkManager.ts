@@ -1,5 +1,5 @@
-import ThreadReceiver, { Message } from "../utils/ThreadReceiver";
-import Player from "./Player";
+import ThreadReceiver, { Message } from "../utils/ThreadReceiver.js";
+import Player from "./Player.js";
 import {Server} from 'socket.io';
 import express from 'express';
 import {createServer} from 'node:http';

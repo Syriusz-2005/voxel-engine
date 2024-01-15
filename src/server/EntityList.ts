@@ -1,5 +1,5 @@
-import Entity from "./Entity";
-import Player from "./Player";
+import Entity from "./Entity.js";
+import Player from "./Player.js";
 
 
 export default class EntityList {

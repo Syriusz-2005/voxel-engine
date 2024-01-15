@@ -1,5 +1,5 @@
 import { Color } from "three";
-import { VoxelType, voxelRegistry } from "../types/VoxelRegistry";
+import { VoxelType, voxelRegistry } from "../types/VoxelRegistry.js";
 
 
 export default class Voxel {

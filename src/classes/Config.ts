@@ -1,6 +1,6 @@
 import {GUI} from 'three/addons/libs/lil-gui.module.min.js';
-import { WorldManagerConfig } from './WorldManagerConfig';
-import RandomFlatWorldGenerator from '../generator/RandomFlatWorldGenerator';
+import { WorldManagerConfig } from './WorldManagerConfig.js';
+import RandomFlatWorldGenerator from '../generator/RandomFlatWorldGenerator.js';
 
 
 export type ConfigSettings = {

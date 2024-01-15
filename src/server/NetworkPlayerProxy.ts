@@ -1,9 +1,9 @@
-import Chunk from "../classes/Chunk";
-import Config from "../classes/Config";
-import { PlayerProxy, ProxyResponse } from "../types/PlayerProxy";
-import Entity from "./Entity";
-import NetworkManager from "./NetworkManager";
-import Player from "./Player";
+import Chunk from "../classes/Chunk.js";
+import Config from "../classes/Config.js";
+import { PlayerProxy, ProxyResponse } from "../types/PlayerProxy.js";
+import Entity from "./Entity.js";
+import NetworkManager from "./NetworkManager.js";
+import Player from "./Player.js";
 
 
 export default class NetworkPlayerProxy implements PlayerProxy {

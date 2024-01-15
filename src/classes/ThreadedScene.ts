@@ -1,12 +1,12 @@
 import { Vector3 } from "three";
-import { WorldLike } from "../types/WorldLike";
-import Chunk from "./Chunk";
-import ThreadedSceneManager from "../server/ThreadedSceneManager";
-import Representation, { VectorRepresentation } from "./VectorRepresentation";
-import Voxel from "./Voxel";
-import CoordTransformations from "../utils/CoordTransformations";
-import WorldGenerator from "../generator/WorldGenerator";
-import { VoxelType } from "../types/VoxelRegistry";
+import { WorldLike } from "../types/WorldLike.js";
+import Chunk from "./Chunk.js";
+import ThreadedSceneManager from "../server/ThreadedSceneManager.js";
+import Representation, { VectorRepresentation } from "./VectorRepresentation.js";
+import Voxel from "./Voxel.js";
+import CoordTransformations from "../utils/CoordTransformations.js";
+import WorldGenerator from "../generator/WorldGenerator.js";
+import { VoxelType } from "../types/VoxelRegistry.js";
 
 
 

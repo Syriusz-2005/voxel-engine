@@ -1,6 +1,6 @@
 import { InstancedBufferGeometry } from "three";
-import WorkerPool from "../utils/WorkerPool.ts";
-import ChunkRenderer from "./ChunkRenderer.ts";
+import WorkerPool from "../utils/WorkerPool.js";
+import ChunkRenderer from "./ChunkRenderer.js";
 
 
 

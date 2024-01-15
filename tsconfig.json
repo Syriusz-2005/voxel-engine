@@ -12,17 +12,18 @@
     "allowImportingTsExtensions": false,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": false,
+    "incremental": true,
 
     /* Linting */
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
     "typeRoots": [
       "node_modules/@types",
-      "src/customTypings"
+      "src/customTypings",
+      "src/vite-env.d.ts"
     ]
   },
   "include": ["src"]

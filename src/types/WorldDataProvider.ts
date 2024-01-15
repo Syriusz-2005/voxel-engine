@@ -1,4 +1,4 @@
-import { ConfigSettings } from "../classes/Config";
+import { ConfigSettings } from "../classes/Config.js";
 
 
 

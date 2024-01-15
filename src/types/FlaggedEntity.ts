@@ -1,4 +1,4 @@
-import { Flags } from "./Flags"
+import { Flags } from "./Flags.js"
 
 
 export type FlaggedEntity = {

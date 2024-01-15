@@ -1,4 +1,4 @@
-import { WorldDataProvider } from "../types/WorldDataProvider";
+import { WorldDataProvider } from "../types/WorldDataProvider.js";
 
 
 

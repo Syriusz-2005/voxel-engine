@@ -1,5 +1,5 @@
-import { VoxelType, voxelNamesRegistryById, voxelRegistry } from "../types/VoxelRegistry";
-import { GreededTransparencyPass, TransparencyPass } from "./Chunk";
+import { VoxelType, voxelNamesRegistryById, voxelRegistry } from "../types/VoxelRegistry.js";
+import { GreededTransparencyPass, TransparencyPass } from "./Chunk.js";
 
 
 

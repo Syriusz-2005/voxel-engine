@@ -1,7 +1,6 @@
-import World from "../server/World";
-import Log from "../utils/Log";
-import PluginApiProvider from "./PluginApiProvider";
-import ThreadedSceneManager from "../server/ThreadedSceneManager";
+import World from "../server/World.js";
+import Log from "../utils/Log.js";
+import PluginApiProvider from "./PluginApiProvider.js";
 
 export type Capability = 'EXECUTE_CODE' | 'EXECUTE_CODE_IN_ISOLATION';
 

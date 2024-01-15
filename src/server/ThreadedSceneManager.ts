@@ -1,12 +1,12 @@
 import { EventDispatcher, Vector3 } from "three";
-import { WorldManagerConfig } from "../classes/WorldManagerConfig";
-import ThreadedScene from "../classes/ThreadedScene";
-import ThreadReceiver from "../utils/ThreadReceiver";
-import { WorldControllerMessage } from "../classes/WorldController";
-import Chunk from "../classes/Chunk";
-import ChunkRenderer from "../classes/ChunkRenderer";
-import PluginLoader from "../classes/PluginLoader";
-import EntityList from "./EntityList";
+import { WorldManagerConfig } from "../classes/WorldManagerConfig.js";
+import ThreadedScene from "../classes/ThreadedScene.js";
+import ThreadReceiver from "../utils/ThreadReceiver.js";
+import { WorldControllerMessage } from "../classes/WorldController.js";
+import Chunk from "../classes/Chunk.js";
+import ChunkRenderer from "../classes/ChunkRenderer.js";
+import EntityList from "./EntityList.js";
+import { AttributeGenerator } from "../classes/generateAttributesForTransparencyPasses.js";
 
 
 
@@ -108,7 +108,7 @@ export default class ThreadedSceneManager extends EventDispatcher<{'chunkUpdate'
     for await (const chunk of chunkPromises) {
       if (chunk.ChunkPos.distanceTo(this.getCameraChunk()!) < renderDistance) {
         const posArr = chunk.ChunkPos.toArray();
-        const attributes = await ChunkRenderer.generateAttributesForTransparencyPasses(chunk);
+        const attributes = await AttributeGenerator.generateAttributesForTransparencyPasses(chunk);
         
         this.threadReceiver.postMessage(players, {
           command: 'chunkRender',

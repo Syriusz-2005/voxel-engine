@@ -1,4 +1,4 @@
-import WorldController from "./WorldController";
+import WorldController from "./WorldController.js";
 
 
 

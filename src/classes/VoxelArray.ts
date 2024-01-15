@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import { VoxelId } from "../types/VoxelRegistry";
+import { VoxelId } from "../types/VoxelRegistry.js";
 
 
 export default class VoxelArray {

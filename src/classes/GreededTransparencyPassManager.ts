@@ -1,8 +1,8 @@
 import { Vector3 } from "three";
-import Chunk, { GreededTransparencyPass } from "./Chunk";
-import RenderableFace from "./RenderableFace";
-import Voxel from "./Voxel";
-import { registry, voxelRegistry } from "../types/VoxelRegistry";
+import Chunk, { GreededTransparencyPass } from "./Chunk.js";
+import RenderableFace from "./RenderableFace.js";
+import Voxel from "./Voxel.js";
+import { registry, voxelRegistry } from "../types/VoxelRegistry.js";
 
 
 

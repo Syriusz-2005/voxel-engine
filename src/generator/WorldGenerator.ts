@@ -1,7 +1,7 @@
 import { Vector3 } from "three";
-import Voxel from "../classes/Voxel";
-import WorkerPool from "../utils/WorkerPool";
-import { voxelNamesRegistryById } from "../types/VoxelRegistry";
+import Voxel from "../classes/Voxel.js";
+import WorkerPool from "../utils/WorkerPool.js";
+import { voxelNamesRegistryById } from "../types/VoxelRegistry.js";
 
 export type VoxelPromiseResult = {posInChunk: Vector3, voxel: Voxel};
 

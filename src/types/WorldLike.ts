@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import Voxel from "../classes/Voxel";
+import Voxel from "../classes/Voxel.js";
 
 
 export type WorldLike = {

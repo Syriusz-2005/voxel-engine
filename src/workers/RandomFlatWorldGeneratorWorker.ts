@@ -1,4 +1,4 @@
-import WorkerVoxelGenerator from "../utils/WorkerVoxelGenerator";
+import WorkerVoxelGenerator from "../utils/WorkerVoxelGenerator.js";
 import Noise from 'noisejs';
 console.log(Noise);
 const noise = new Noise.Noise(1);

@@ -1,5 +1,5 @@
-import Player from "../server/Player";
-import { TaskData } from "./WorkerPool";
+import Player from "../server/Player.js";
+import { TaskData } from "./WorkerPool.js";
 
 export type Message = TaskData;
 

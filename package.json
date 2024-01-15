@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"vite\" \"node ./\"",
+    "dev": "concurrently \"vite\" \"tsc -w --project tsconfig.json\" \"nodemon ./out/server.js\"",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },

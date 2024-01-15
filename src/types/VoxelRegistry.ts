@@ -1,5 +1,5 @@
 import { Color } from "three";
-import VoxelRegistry from "../classes/VoxelRegistry";
+import VoxelRegistry from "../classes/VoxelRegistry.js";
 
 export type VoxelData = {
   color: THREE.Color;

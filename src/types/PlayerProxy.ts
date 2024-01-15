@@ -1,7 +1,7 @@
-import Chunk from "../classes/Chunk"
-import Config from "../classes/Config";
-import Entity from "../server/Entity";
-import Player from "../server/Player"
+import Chunk from "../classes/Chunk.js";
+import Config from "../classes/Config.js";
+import Entity from "../server/Entity.js";
+import Player from "../server/Player.js"
 
 export type ProxyResponse = void | Promise<void>;
 

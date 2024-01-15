@@ -1,5 +1,4 @@
-import { WorldConfig } from "../types/WorldConfig";
-import WorldScene from "./WorldScene";
+import { WorldConfig } from "../types/WorldConfig.js";
 
 export type StoredChunk = {
   size: number;

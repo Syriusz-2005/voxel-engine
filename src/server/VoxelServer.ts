@@ -1,7 +1,7 @@
-import Config from "../classes/Config";
-import NetworkManager from "./NetworkManager";
-import NetworkPlayerProxy from "./NetworkPlayerProxy";
-import World from "./World";
+import Config from "../classes/Config.js";
+import NetworkManager from "./NetworkManager.js";
+import NetworkPlayerProxy from "./NetworkPlayerProxy.js";
+import World from "./World.js";
 
 
 

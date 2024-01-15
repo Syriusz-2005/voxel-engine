@@ -1,5 +1,5 @@
-import CameraApi from "../api/Camera";
-import ThreadedSceneManager from "../server/ThreadedSceneManager";
+import CameraApi from "../api/Camera.js";
+import ThreadedSceneManager from "../server/ThreadedSceneManager.js";
 
 
 

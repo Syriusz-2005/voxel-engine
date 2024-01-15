@@ -1,8 +1,8 @@
 import { Vector3 } from "three";
-import ThreadedSceneManager from "../server/ThreadedSceneManager";
-import { WorldControllerMessage } from "../classes/WorldController";
-import ThreadReceiver from "../utils/ThreadReceiver";
-import RandomFlatWorldGenerator from "../generator/RandomFlatWorldGenerator";
+import ThreadedSceneManager from "../server/ThreadedSceneManager.js";
+import { WorldControllerMessage } from "../classes/WorldController.js";
+import ThreadReceiver from "../utils/ThreadReceiver.js";
+import RandomFlatWorldGenerator from "../generator/RandomFlatWorldGenerator.js";
 
 
 export default class WorldControllerThread {

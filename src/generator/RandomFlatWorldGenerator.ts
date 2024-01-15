@@ -1,5 +1,5 @@
-import WorldGenerator from "./WorldGenerator";
-import { Generator } from "./WorldGenerator";
+import WorldGenerator from "./WorldGenerator.js";
+import { Generator } from "./WorldGenerator.js";
 
 export default class RandomFlatWorldGenerator extends Generator implements WorldGenerator {
 

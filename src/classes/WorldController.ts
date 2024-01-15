@@ -1,9 +1,9 @@
 import { Scene, Vector3 } from "three";
-import ThreadController from "../utils/ThreadController";
-import { WorldManagerConfig } from "./WorldManagerConfig";
-import Attribute from "../types/Attribute";
-import Config from "./Config";
-import WorldScene from "./WorldScene";
+import ThreadController from "../utils/ThreadController.js";
+import { WorldManagerConfig } from "./WorldManagerConfig.js";
+import Attribute from "../types/Attribute.js";
+import Config from "./Config.js";
+import WorldScene from "./WorldScene.js";
 
 export type NextFrameMessage = {
   command: 'nextFrame';

@@ -1,13 +1,13 @@
 import { Vector3 } from "three";
-import { VoxelId, VoxelType, registry, voxelRegistry } from "../types/VoxelRegistry";
-import Voxel from "./Voxel";
-import RenderableVoxel from "./RenderableVoxel";
-import WorldGenerator from "../generator/WorldGenerator";
-import Perf from "../utils/Perf";
-import RenderableFace from "./RenderableFace";
-import GreededTransparencyPassesManager from "./GreededTransparencyPassManager";
-import ThreadedScene from "./ThreadedScene";
-import VoxelArray from "./VoxelArray";
+import { VoxelId, VoxelType, registry, voxelRegistry } from "../types/VoxelRegistry.js";
+import Voxel from "./Voxel.js";
+import RenderableVoxel from "./RenderableVoxel.js";
+import WorldGenerator from "../generator/WorldGenerator.js";
+import Perf from "../utils/Perf.js";
+import RenderableFace from "./RenderableFace.js";
+import GreededTransparencyPassesManager from "./GreededTransparencyPassManager.js";
+import ThreadedScene from "./ThreadedScene.js";
+import VoxelArray from "./VoxelArray.js";
 
 const perfTest = new Perf('Voxel info generation', 400);
 

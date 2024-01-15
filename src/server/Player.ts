@@ -1,7 +1,7 @@
 import { Vector3 } from "three";
-import Entity from "./Entity";
-import { Flags } from "../types/Flags";
-import { FlaggedEntity } from "../types/FlaggedEntity";
+import Entity from "./Entity.js";
+import { Flags } from "../types/Flags.js";
+import { FlaggedEntity } from "../types/FlaggedEntity.js";
 
 
 
