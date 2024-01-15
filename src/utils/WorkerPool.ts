@@ -1,3 +1,5 @@
+import {Worker} from 'node:worker_threads';
+
 
 export type WorkerData = {
   worker: Worker;
@@ -27,13 +29,13 @@ export default class WorkerPool {
     private readonly onSpontaneusMessage?: (data: TaskData) => void,
   ) {
     for (let i = 0; i < this.workersCount; i++) {
-      const worker = new Worker(this.workersPath, {type: 'module'});
+      const worker = new Worker(this.workersPath, {});
       const initialWorkerData: WorkerData = {
         worker,
         isBusy: false,
       }
       this.workers.push(initialWorkerData);
-      worker.addEventListener('message', (event) => {
+      worker.on('message', (event) => {
         if (event.data.spontaneus) {
           this.onSpontaneusMessage?.(event.data);
         }
@@ -47,17 +49,17 @@ export default class WorkerPool {
 
   private assignTask(worker: WorkerData, task: Task) {
     worker.isBusy = true;
-    worker.worker.postMessage(task.data, {transfer: task.transfers});
-    worker.worker.onmessage = (event) => {
+    worker.worker.postMessage(task.data, task.transfers as any);
+    worker.worker.once('message', (event) => {
       worker.isBusy = false;
       task.resolve(event.data);
       this.assignTaskFromQueue();
-    }
-    worker.worker.onerror = (event) => {
+    });
+    worker.worker.once('error', (event) => {
       worker.isBusy = false;
       task.reject(event);
       this.assignTaskFromQueue();
-    }
+    });
   }
 
   private assignTaskFromQueue() {

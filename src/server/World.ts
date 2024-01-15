@@ -6,6 +6,8 @@ import { WorldDataProvider } from "../types/WorldDataProvider.js";
 import NetworkManager from "./NetworkManager.js";
 import TickingService from "./TickingService.js";
 import { PlayerProxy } from "../types/PlayerProxy.js";
+import ServerConfig from "./ServerConfig.js";
+import { WorldManagerConfig } from "../classes/WorldManagerConfig.js";
 
 
 
@@ -16,7 +18,7 @@ export default class World implements WorldDataProvider {
 
 
   constructor(
-    private readonly config: Config,
+    private readonly config: Config | ServerConfig,
     private readonly networkManager: NetworkManager,
     private readonly proxy: PlayerProxy,
   ) {
@@ -32,7 +34,7 @@ export default class World implements WorldDataProvider {
     this.scene.addEventListener('chunkUpdate', (event) => callback(event.chunkPos));
   }
 
-  public getWorldConfig(): ConfigSettings {
-    return this.config.settings;
+  public getWorldConfig(): WorldManagerConfig {
+    return this.config.getWorldConfig();
   }
 }

@@ -6,10 +6,10 @@ export type Message = TaskData;
 
 export default class ThreadReceiver<M extends Message> {
   constructor(
-    private readonly onMessage: (message: M) => void,
+    onMessage: (message: M) => void,
   ) {
     self.onmessage = (event) => {
-      this.onMessage(event.data);
+      onMessage(event.data);
     };
   }
 

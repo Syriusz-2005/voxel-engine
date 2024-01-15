@@ -45,8 +45,8 @@ export default class PluginLoader {
     
     if (willExecuteCode) {
       const {main} = await import(`../plugins/${name}/load`) as {main: (provider: PluginApiProvider) => void};
-      const provider = new PluginApiProvider(this.manager);
-      main(provider);
+      // const provider = new PluginApiProvider(this.manager);
+      // main(provider);
     }
     
     Log.fromPluginLoader(`The plugin ${name} has been loaded`);
