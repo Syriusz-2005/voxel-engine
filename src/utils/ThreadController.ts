@@ -20,6 +20,6 @@ export default class ThreadController<M extends Message> {
   }
 
   public postMessage(message: M, transferable?: Transferable[]) {
-    this.pool.FirstWorker.postMessage(message, {transfer: transferable});
+    this.pool.FirstWorker.postMessage(message, transferable as any);
   }
 }

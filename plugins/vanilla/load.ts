@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import PluginApiProvider from "../../classes/PluginApiProvider";
+import PluginApiProvider from "../../src/classes/PluginApiProvider";
 
 
 export function main(api: PluginApiProvider) {

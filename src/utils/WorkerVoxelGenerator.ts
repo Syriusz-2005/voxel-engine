@@ -4,17 +4,17 @@ import { VoxelType, voxelRegistry } from "../types/VoxelRegistry.js";
 import Perf from "./Perf.js";
 import StorageClient from "../classes/StorageClient.js";
 import VoxelArray from "../classes/VoxelArray.js";
+import {MessageChannel} from 'node:worker_threads';
 
 const workerVoxelGeneratorTimer = new Perf('Worker generation time', 400);
 
 export default class WorkerVoxelGenerator {
-  private readonly storage = StorageClient.createNew();
-
+  private readonly channel = new MessageChannel();
 
   constructor(
     private readonly onGetVoxel: (worldPos: Vector3) => VoxelType,
   ) {
-    self.onmessage = (event) => {
+    this.channel.port2.on('message', (event) => {
       
       const data: TaskData = event.data;
 
@@ -41,8 +41,8 @@ export default class WorkerVoxelGenerator {
         }
       }
 
-      self.postMessage(arr.Buffer, {transfer: [arr.Buffer]});
+      this.channel.port2.postMessage(arr.Buffer, [arr.Buffer]);
       workerVoxelGeneratorTimer.stop();
-    }
+    });
   }
 }

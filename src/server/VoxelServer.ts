@@ -5,7 +5,6 @@ import ServerConfig from "./ServerConfig.js";
 import World from "./World.js";
 
 
-
 export default class VoxelServer {
   private readonly config = new ServerConfig();
   private readonly networkManager = new NetworkManager((message) => console.log(message));

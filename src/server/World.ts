@@ -1,6 +1,5 @@
 import { Vector3 } from "three";
 import Config, { ConfigSettings } from "../classes/Config.js";
-import PluginLoader from "../classes/PluginLoader.js";
 import ThreadedSceneManager from "./ThreadedSceneManager.js";
 import { WorldDataProvider } from "../types/WorldDataProvider.js";
 import NetworkManager from "./NetworkManager.js";
@@ -10,9 +9,8 @@ import ServerConfig from "./ServerConfig.js";
 import { WorldManagerConfig } from "../classes/WorldManagerConfig.js";
 
 
-
 export default class World implements WorldDataProvider {
-  private readonly pluginLoader: PluginLoader = new PluginLoader(this);
+  // private readonly pluginLoader: PluginLoader = new PluginLoader(this);
   private readonly tickingService = new TickingService(20);
   private readonly scene: ThreadedSceneManager;
 
@@ -23,7 +21,7 @@ export default class World implements WorldDataProvider {
     private readonly proxy: PlayerProxy,
   ) {
     this.scene = new ThreadedSceneManager(config.getWorldConfig(), this.networkManager);
-    this.pluginLoader.loadPlugin('vanilla');
+    // this.pluginLoader.loadPlugin('vanilla');
   }
 
   public onTick(callback: (tickIndex: number) => void): void {

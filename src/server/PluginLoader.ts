@@ -1,6 +1,6 @@
-import World from "../server/World.js";
+import World from "./World.js";
 import Log from "../utils/Log.js";
-import PluginApiProvider from "./PluginApiProvider.js";
+import fs from 'fs/promises';
 
 export type Capability = 'EXECUTE_CODE' | 'EXECUTE_CODE_IN_ISOLATION';
 
@@ -20,8 +20,13 @@ export default class PluginLoader {
     private readonly manager: World,
   ) {}
 
+  private async loadFile(path: string) {
+    return await fs.readFile(path, 'utf-8');
+  }
+
   public async loadPlugin(name: string) {
-    const {default: manifest} = await import(`../plugins/${name}/manifest.json`) as {default: Manifest};
+    console.log(import.meta.url);
+    const manifest = JSON.parse(await this.loadFile(`/plugins/${name}/manifest.json`)) as Manifest;
     console.log(manifest);
 
     if (!manifest.capabilities) {
@@ -44,7 +49,7 @@ export default class PluginLoader {
 
     
     if (willExecuteCode) {
-      const {main} = await import(`../plugins/${name}/load`) as {main: (provider: PluginApiProvider) => void};
+      // const {main} = await import(`/plugins/${name}/load`) as {main: (provider: PluginApiProvider) => void};
       // const provider = new PluginApiProvider(this.manager);
       // main(provider);
     }

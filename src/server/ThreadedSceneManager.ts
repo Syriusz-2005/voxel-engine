@@ -27,7 +27,6 @@ export default class ThreadedSceneManager extends EventDispatcher<{'chunkUpdate'
     this.chunkSize = config.chunkSize;
     this.chunkHeight = config.chunkHeight;
     this.world = new ThreadedScene(this, this.chunkSize, this.chunkHeight);
-    console.log(this)
   }
 
   public get Config(): WorldManagerConfig {
