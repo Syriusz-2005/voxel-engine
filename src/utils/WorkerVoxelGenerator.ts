@@ -14,7 +14,7 @@ export default class WorkerVoxelGenerator {
   constructor(
     private readonly onGetVoxel: (worldPos: Vector3) => VoxelType,
   ) {
-    this.channel.port2.on('message', (event) => {
+    this.channel.port1.on('message', (event) => {
       
       const data: TaskData = event.data;
 
